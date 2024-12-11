@@ -2,15 +2,14 @@
 
 # Liste des fichiers sources
 set(SOURCE_FILES
-    Logger.cpp
-    MeshHandler.cpp
+    Vector3D.cpp
     Quadrature.cpp
     AngularQuadrature.cpp
     main.cpp
 )
 
 # Ajouter l'exécutable principal
-add_executable(MOC_Solver ${SOURCE_FILES})
+add_executable(SN_Solver ${SOURCE_FILES})
 
-# Lier les bibliothèques MedCoupling et OpenMP
-target_link_libraries(MOC_Solver ${MedCoupling_LIBRARIES} OpenMP::OpenMP_CXX)
+# Lier les bibliothèques MEDCoupling et OpenMP
+target_link_libraries(SN_Solver medcoupling ${OpenMP_LIBRARIES})
