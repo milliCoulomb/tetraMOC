@@ -9,7 +9,7 @@ set(SOURCE_FILES
 )
 
 # Ajouter l'exécutable principal
-add_executable(SN_Solver ${SOURCE_FILES})
+add_executable(MOC_Solver ${SOURCE_FILES})
 
 # Lier les bibliothèques MEDCoupling et OpenMP
-target_link_libraries(SN_Solver medcoupling ${OpenMP_LIBRARIES})
+target_link_libraries(MOC_Solver medcoupling ${OpenMP_LIBRARIES})
