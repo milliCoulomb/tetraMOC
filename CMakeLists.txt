@@ -8,12 +8,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Activer les optimisations
-set(CMAKE_BUILD_TYPE Release)
-
-# Trouver MedCoupling
-find_package(MedCoupling REQUIRED)
-if(NOT MedCoupling_FOUND)
-    message(FATAL_ERROR "MedCoupling not found")
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # Trouver OpenMP
@@ -23,7 +19,10 @@ if(NOT OpenMP_FOUND)
 endif()
 
 # Ajouter les répertoires d'en-têtes
-include_directories(${MedCoupling_INCLUDE_DIRS} include)
+include_directories(include)
+
+# Ajouter MEDCoupling
+add_subdirectory(external/medcoupling)
 
 # Ajouter les sous-répertoires
 add_subdirectory(src)
