@@ -26,9 +26,9 @@ TEST(AngularQuadratureTest, GenerateQuadratureSnOrder2) {
     std::vector<double> expected_phi_calculated = { M_PI * 1.0 / 8.0, M_PI * 3.0 / 8.0, M_PI * 5.0 / 8.0, M_PI * 7.0 / 8.0 };
 
     // Vérifier que chaque combinaison mu x phi est présente
-    for(int i = 0; i < snOrder_; ++i) { // snOrder_ = 2
-        for(int j = 0; j < snOrder_ * 2; ++j) { // phi_order = 4
-            int index = i * (snOrder_ * 2) + j;
+    for(int i = 0; i < theta_order; ++i) { // snOrder_ = 2
+        for(int j = 0; j < phi_order; ++j) { // phi_order = 4
+            int index = i * phi_order + j;
             EXPECT_NEAR(directions[index].mu, expected_mu[i], 1e-10);
             EXPECT_NEAR(directions[index].phi, expected_phi_calculated[j], 1e-10);
         }
@@ -89,8 +89,9 @@ TEST(AngularQuadratureTest, WeightNormalizationSnOrder3) {
 
 // Test de consistance entre Quadrature et AngularQuadrature pour snOrder = 4
 TEST(AngularQuadratureTest, ConsistencyWithQuadratureSnOrder4) {
-    int snOrder = 4;
-    AngularQuadrature aq(snOrder);
+    int n_theta = 4;
+    int n_phi = 4;
+    AngularQuadrature aq(n_theta, n_phi);
     const std::vector<Direction>& directions = aq.getDirections();
 
     // Vérifier que la somme des poids est proche de 4*pi
@@ -103,14 +104,14 @@ TEST(AngularQuadratureTest, ConsistencyWithQuadratureSnOrder4) {
 
 // Test de gestion des ordres invalides (snOrder < 1)
 TEST(AngularQuadratureTest, InvalidSnOrder) {
-    EXPECT_THROW(SNSolver::AngularQuadrature aq(0), std::invalid_argument);
-    EXPECT_THROW(SNSolver::AngularQuadrature aq(-2), std::invalid_argument);
+    EXPECT_THROW(SNSolver::AngularQuadrature aq(0, 4), std::invalid_argument);
+    EXPECT_THROW(SNSolver::AngularQuadrature aq(-2, 4), std::invalid_argument);
 }
 
 } // namespace SNSolver
 
-// main.cpp pour les tests (si nécessaire)
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+// // main.cpp pour les tests (si nécessaire)
+// int main(int argc, char **argv) {
+//     ::testing::InitGoogleTest(&argc, argv);
+//     return RUN_ALL_TESTS();
+// }
