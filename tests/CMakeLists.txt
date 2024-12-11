@@ -21,7 +21,7 @@ set(TEST_SOURCES
 add_executable(runTests ${TEST_SOURCES})
 
 # Lier les bibliothèques nécessaires
-target_link_libraries(runTests gtest gtest_main ${MedCoupling_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries(runTests gtest gtest_main medcoupling ${OpenMP_LIBRARIES})
 
 # Ajouter les tests à CTest
 add_test(NAME RunAllTests COMMAND runTests)
