@@ -74,8 +74,8 @@ TEST(QuadratureTest, GaussLegendreWeightsSumN3) {
 
 } // namespace Quadrature
 
-// main.cpp pour les tests (si nécessaire)
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+// // main.cpp pour les tests (si nécessaire)
+// int main(int argc, char **argv) {
+//     ::testing::InitGoogleTest(&argc, argv);
+//     return RUN_ALL_TESTS();
+// }
