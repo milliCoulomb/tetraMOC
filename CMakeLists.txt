@@ -1,7 +1,7 @@
 # CMakeLists.txt (racine)
 
 cmake_minimum_required(VERSION 3.10)
-project(SN_Solver)
+project(MOC_Solver)
 
 # Définir le standard C++
 set(CMAKE_CXX_STANDARD 17)
@@ -22,7 +22,7 @@ endif()
 include_directories(include)
 
 # Ajouter MEDCoupling
-add_subdirectory(external/medcoupling)
+# add_subdirectory(external/medcoupling)
 
 # Ajouter les sous-répertoires
 add_subdirectory(src)
