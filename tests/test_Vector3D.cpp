@@ -105,8 +105,8 @@ TEST(Vector3DTest, Inequality) {
 
 } // namespace SNSolver
 
-// main.cpp for tests (optional if using gtest_main)
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+// // main.cpp for tests (optional if using gtest_main)
+// int main(int argc, char **argv) {
+//     ::testing::InitGoogleTest(&argc, argv);
+//     return RUN_ALL_TESTS();
+// }
