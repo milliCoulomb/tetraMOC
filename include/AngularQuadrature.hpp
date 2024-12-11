@@ -22,7 +22,8 @@ public:
     const std::vector<Direction>& getDirections() const;
 
 private:
-    int snOrder_;
+    int thetaOrder_;
+    int phiOrder_;
     std::vector<Direction> directions_;
     void generateQuadrature();
 };
