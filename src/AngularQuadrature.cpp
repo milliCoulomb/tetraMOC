@@ -1,5 +1,6 @@
 // AngularQuadrature.cpp
 #include "AngularQuadrature.hpp"
+#include "Quadrature.hpp"
 #include "Logger.hpp"
 #include <cmath>
 
