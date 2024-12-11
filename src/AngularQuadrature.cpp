@@ -1,11 +1,11 @@
 // AngularQuadrature.cpp
 #include "AngularQuadrature.hpp"
-#include "Logger.hpp" // Assure-toi que Logger est implémenté
+#include "Logger.hpp"
 #include <cmath>
 
 namespace SNSolver {
 
-AngularQuadrature::AngularQuadrature(int snOrder) : snOrder_(snOrder) {
+AngularQuadrature::AngularQuadrature(int theta_order, int phi_order) : thetaOrder_(theta_order), phiOrder_(phi_order) {
     generateQuadrature();
 }
 
@@ -14,8 +14,8 @@ const std::vector<Direction>& AngularQuadrature::getDirections() const {
 }
 
 void AngularQuadrature::generateQuadrature() {
-    int n_theta = snOrder_;
-    int n_phi = snOrder_;
+    int n_theta = thetaOrder_;
+    int n_phi = phiOrder_;
 
     // Generate gauss-legendre for theta
     std::vector<double> roots = Quadrature::legendreRoots(n_theta);

@@ -16,7 +16,7 @@ struct Direction {
 
 class AngularQuadrature {
 public:
-    AngularQuadrature(int snOrder);
+    AngularQuadrature(int theta_order, int phi_order);
     ~AngularQuadrature() = default;
 
     const std::vector<Direction>& getDirections() const;
