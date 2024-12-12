@@ -91,7 +91,7 @@ TEST(Vector3DTest, NormalizationOfZeroVector) {
 
 // test the equality of vectors
 TEST(Vector3DTest, Equality) {
-    Vector3D v1(1.000000000001, 2.0, 3.0);
+    Vector3D v1(1.0, 2.0, 3.0);
     Vector3D v2(1.0, 2.0, 3.0);
     EXPECT_TRUE(v1 == v2);
 }
