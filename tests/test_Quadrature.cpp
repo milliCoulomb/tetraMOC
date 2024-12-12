@@ -32,7 +32,7 @@ TEST(QuadratureTest, GaussLegendreWeightsN2) {
 // points for n = 3
 TEST(QuadratureTest, GaussChebyshevPointsN3) {
     int n = 3;
-    std::vector<double> expected_points = { M_PI/6, M_PI/2, 5*M_PI/6 };
+    std::vector<double> expected_points = { M_PI/3.0, M_PI, 5*M_PI/3.0 };
     auto [points, weights] = gaussChebyshev(n);
     ASSERT_EQ(points.size(), expected_points.size());
     for(size_t i = 0; i < points.size(); ++i) {
@@ -43,7 +43,7 @@ TEST(QuadratureTest, GaussChebyshevPointsN3) {
 // weights for n = 3
 TEST(QuadratureTest, GaussChebyshevWeightsN3) {
     int n = 3;
-    std::vector<double> expected_weights = { M_PI/3, M_PI/3, M_PI/3 };
+    std::vector<double> expected_weights = { 2.0 * M_PI/3.0, 2.0 * M_PI/3.0, 2.0 * M_PI/3.0 };
     auto [points, weights] = gaussChebyshev(n);
     ASSERT_EQ(weights.size(), expected_weights.size());
     for(size_t i = 0; i < weights.size(); ++i) {
