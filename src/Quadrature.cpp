@@ -57,10 +57,10 @@ std::vector<double> legendreWeights(const std::vector<double>& roots, int n) {
 
 std::pair<std::vector<double>, std::vector<double>> gaussChebyshev(int n) {
     std::vector<double> points(n);
-    std::vector<double> weights(n, M_PI / n); // Poids constants pour Gauss-Chebyshev
+    std::vector<double> weights(n, 2.0 * M_PI / n); // Poids constants pour Gauss-Chebyshev
 
-    for (int i = 0; i < n; ++i) {
-        points[i] = M_PI * (2.0 * i + 1.0) / (2.0 * n);
+    for (int i = 1; i <= n; ++i) {
+        points[i-1] = M_PI * (2.0 * i - 1.0) / (n);
     }
 
     return {points, weights};
