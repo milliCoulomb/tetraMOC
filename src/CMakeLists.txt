@@ -1,16 +1,17 @@
 # src/CMakeLists.txt
 
-# Liste des fichiers sources
+# Liste des fichiers sources (exclure main.cpp)
 set(SOURCE_FILES
     Logger.cpp
     Quadrature.cpp
     AngularQuadrature.cpp
-    main.cpp
 )
 
-# Ajouter l'exécutable principal
-add_executable(MOC_Solver ${SOURCE_FILES})
+# Créer une bibliothèque statique
+add_library(moc_solver_lib STATIC ${SOURCE_FILES})
 
-# Lier les bibliothèques MEDCoupling et OpenMP
-target_link_libraries(MOC_Solver ${OpenMP_LIBRARIES})
-# target_link_libraries(MOC_Solver medcoupling ${OpenMP_LIBRARIES})
+# Inclure les répertoires d'en-têtes
+target_include_directories(moc_solver_lib PUBLIC ${CMAKE_SOURCE_DIR}/include)
+
+# Lier MEDCoupling et OpenMP à la bibliothèque
+target_link_libraries(moc_solver_lib PUBLIC OpenMP::OpenMP_CXX)
