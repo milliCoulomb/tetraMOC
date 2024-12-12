@@ -16,7 +16,15 @@ const std::vector<Direction>& AngularQuadrature::getDirections() const {
 
 void AngularQuadrature::generateQuadrature() {
     int n_theta = thetaOrder_;
+    if (n_theta < 1) {
+        Logger::error("Invalid theta order: " + std::to_string(n_theta));
+        throw std::invalid_argument("Theta order must be at least 1.");
+    }
     int n_phi = phiOrder_;
+    if (n_phi < 1) {
+        Logger::error("Invalid phi order: " + std::to_string(n_phi));
+        throw std::invalid_argument("Phi order must be at least 1.");
+    }
 
     // Generate gauss-legendre for theta
     std::vector<double> roots = Quadrature::legendreRoots(n_theta);
@@ -27,11 +35,10 @@ void AngularQuadrature::generateQuadrature() {
 
     // Generate directions with a tensor product of the two quadratures
     for(int i = 0; i < n_theta; ++i) {
-        double mu = std::cos(roots[i]); // mu = cos(theta)
         for(int j = 0; j < n_phi; ++j) {
             double phi = phi_points[j];
             double weight = weights_legendre[i] * phi_weights[j];
-            directions_.emplace_back(Direction{mu, phi, weight});
+            directions_.emplace_back(Direction{roots[i], phi, weight});
         }
     }
     Logger::info("Angular quadrature generated successfully. Number of directions: " + std::to_string(directions_.size()));
