@@ -16,7 +16,7 @@ bool RayTracer::loadFaceConnectivity(const std::string& filename) {
         std::cerr << "Error: Unable to open face connectivity file " << filename << std::endl;
         return false;
     }
-    
+
     std::string line;
     while(std::getline(infile, line)) {
         std::istringstream iss(line);
@@ -36,7 +36,7 @@ bool RayTracer::loadFaceConnectivity(const std::string& filename) {
         std::tuple<int, int, int> face_key = std::make_tuple(sorted_nodes[0], sorted_nodes[1], sorted_nodes[2]);
         face_to_cells[face_key] = cells;
     }
-    
+
     infile.close();
     return true;
 }
@@ -61,23 +61,23 @@ int RayTracer::getNeighborCell(int current_cell_id, int exit_face_id) const {
         default:
             return -1;
     }
-    
+
     // Sort the face nodes to match the key
     std::sort(face_nodes.begin(), face_nodes.end());
     std::tuple<int, int, int> face_key = std::make_tuple(face_nodes[0], face_nodes[1], face_nodes[2]);
-    
+
     auto it = face_to_cells.find(face_key);
     if(it == face_to_cells.end()) {
         return -1; // No neighbor found
     }
-    
+
     const std::vector<int>& adjacent_cells = it->second;
     for(auto cell_id : adjacent_cells) {
         if(cell_id != current_cell_id) {
             return cell_id;
         }
     }
-    
+
     return -1; // No neighbor found
 }
 
@@ -86,28 +86,28 @@ std::vector<DirectionData> RayTracer::traceRay(int start_cell_id, const std::arr
     int current_cell_id = start_cell_id;
     std::array<double, 3> current_point = start_point;
     double total_time = 0.0;
-    
+
     for(int iter = 0; iter < max_iter; ++iter) {
         if(current_cell_id < 0 || current_cell_id >= static_cast<int>(mesh.getCells().size())) {
             std::cerr << "Invalid current cell ID: " << current_cell_id << std::endl;
             break;
         }
-        
+
         const TetraCell& cell = mesh.getCells()[current_cell_id];
         const CellField& field_val = field.getCellValues()[current_cell_id];
         Tetrahedron tetra(cell, mesh.getNodes(), field_val);
-        
-        Vector3D v(field_val.vx, field_val.vy, field_val.vz);
+
+        SNSolver::Vector3D v(field_val.vx, field_val.vy, field_val.vz);
         double t_exit;
         std::array<double, 3> x_exit;
         int exit_face_id;
-        
+
         bool has_exit = tetra.findExit(current_point, v, t_exit, x_exit, exit_face_id);
         if(!has_exit) {
             std::cerr << "No exit found for cell " << current_cell_id << " at iteration " << iter << std::endl;
             break;
         }
-        
+
         // Record the segment
         DirectionData segment;
         segment.cell_id = current_cell_id;
@@ -116,7 +116,7 @@ std::vector<DirectionData> RayTracer::traceRay(int start_cell_id, const std::arr
         segment.end_point = x_exit;
         pathline.push_back(segment);
         total_time += t_exit;
-        
+
         // Find the neighboring cell via the exit face
         int neighbor_cell_id = getNeighborCell(current_cell_id, exit_face_id);
         if(neighbor_cell_id == -1) {
@@ -124,11 +124,11 @@ std::vector<DirectionData> RayTracer::traceRay(int start_cell_id, const std::arr
             std::cout << "Ray exited the domain at iteration " << iter << std::endl;
             break;
         }
-        
+
         current_cell_id = neighbor_cell_id;
         current_point = x_exit;
     }
-    
+
     std::cout << "Ray tracing completed. Total time elapsed: " << total_time << std::endl;
     return pathline;
 }
