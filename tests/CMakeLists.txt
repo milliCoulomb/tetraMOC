@@ -19,8 +19,8 @@ set(TEST_SOURCES
 # Créer l'exécutable des tests
 add_executable(runTests ${TEST_SOURCES})
 
-# Lier les bibliothèques nécessaires
-target_link_libraries(runTests gtest gtest_main ${OpenMP_LIBRARIES})
+# Lier les bibliothèques nécessaires (Google Test et ta bibliothèque)
+target_link_libraries(runTests gtest gtest_main moc_solver_lib)
 
 # Ajouter les tests à CTest
 add_test(NAME RunAllTests COMMAND runTests)
