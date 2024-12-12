@@ -5,6 +5,7 @@ set(SOURCE_FILES
     Logger.cpp
     Quadrature.cpp
     AngularQuadrature.cpp
+    Tetrahedron.cpp
 )
 
 # Créer une bibliothèque statique
