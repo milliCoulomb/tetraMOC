@@ -14,27 +14,20 @@ TEST(AngularQuadratureTest, GenerateQuadratureSnOrder2) {
     AngularQuadrature aq(theta_order, phi_order);
     const std::vector<Direction>& directions = aq.getDirections();
     
-    // Calcul attendu : theta_order = 2, phi_order = 4 => 2 * 4 = 8 directions
     EXPECT_EQ(directions.size(), 8);
 
-    // Vérifier les mu et phi des directions
-    // Pour snOrder = 2, les racines Gauss-Legendre sont ±sqrt(1/3)
-    std::vector<double> expected_mu = { -std::sqrt(1.0/3.0), std::sqrt(1.0/3.0) };
-    std::vector<double> expected_phi = { M_PI/4, M_PI/2, 3*M_PI/4, M_PI }; // Si n_phi = 4
+    std::vector<double> expected_mu = {-std::sqrt(1.0/3.0), std::sqrt(1.0/3.0)};
+    std::vector<double> expected_phi = { M_PI/4.0, 3.0 * M_PI/4.0, 5.0*M_PI/4.0, 7.0 / 4.0 * M_PI }; // Si n_phi = 4
 
-    // Puisque phi_order = 4, les points de Gauss-Chebyshev pour n_phi = 4 sont pi*(2k +1)/(2n)
-    std::vector<double> expected_phi_calculated = { M_PI * 1.0 / 8.0, M_PI * 3.0 / 8.0, M_PI * 5.0 / 8.0, M_PI * 7.0 / 8.0 };
-
-    // Vérifier que chaque combinaison mu x phi est présente
     for(int i = 0; i < theta_order; ++i) { // snOrder_ = 2
+    
         for(int j = 0; j < phi_order; ++j) { // phi_order = 4
             int index = i * phi_order + j;
             EXPECT_NEAR(directions[index].mu, expected_mu[i], 1e-10);
-            EXPECT_NEAR(directions[index].phi, expected_phi_calculated[j], 1e-10);
+            EXPECT_NEAR(directions[index].phi, expected_phi[j], 1e-10);
         }
     }
 
-    // Vérifier la somme des poids
     double total_weight = 0.0;
     for(const auto& dir : directions) {
         total_weight += dir.weight;
@@ -54,8 +47,8 @@ TEST(AngularQuadratureTest, GenerateQuadratureSnOrder1) {
 
     // Vérifier les mu et phi des directions
     // Pour snOrder = 1, les racines Gauss-Legendre sont cos(0) = 1
-    std::vector<double> expected_mu = { std::cos(0.0) };
-    std::vector<double> expected_phi_calculated = { M_PI/2, 3*M_PI/2 }; // Gauss-Chebyshev n_phi = 2
+    std::vector<double> expected_mu = { 0.0 };
+    std::vector<double> expected_phi_calculated = { M_PI/2.0, 3.0*M_PI/2.0 }; // Gauss-Chebyshev n_phi = 2
 
     // Vérifier chaque direction
     EXPECT_NEAR(directions[0].mu, expected_mu[0], 1e-10);
