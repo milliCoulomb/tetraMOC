@@ -2,7 +2,7 @@
 #ifndef TETRAHEDRON_H
 #define TETRAHEDRON_H
 
-#include "MeshHandler.h"
+#include "MeshHandler.hpp"
 #include "Vector3D.hpp" // Include your existing Vector3D class
 #include <array>
 
