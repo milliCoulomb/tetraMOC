@@ -17,12 +17,12 @@ const std::vector<Direction>& AngularQuadrature::getDirections() const {
 void AngularQuadrature::generateQuadrature() {
     int n_theta = thetaOrder_;
     if (n_theta < 1) {
-        Logger::error("Invalid theta order: " + std::to_string(n_theta));
+        // Logger::error("Invalid theta order: " + std::to_string(n_theta));
         throw std::invalid_argument("Theta order must be at least 1.");
     }
     int n_phi = phiOrder_;
     if (n_phi < 1) {
-        Logger::error("Invalid phi order: " + std::to_string(n_phi));
+        // Logger::error("Invalid phi order: " + std::to_string(n_phi));
         throw std::invalid_argument("Phi order must be at least 1.");
     }
 
@@ -41,14 +41,14 @@ void AngularQuadrature::generateQuadrature() {
             directions_.emplace_back(Direction{roots[i], phi, weight});
         }
     }
-    Logger::info("Angular quadrature generated successfully. Number of directions: " + std::to_string(directions_.size()));
+    // Logger::info("Angular quadrature generated successfully. Number of directions: " + std::to_string(directions_.size()));
 
     // Vérifier la normalisation des poids
     double total_weight = 0.0;
     for(const auto& dir : directions_) {
         total_weight += dir.weight;
     }
-    Logger::info("Sum of weights: " + std::to_string(total_weight) + " (should be close to 4*pi ≈ " + std::to_string(4.0 * M_PI) + ")");
+    // Logger::info("Sum of weights: " + std::to_string(total_weight) + " (should be close to 4*pi ≈ " + std::to_string(4.0 * M_PI) + ")");
 }
 
 } // namespace SNSolver

@@ -71,7 +71,7 @@ public:
     Vector3D normalized() const {
         double n = norm();
         if (n == 0.0) {
-            std::cerr << "Warning: Attempt to normalize a zero vector.\n";
+            // std::cerr << "Warning: Attempt to normalize a zero vector.\n";
             return Vector3D(0.0, 0.0, 0.0);
         }
         return (*this) / n;
