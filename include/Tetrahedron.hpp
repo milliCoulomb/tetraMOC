@@ -5,6 +5,7 @@
 #include "MeshHandler.hpp"
 #include "Vector3D.hpp" // Include your existing Vector3D class
 #include <array>
+#include "Field.hpp"
 
 struct DirectionData {
     int cell_id;
