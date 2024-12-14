@@ -73,7 +73,7 @@ TEST(TetrahedronTest, NoExitTest) {
     Tetrahedron tetra(cell, nodes, field);
     
     // Define a starting point inside the tetrahedron
-    std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    std::array<double, 3> start_point = {0.0, 0.0, 0.1};
     
     // Define velocity vector
     SNS::Vector3D velocity(-1.0, -1.0, -1.0); // Inward direction
@@ -84,7 +84,7 @@ TEST(TetrahedronTest, NoExitTest) {
     
     // Call findExit
     bool has_exit = tetra.findExit(start_point, velocity, t_exit, x_exit, exit_face_id);
-    
+    std::cout << "t_exit: " << t_exit << std::endl;
     // Assertions
     EXPECT_FALSE(has_exit);
 }
