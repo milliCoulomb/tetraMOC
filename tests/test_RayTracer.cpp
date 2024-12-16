@@ -6,7 +6,7 @@
 #include "TestUtils.hpp" // Include the Test Utilities
 #include "Vector3D.hpp"
 
-namespace SNS = SNSolver;
+using namespace SNSolver;
 
 // Helper function to create a simple mesh with two adjacent tetrahedrons
 void setupSimpleMesh(MeshHandler& mesh) {
