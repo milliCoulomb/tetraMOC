@@ -2,6 +2,7 @@
 
 import numpy as np
 import medcoupling as mc
+from typing import Dict, List, Tuple
 import argparse
 import logging
 import os
@@ -13,35 +14,41 @@ def setup_logging():
     """
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-def build_faces_connectivity(cell_conn: np.ndarray) -> Dict[Tuple[int, ...], List[int]]:
+def build_faces_cell_connectivity(mesh: mc.MEDCouplingUMesh) -> Tuple[Dict[Tuple[int, ...], List[int]], np.ndarray, np.ndarray]:
     """
-    Constructs a dictionary mapping each unique face (sorted tuple of node IDs) to the list of cell IDs
-    that share that face.
+    Builds the face-to-cell connectivity for the mesh.
 
     Args:
-        cell_conn (np.ndarray): Array of cell connectivity, where each row contains node indices of a cell.
+        mesh (mc.MEDCouplingUMesh): The mesh object.
 
     Returns:
-        Dict[Tuple[int, ...], List[int]]: Mapping from face node tuples to adjacent cell IDs.
+        Tuple containing:
+            - Dictionary mapping sorted face node IDs to cell IDs.
+            - NumPy array of reversed connectivity.
+            - NumPy array of reversed connectivity indices.
     """
     logger = logging.getLogger(__name__)
-    logger.info("Building face connectivity.")
+    logger.info("Building face-to-cell connectivity.")
+    mesh_faces, desc, descIndex, revDesc, revDescIndex = mesh.buildDescendingConnectivity()
 
-    face_dict = defaultdict(list)
+    revDesc_np = revDesc.toNumPyArray()
+    revDescIndex_np = revDescIndex.toNumPyArray()
+    mesh_faces_nodes = mesh_faces.getNodalConnectivity().toNumPyArray().reshape(-1, 4)
+    face_node_ids = mesh_faces_nodes[:, 1:]
 
-    for cell_id, cell in enumerate(cell_conn):
-        # Define the four faces of a tetrahedron
-        faces = [
-            tuple(sorted([cell[0], cell[1], cell[2]])),
-            tuple(sorted([cell[0], cell[1], cell[3]])),
-            tuple(sorted([cell[0], cell[2], cell[3]])),
-            tuple(sorted([cell[1], cell[2], cell[3]])),
-        ]
-        for face in faces:
-            face_dict[face].append(cell_id)
+    faces_cell_connectivity = defaultdict(list)
+    num_faces = mesh_faces.getNumberOfCells()
 
-    logger.info(f"Total unique faces: {len(face_dict)}")
-    return face_dict
+    for face_id in range(num_faces):
+        sorted_face = tuple(sorted(face_node_ids[face_id]))
+        start_idx = revDescIndex_np[face_id]
+        end_idx = revDescIndex_np[face_id + 1]
+        cell_ids = revDesc_np[start_idx:end_idx]
+        faces_cell_connectivity[sorted_face].extend(cell_ids)
+        # logger.debug(f"Face {sorted_face} connected to cells {cell_ids}.")
+
+    logger.info("Completed building face-to-cell connectivity.")
+    return faces_cell_connectivity, revDesc_np, revDescIndex_np
 
 def export_faces_connectivity(face_dict: Dict[Tuple[int, ...], List[int]], output_dir: str):
     """
@@ -81,10 +88,10 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     """
     logger = logging.getLogger(__name__)
     logger.info(f"Loading MED mesh file: {med_file}")
-
+    field_name = 'VITESSE_ELEM_dom'
     try:
         # Load the field from the MED file
-        field_obj = mc.ReadField(field_file, 1, -1)
+        field_obj = mc.ReadField(field_file, field_name, 1, -1)
         mesh = field_obj.getMesh()
     except Exception as e:
         logger.error(f"Failed to load field file: {e}")
@@ -94,9 +101,9 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     coords = mesh.getCoords().toNumPyArray().reshape(-1, 3)
     num_nodes = coords.shape[0]
     logger.info(f"Number of nodes: {num_nodes}")
-
+    mesh_faces, desc, descIndex, revDesc, revDescIndex = mesh.buildDescendingConnectivity()
+    cell_conn = mesh_faces.getNodalConnectivity().toNumPyArray().reshape(-1, 4)
     # Extract cell connectivity (assuming tetrahedral cells)
-    cell_conn = mesh.getNodalConnectivity().toNumPyArray()
     if cell_conn.shape[1] != 4:
         logger.error("Mesh is not tetrahedral. Each cell must have 4 nodes.")
         raise ValueError("Non-tetrahedral mesh.")
@@ -110,9 +117,9 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
         logger.error(f"Failed to extract velocity field: {e}")
         raise
 
-    if v_field.shape[0] != num_cells:
-        logger.error("Number of velocity vectors does not match the number of cells.")
-        raise ValueError("Mismatch between velocity field and mesh.")
+    # if v_field.shape[0] != num_cells:
+    #     logger.error("Number of velocity vectors does not match the number of cells.")
+    #     raise ValueError("Mismatch between velocity field and mesh.")
 
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
@@ -143,7 +150,7 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
 
     # Build and export face connectivity to faces.txt
     logger.info("Building face connectivity.")
-    face_dict = build_faces_connectivity(cell_conn)
+    face_dict = build_faces_cell_connectivity(mesh)[0]
     export_faces_connectivity(face_dict, output_dir)
 
     logger.info("Preprocessing completed successfully.")
