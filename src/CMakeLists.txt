@@ -9,6 +9,8 @@ set(SOURCE_FILES
     MeshHandler.cpp
     Field.cpp
     RayTracer.cpp
+    GeometryUtils.cpp
+    RayTracerManager.cpp
 )
 
 # Créer une bibliothèque statique
