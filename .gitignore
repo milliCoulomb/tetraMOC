@@ -1,7 +1,10 @@
 # Prerequisites
 *.d
 /build/
+/venv/
 
+*.med
+*.txt
 # Compiled Object files
 *.slo
 *.lo
