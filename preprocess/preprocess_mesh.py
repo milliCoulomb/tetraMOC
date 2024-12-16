@@ -41,6 +41,7 @@ def build_faces_cell_connectivity(mesh: mc.MEDCouplingUMesh) -> Tuple[Dict[Tuple
 
     for face_id in range(num_faces):
         sorted_face = tuple(sorted(face_node_ids[face_id]))
+        print(f"Face {face_id}: {sorted_face}")
         start_idx = revDescIndex_np[face_id]
         end_idx = revDescIndex_np[face_id + 1]
         cell_ids = revDesc_np[start_idx:end_idx]
