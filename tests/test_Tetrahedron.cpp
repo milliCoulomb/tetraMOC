@@ -24,7 +24,7 @@ TEST(TetrahedronTest, FindExitBasicTest) {
     
     // Define a single tetrahedron
     TetraCell cell = createSimpleTetraCell(0, {0, 1, 2, 3});
-    CellField field = {1.0, 1.0, 1.0}; // Velocity vector
+    CellVectorField field = {1.0, 1.0, 1.0}; // Velocity vector
     
     // Create Tetrahedron object
     Tetrahedron tetra(cell, nodes, field);
@@ -67,7 +67,7 @@ TEST(TetrahedronTest, NoExitTest) {
     
     // Define a single tetrahedron
     TetraCell cell = createSimpleTetraCell(0, {0, 1, 2, 3});
-    CellField field = {-1.0, -1.0, -1.0}; // Velocity vector pointing inward
+    CellVectorField field = {-1.0, -1.0, -1.0}; // Velocity vector pointing inward
     
     // Create Tetrahedron object
     Tetrahedron tetra(cell, nodes, field);
