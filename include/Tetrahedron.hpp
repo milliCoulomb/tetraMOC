@@ -1,11 +1,12 @@
-// include/tetrahedron.h
+// include/Tetrahedron.hpp
+
 #ifndef TETRAHEDRON_H
 #define TETRAHEDRON_H
 
 #include "MeshHandler.hpp"
-#include "Vector3D.hpp" // Include your existing Vector3D class
+#include "Vector3D.hpp" // Use your existing Vector3D class
+#include "Field.hpp" // Include the Field class
 #include <array>
-#include "Field.hpp"
 
 struct DirectionData {
     int cell_id;
@@ -16,14 +17,15 @@ struct DirectionData {
 
 class Tetrahedron {
 public:
-    Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellField& field);
+    // Updated constructor to accept CellVectorField
+    Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellVectorField& field);
 
-    // Use SNSolver::Vector3D for the velocity vector
-    bool findExit(const std::array<double, 3>& x0, const SNSolver::Vector3D& v, double& t_exit, std::array<double, 3>& x_exit, int& exit_face_id) const;
+    // Use your project's Vector3D class instead of SNSolver::Vector3D
+    bool findExit(const std::array<double, 3>& x0, const Vector3D& v, double& t_exit, std::array<double, 3>& x_exit, int& exit_face_id) const;
 
 private:
-    std::array<SNSolver::Vector3D, 4> vertices;
-    SNSolver::Vector3D velocity;
+    std::array<Vector3D, 4> vertices; // Use your project's Vector3D
+    Vector3D velocity;
 };
 
 #endif // TETRAHEDRON_H
