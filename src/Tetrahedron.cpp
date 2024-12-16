@@ -5,6 +5,8 @@
 #include <limits>
 #include <iostream>
 
+// Removed: using namespace SNSolver;
+
 Tetrahedron::Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellVectorField& field) {
     for(int i = 0; i < 4; ++i) {
         vertices[i] = SNSolver::Vector3D(nodes[cell.node_ids[i]].x, nodes[cell.node_ids[i]].y, nodes[cell.node_ids[i]].z);
