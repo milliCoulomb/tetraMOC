@@ -18,6 +18,7 @@ set(TEST_SOURCES
     test_MeshHandler.cpp
     test_Field.cpp
     test_RayTracer.cpp
+    test_RayTracerManager.cpp
 )
 
 # Créer l'exécutable des tests
