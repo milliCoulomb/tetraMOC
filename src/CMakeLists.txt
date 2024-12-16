@@ -7,6 +7,7 @@ set(SOURCE_FILES
     AngularQuadrature.cpp
     Tetrahedron.cpp
     MeshHandler.cpp
+    Field.cpp
 )
 
 # Créer une bibliothèque statique
