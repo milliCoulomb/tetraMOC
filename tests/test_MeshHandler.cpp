@@ -3,15 +3,7 @@
 #include <fstream>
 #include <cstdio> // For std::remove
 #include "MeshHandler.hpp"
-
-// Utility function to create a temporary file with given content
-bool createTempFile(const std::string& filename, const std::string& content) {
-    std::ofstream outfile(filename);
-    if (!outfile.is_open()) return false;
-    outfile << content;
-    outfile.close();
-    return true;
-}
+#include "TestUtils.hpp"
 
 // Test Fixture for MeshHandler
 class MeshHandlerTest : public ::testing::Test {
