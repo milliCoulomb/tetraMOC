@@ -214,7 +214,7 @@ TEST_F(MeshHandlerTest, LoadFaces_IncorrectFaceCount) {
 TEST_F(MeshHandlerTest, LoadFaces_BeforeNodesAndCells) {
     // Define content for faces.txt referencing node and cell IDs that haven't been loaded yet
     std::string faces_content = "1\n"
-                                 "0 1 2 0\n";
+                                 "0 1 2 1 0\n"; // count=1, cell_id=0
     
     // Create temporary faces.txt
     ASSERT_TRUE(createTempFile(faces_file, faces_content)) << "Failed to create temporary faces.txt";
