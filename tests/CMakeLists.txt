@@ -16,6 +16,7 @@ set(TEST_SOURCES
     test_AngularQuadrature.cpp
     test_Tetrahedron.cpp
     test_MeshHandler.cpp
+    test_Field.cpp
 )
 
 # Créer l'exécutable des tests
