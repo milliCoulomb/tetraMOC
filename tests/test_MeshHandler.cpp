@@ -214,16 +214,42 @@ TEST_F(MeshHandlerTest, LoadFaces_IncorrectFaceCount) {
     MeshHandler mesh;
     EXPECT_FALSE(mesh.loadFaceConnectivity(faces_file)) << "MeshHandler should fail due to face count mismatch";
 }
+
 TEST_F(MeshHandlerTest, LoadField_Success) {
+    // Define content for nodes.txt
+    std::string nodes_content = "8\n" // Number of nodes
+                                 "0.0 0.0 0.0\n" // Node 0
+                                 "1.0 0.0 0.0\n" // Node 1
+                                 "0.0 1.0 0.0\n" // Node 2
+                                 "0.0 0.0 1.0\n" // Node 3
+                                 "1.0 1.0 1.0\n" // Node 4
+                                 "2.0 0.0 0.0\n" // Node 5
+                                 "0.0 2.0 0.0\n" // Node 6
+                                 "0.0 0.0 2.0\n"; // Node 7
+    
+    // Define content for cells.txt
+    std::string cells_content = "2\n" // Number of cells
+                                 "0 1 2 3\n" // Cell 0
+                                 "4 5 6 7\n"; // Cell 1
+    
     // Define content for field.txt
     std::string field_content = "2\n" // Number of velocity vectors
                                    "1.0 0.0 0.0\n" // Velocity for cell 0
                                    "0.0 1.0 0.0\n"; // Velocity for cell 1
     
+    // Create temporary nodes.txt
+    ASSERT_TRUE(createTempFile(nodes_file, nodes_content)) << "Failed to create temporary nodes.txt";
+    
+    // Create temporary cells.txt
+    ASSERT_TRUE(createTempFile(cells_file, cells_content)) << "Failed to create temporary cells.txt";
+    
     // Create temporary field.txt
     ASSERT_TRUE(createTempFile(field_file, field_content)) << "Failed to create temporary field.txt";
-
+    
     MeshHandler mesh;
+    EXPECT_TRUE(mesh.loadNodes(nodes_file)) << "MeshHandler failed to load nodes.txt";
+    EXPECT_TRUE(mesh.loadCells(cells_file)) << "MeshHandler failed to load cells.txt";
+    // Faces are not required for loading the velocity field, so we can skip loading faces here
     EXPECT_TRUE(mesh.loadVelocityField(field_file)) << "MeshHandler failed to load field.txt";
 
     // Verify loaded velocities
@@ -238,6 +264,7 @@ TEST_F(MeshHandlerTest, LoadField_Success) {
     EXPECT_DOUBLE_EQ(velocities[1].vy, 1.0);
     EXPECT_DOUBLE_EQ(velocities[1].vz, 0.0);
 }
+
 TEST_F(MeshHandlerTest, LoadField_MalformedFile) {
     // Define malformed content for field.txt (missing a velocity component)
     std::string field_content = "1\n"
