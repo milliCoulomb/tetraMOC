@@ -26,12 +26,12 @@ protected:
 };
 
 TEST_F(MeshHandlerTest, LoadNodes_Success) {
-    // Define content for nodes.txt
+    // Define content for nodes.txt with node IDs
     std::string nodes_content = "4\n"
-                                 "0.0 0.0 0.0\n"
-                                 "1.0 0.0 0.0\n"
-                                 "0.0 1.0 0.0\n"
-                                 "0.0 0.0 1.0\n";
+                                 "0 0.0 0.0 0.0\n"
+                                 "1 1.0 0.0 0.0\n"
+                                 "2 0.0 1.0 0.0\n"
+                                 "3 0.0 0.0 1.0\n";
     
     // Create temporary nodes.txt
     ASSERT_TRUE(createTempFile(nodes_file, nodes_content)) << "Failed to create temporary nodes.txt";
@@ -90,10 +90,10 @@ TEST_F(MeshHandlerTest, LoadNodes_IncorrectNodeCount) {
 }
 
 TEST_F(MeshHandlerTest, LoadCells_Success) {
-    // Define content for cells.txt
+    // Define content for cells.txt with cell IDs and four node IDs per cell
     std::string cells_content = "2\n"
-                                 "0 1 2 3\n"
-                                 "1 2 3 4\n"; // Assuming node IDs up to 4
+                                 "0 0 1 2 3\n"
+                                 "1 1 2 3 4\n"; // Assuming node IDs up to 4
     
     // Create temporary cells.txt
     ASSERT_TRUE(createTempFile(cells_file, cells_content)) << "Failed to create temporary cells.txt";
@@ -145,11 +145,11 @@ TEST_F(MeshHandlerTest, LoadCells_NonTetrahedral) {
 }
 
 TEST_F(MeshHandlerTest, LoadFaces_Success) {
-    // Define content for faces.txt
+    // Define content for faces.txt with counts of adjacent cells
     std::string faces_content = "3\n" // Number of faces
-                                   "0 1 2 0 1\n" // Face with nodes 0,1,2 adjacent to cells 0 and 1
-                                   "0 1 3 0\n"   // Face with nodes 0,1,3 adjacent to cell 0
-                                   "1 2 3 1\n";  // Face with nodes 1,2,3 adjacent to cell 1
+                                   "0 1 2 2 0 1\n" // Face with nodes 0,1,2 adjacent to cells 0 and 1
+                                   "0 1 3 1 0\n"   // Face with nodes 0,1,3 adjacent to cell 0
+                                   "1 2 3 1 1\n";  // Face with nodes 1,2,3 adjacent to cell 1
     
     // Create temporary faces.txt
     ASSERT_TRUE(createTempFile(faces_file, faces_content)) << "Failed to create temporary faces.txt";
@@ -162,27 +162,28 @@ TEST_F(MeshHandlerTest, LoadFaces_Success) {
     ASSERT_EQ(faces.size(), 3) << "Number of loaded faces mismatch";
 
     // Face 0
-    EXPECT_EQ(std::get<0>(faces[0]), 0);
-    EXPECT_EQ(std::get<1>(faces[0]), 1);
-    EXPECT_EQ(std::get<2>(faces[0]), 2);
-    EXPECT_EQ(std::get<3>(faces[0]).size(), 2);
-    EXPECT_EQ(std::get<3>(faces[0])[0], 0);
-    EXPECT_EQ(std::get<3>(faces[0])[1], 1);
+    EXPECT_EQ(faces[0].n0, 0);
+    EXPECT_EQ(faces[0].n1, 1);
+    EXPECT_EQ(faces[0].n2, 2);
+    ASSERT_EQ(faces[0].adjacent_cell_ids.size(), 2);
+    EXPECT_EQ(faces[0].adjacent_cell_ids[0], 0);
+    EXPECT_EQ(faces[0].adjacent_cell_ids[1], 1);
 
     // Face 1
-    EXPECT_EQ(std::get<0>(faces[1]), 0);
-    EXPECT_EQ(std::get<1>(faces[1]), 1);
-    EXPECT_EQ(std::get<2>(faces[1]), 3);
-    EXPECT_EQ(std::get<3>(faces[1]).size(), 1);
-    EXPECT_EQ(std::get<3>(faces[1])[0], 0);
+    EXPECT_EQ(faces[1].n0, 0);
+    EXPECT_EQ(faces[1].n1, 1);
+    EXPECT_EQ(faces[1].n2, 3);
+    ASSERT_EQ(faces[1].adjacent_cell_ids.size(), 1);
+    EXPECT_EQ(faces[1].adjacent_cell_ids[0], 0);
 
     // Face 2
-    EXPECT_EQ(std::get<0>(faces[2]), 1);
-    EXPECT_EQ(std::get<1>(faces[2]), 2);
-    EXPECT_EQ(std::get<2>(faces[2]), 3);
-    EXPECT_EQ(std::get<3>(faces[2]).size(), 1);
-    EXPECT_EQ(std::get<3>(faces[2])[0], 1);
+    EXPECT_EQ(faces[2].n0, 1);
+    EXPECT_EQ(faces[2].n1, 2);
+    EXPECT_EQ(faces[2].n2, 3);
+    ASSERT_EQ(faces[2].adjacent_cell_ids.size(), 1);
+    EXPECT_EQ(faces[2].adjacent_cell_ids[0], 1);
 }
+
 TEST_F(MeshHandlerTest, LoadFaces_MalformedFile) {
     // Define malformed content for faces.txt (missing cell IDs)
     std::string faces_content = "2\n"
@@ -195,6 +196,7 @@ TEST_F(MeshHandlerTest, LoadFaces_MalformedFile) {
     MeshHandler mesh;
     EXPECT_FALSE(mesh.loadFaceConnectivity(faces_file)) << "MeshHandler should fail to load malformed faces.txt";
 }
+
 TEST_F(MeshHandlerTest, LoadFaces_IncorrectFaceCount) {
     // Define content where the number of faces specified doesn't match the actual data
     std::string faces_content = "4\n" // Specifying 4 faces
@@ -219,10 +221,13 @@ TEST_F(MeshHandlerTest, LoadFaces_BeforeNodesAndCells) {
 
     MeshHandler mesh;
     EXPECT_TRUE(mesh.loadFaceConnectivity(faces_file)) << "MeshHandler should load faces even if nodes and cells are not loaded yet";
-
-    // However, accessing face data should still work, but might reference non-existent nodes/cells
+    
+    // Access face data, but nodes and cells may not exist
     const auto& faces = mesh.getFaces();
-    ASSERT_EQ(faces.size(), 1);
-    EXPECT_EQ(std::get<3>(faces[0]).size(), 1);
-    EXPECT_EQ(std::get<3>(faces[0])[0], 0);
+    ASSERT_EQ(faces.size(), 1) << "Number of loaded faces mismatch";
+    EXPECT_EQ(faces[0].adjacent_cell_ids.size(), 1);
+    EXPECT_EQ(faces[0].adjacent_cell_ids[0], 0);
+    
+    // Optionally, verify node IDs if nodes are loaded
+    // In this test, nodes are not loaded, so node IDs may not correspond to actual nodes
 }
