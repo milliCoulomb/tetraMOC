@@ -1,11 +1,11 @@
-// include/ray_tracer.h
-#ifndef RAY_TRACER_H
-#define RAY_TRACER_H
+// include/RayTracer.hpp
+#ifndef RAY_TRACER_HPP
+#define RAY_TRACER_HPP
 
 #include "MeshHandler.hpp"
 #include "Field.hpp"
 #include "Tetrahedron.hpp"
-#include "Vector3D.hpp" // Your existing Vector3D class
+#include "Vector3D.hpp" // Ensure this defines SNSolver::Vector3D
 #include <vector>
 #include <array>
 #include <unordered_map>
@@ -40,4 +40,4 @@ private:
     int getNeighborCell(int current_cell_id, int exit_face_id) const;
 };
 
-#endif // RAY_TRACER_H
+#endif // RAY_TRACER_HPP
