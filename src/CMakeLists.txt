@@ -8,6 +8,7 @@ set(SOURCE_FILES
     Tetrahedron.cpp
     MeshHandler.cpp
     Field.cpp
+    RayTracer.cpp
 )
 
 # Créer une bibliothèque statique
