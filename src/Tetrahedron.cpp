@@ -1,24 +1,25 @@
-// src/tetrahedron.cpp
+// src/Tetrahedron.cpp
+
 #include "Tetrahedron.hpp"
 #include <cmath>
 #include <limits>
 #include <iostream>
 
-Tetrahedron::Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellField& field) {
+Tetrahedron::Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellVectorField& field) {
     for(int i = 0; i < 4; ++i) {
-        vertices[i] = SNSolver::Vector3D(nodes[cell.node_ids[i]].x, nodes[cell.node_ids[i]].y, nodes[cell.node_ids[i]].z);
+        vertices[i] = Vector3D(nodes[cell.node_ids[i]].x, nodes[cell.node_ids[i]].y, nodes[cell.node_ids[i]].z);
     }
-    // Copy the vector field
-    velocity = SNSolver::Vector3D(field.vx, field.vy, field.vz);
+    // Initialize the velocity vector
+    velocity = Vector3D(field.vx, field.vy, field.vz);
 }
 
-bool Tetrahedron::findExit(const std::array<double, 3>& x0, const SNSolver::Vector3D& v, double& t_exit, std::array<double, 3>& x_exit, int& exit_face_id) const {
+bool Tetrahedron::findExit(const std::array<double, 3>& x0, const Vector3D& v, double& t_exit, std::array<double, 3>& x_exit, int& exit_face_id) const {
     t_exit = std::numeric_limits<double>::max();
     exit_face_id = -1;
 
     for(int i = 0; i < 4; ++i) {
         // Define the three vertices of the face
-        std::array<SNSolver::Vector3D, 3> face_vertices;
+        std::array<Vector3D, 3> face_vertices;
         switch(i) {
             case 0:
                 face_vertices = { vertices[0], vertices[1], vertices[2] };
@@ -37,13 +38,13 @@ bool Tetrahedron::findExit(const std::array<double, 3>& x0, const SNSolver::Vect
         }
 
         // Compute the plane of the face
-        SNSolver::Vector3D p1 = face_vertices[0];
-        SNSolver::Vector3D p2 = face_vertices[1];
-        SNSolver::Vector3D p3 = face_vertices[2];
+        Vector3D p1 = face_vertices[0];
+        Vector3D p2 = face_vertices[1];
+        Vector3D p3 = face_vertices[2];
 
-        SNSolver::Vector3D edge1 = p2 - p1;
-        SNSolver::Vector3D edge2 = p3 - p1;
-        SNSolver::Vector3D normal = edge1.cross(edge2).normalized();
+        Vector3D edge1 = p2 - p1;
+        Vector3D edge2 = p3 - p1;
+        Vector3D normal = edge1.cross(edge2).normalized();
 
         double D = normal.dot(p1);
 
@@ -52,18 +53,18 @@ bool Tetrahedron::findExit(const std::array<double, 3>& x0, const SNSolver::Vect
             continue; // Ray parallel to face
         }
 
-        double t = (D - normal.dot(SNSolver::Vector3D(x0[0], x0[1], x0[2]))) / denom;
+        double t = (D - normal.dot(Vector3D(x0[0], x0[1], x0[2]))) / denom;
         if(t <= 1e-10) {
             continue; // Intersection behind the start point or too close
         }
 
         // Compute the intersection point
-        SNSolver::Vector3D intersect = SNSolver::Vector3D(x0[0], x0[1], x0[2]) + v * t;
+        Vector3D intersect = Vector3D(x0[0], x0[1], x0[2]) + v * t;
 
         // Check if the point is inside the triangle using barycentric coordinates
-        SNSolver::Vector3D v0 = p3 - p1;
-        SNSolver::Vector3D v1 = p2 - p1;
-        SNSolver::Vector3D v2 = intersect - p1;
+        Vector3D v0 = p3 - p1;
+        Vector3D v1 = p2 - p1;
+        Vector3D v2 = intersect - p1;
 
         double dot00 = v0.dot(v0);
         double dot01 = v0.dot(v1);
