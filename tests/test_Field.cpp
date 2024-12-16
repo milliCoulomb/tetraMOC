@@ -6,6 +6,8 @@
 #include <cstdio> // For std::remove
 #include "TestUtils.hpp"
 
+using namespace SNSolver;
+
 // Test Fixture for Field
 class FieldTest : public ::testing::Test {
 protected:
