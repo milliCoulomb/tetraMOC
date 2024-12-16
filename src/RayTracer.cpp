@@ -1,9 +1,10 @@
-// src/ray_tracer.cpp
+// src/RayTracer.cpp
 #include "RayTracer.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <limits>
 
 RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler)
     : mesh(mesh_handler), field(field_handler) {
@@ -94,7 +95,7 @@ std::vector<DirectionData> RayTracer::traceRay(int start_cell_id, const std::arr
         }
 
         const TetraCell& cell = mesh.getCells()[current_cell_id];
-        const CellField& field_val = field.getCellValues()[current_cell_id];
+        const CellVectorField& field_val = field.getVectorFields()[current_cell_id];
         Tetrahedron tetra(cell, mesh.getNodes(), field_val);
 
         SNSolver::Vector3D v(field_val.vx, field_val.vy, field_val.vz);
