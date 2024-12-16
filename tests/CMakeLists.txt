@@ -17,6 +17,7 @@ set(TEST_SOURCES
     test_Tetrahedron.cpp
     test_MeshHandler.cpp
     test_Field.cpp
+    test_RayTracer.cpp
 )
 
 # Créer l'exécutable des tests
