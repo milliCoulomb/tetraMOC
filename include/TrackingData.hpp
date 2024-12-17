@@ -4,9 +4,6 @@
 
 #include <vector>
 #include <array>
-
-namespace SNSolver {
-
 // Structure to store information about a single cell traversal
 struct CellTrace {
     int cell_id;
@@ -18,9 +15,8 @@ struct CellTrace {
 // Structure to store tracking data for a single ray
 struct TrackingData {
     int ray_id;
+    std::array<double, 3> direction;
     std::vector<CellTrace> cell_traces;
 };
-
-} // namespace SNSolver
 
 #endif // TRACKINGDATA_HPP
