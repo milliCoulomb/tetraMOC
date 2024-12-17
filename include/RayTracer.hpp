@@ -5,7 +5,7 @@
 #include "MeshHandler.hpp"
 #include "Field.hpp"
 #include "Tetrahedron.hpp"
-#include "Vector3D.hpp" // Ensure this defines SNSolver::Vector3D
+#include "Vector3D.hpp" // Ensure this defines Vector3D
 #include <TrackingData.hpp>
 #include <vector>
 #include <array>
