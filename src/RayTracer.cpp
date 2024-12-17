@@ -15,10 +15,10 @@ RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler
 }
 
 // Implementation of traceRay
-std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const std::array<double, 3>& start_point, int max_iter) const {
+std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& start_point, int max_iter) const {
     std::vector<CellTrace> pathline;
     int current_cell_id = start_cell_id;
-    std::array<double, 3> current_point = start_point;
+    Vector3D current_point = start_point;
     double total_time = 0.0;
 
     for(int iter = 0; iter < max_iter; ++iter) {
@@ -36,10 +36,10 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const std::array<d
         Tetrahedron tetra(cell, mesh.getNodes(), field_val);
 
         // Define the velocity vector
-        SNSolver::Vector3D v(field_val.vx, field_val.vy, field_val.vz);
+        Vector3D v(field_val.vx, field_val.vy, field_val.vz);
 
         double t_exit;
-        std::array<double, 3> x_exit;
+        Vector3D x_exit;
         int exit_face_id;
 
         // Find the exit point and corresponding face
