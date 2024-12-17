@@ -6,8 +6,6 @@
 #include "Quadrature.hpp"
 #include <utility>
 
-namespace SNSolver {
-
 struct Direction {
     double mu;
     double phi;
@@ -27,7 +25,5 @@ private:
     std::vector<Direction> directions_;
     void generateQuadrature();
 };
-
-} // namespace SNSolver
 
 #endif // ANGULARQUADRATURE_HPP
