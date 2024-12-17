@@ -3,8 +3,6 @@
 #include "Tetrahedron.hpp"
 #include "Vector3D.hpp"
 
-namespace SNS = SNSolver;
-
 // Helper function to create a simple tetrahedron
 TetraCell createSimpleTetraCell(int cell_id, const std::array<int, 4>& node_ids) {
     TetraCell cell;
@@ -30,13 +28,15 @@ TEST(TetrahedronTest, FindExitBasicTest) {
     Tetrahedron tetra(cell, nodes, field);
     
     // Define a starting point inside the tetrahedron
-    std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    // std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    Vector3D start_point(0.1, 0.1, 0.1);
     
     // Define velocity vector
-    SNS::Vector3D velocity(1.0, 1.0, 1.0); // Diagonal direction
+    Vector3D velocity(1.0, 1.0, 1.0); // Diagonal direction
     
     double t_exit;
-    std::array<double, 3> x_exit;
+    // std::array<double, 3> x_exit;
+    Vector3D x_exit;
     int exit_face_id;
     
     // Call findExit
@@ -48,12 +48,12 @@ TEST(TetrahedronTest, FindExitBasicTest) {
     EXPECT_NE(exit_face_id, -1);
     
     // Check that exit point is within the expected bounds
-    EXPECT_GE(x_exit[0], 0.0);
-    EXPECT_LE(x_exit[0], 1.0);
-    EXPECT_GE(x_exit[1], 0.0);
-    EXPECT_LE(x_exit[1], 1.0);
-    EXPECT_GE(x_exit[2], 0.0);
-    EXPECT_LE(x_exit[2], 1.0);
+    EXPECT_GE(x_exit.x, 0.0);
+    EXPECT_LE(x_exit.x, 1.0);
+    EXPECT_GE(x_exit.y, 0.0);
+    EXPECT_LE(x_exit.y, 1.0);
+    EXPECT_GE(x_exit.z, 0.0);
+    EXPECT_LE(x_exit.z, 1.0);
 }
 
 TEST(TetrahedronTest, NoExitTest) {
@@ -73,13 +73,15 @@ TEST(TetrahedronTest, NoExitTest) {
     Tetrahedron tetra(cell, nodes, field);
     
     // Define a starting point inside the tetrahedron
-    std::array<double, 3> start_point = {0.0, 0.0, 0.1};
+    // std::array<double, 3> start_point = {0.0, 0.0, 0.1};
+    Vector3D start_point(0.0, 0.0, 0.1);
     
     // Define velocity vector
-    SNS::Vector3D velocity(-1.0, -1.0, -1.0); // Inward direction
+    Vector3D velocity(-1.0, -1.0, -1.0); // Inward direction
     
     double t_exit;
-    std::array<double, 3> x_exit;
+    // std::array<double, 3> x_exit;
+    Vector3D x_exit;
     int exit_face_id;
     
     // Call findExit
