@@ -4,7 +4,7 @@
 #include <random>
 #include <thread>
 
-std::array<double, 3> computeFaceNormal(const std::array<Node, 3>& triangle) {
+Vector3D computeFaceNormal(const std::array<Node, 3>& triangle) {
     // Vectors from the first node
     double ux = triangle[1].x - triangle[0].x;
     double uy = triangle[1].y - triangle[0].y;
@@ -23,10 +23,10 @@ std::array<double, 3> computeFaceNormal(const std::array<Node, 3>& triangle) {
     double norm = std::sqrt(nx * nx + ny * ny + nz * nz);
     if(norm == 0) return {0.0, 0.0, 0.0}; // Degenerate triangle
 
-    return {nx / norm, ny / norm, nz / norm};
+    return Vector3D(nx / norm, ny / norm, nz / norm);
 }
 
-std::array<double, 3> samplePointOnTriangle(const std::array<Node, 3>& triangle) {
+Vector3D samplePointOnTriangle(const std::array<Node, 3>& triangle) {
     // Thread-local random number generator for thread safety
     thread_local std::mt19937 generator(std::random_device{}());
     std::uniform_real_distribution<double> distribution(0.0, 1.0);
@@ -44,5 +44,5 @@ std::array<double, 3> samplePointOnTriangle(const std::array<Node, 3>& triangle)
     double y = triangle[0].y + u * (triangle[1].y - triangle[0].y) + v * (triangle[2].y - triangle[0].y);
     double z = triangle[0].z + u * (triangle[1].z - triangle[0].z) + v * (triangle[2].z - triangle[0].z);
 
-    return {x, y, z};
+    return Vector3D(x, y, z);
 }
