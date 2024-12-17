@@ -5,8 +5,6 @@
 #include <cmath>
 #include <vector>
 
-namespace SNSolver {
-
 // angular quadrature (theta_order = 2, phi_order = 4)
 TEST(AngularQuadratureTest, GenerateQuadratureSnOrder2) {
     int theta_order = 2;
@@ -97,11 +95,9 @@ TEST(AngularQuadratureTest, ConsistencyWithQuadratureSnOrder4) {
 
 // Test de gestion des ordres invalides (snOrder < 1)
 TEST(AngularQuadratureTest, InvalidSnOrder) {
-    EXPECT_THROW(SNSolver::AngularQuadrature aq(0, 4), std::invalid_argument);
-    EXPECT_THROW(SNSolver::AngularQuadrature aq(-2, 4), std::invalid_argument);
+    EXPECT_THROW(AngularQuadrature aq(0, 4), std::invalid_argument);
+    EXPECT_THROW(AngularQuadrature aq(-2, 4), std::invalid_argument);
 }
-
-} // namespace SNSolver
 
 // // main.cpp pour les tests (si nécessaire)
 // int main(int argc, char **argv) {
