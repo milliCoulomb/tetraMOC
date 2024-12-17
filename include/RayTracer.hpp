@@ -16,7 +16,7 @@
 class RayTracer {
 public:
     RayTracer(const MeshHandler& mesh, const Field& field);
-    std::vector<CellTrace> traceRay(int start_cell_id, const std::array<double, 3>& start_point, int max_iter = 100) const;
+    std::vector<CellTrace> traceRay(int start_cell_id, const Vector3D& start_point, int max_iter = 100) const;
     
 private:
     const MeshHandler& mesh;
