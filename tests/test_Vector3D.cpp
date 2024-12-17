@@ -2,8 +2,6 @@
 #include "Vector3D.hpp"
 #include <gtest/gtest.h>
 
-namespace SNSolver {
-
 // testing initialization of a vector
 TEST(Vector3DTest, DefaultConstructor) {
     Vector3D v;
@@ -102,8 +100,6 @@ TEST(Vector3DTest, Inequality) {
     Vector3D v2(1.0, 2.1, 3.0);
     EXPECT_TRUE(v1 != v2);
 }
-
-} // namespace SNSolver
 
 // // main.cpp for tests (optional if using gtest_main)
 // int main(int argc, char **argv) {
