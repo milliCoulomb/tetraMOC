@@ -21,7 +21,7 @@ public:
     Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellVectorField& field);
 
     // findExit method using Vector3D
-    bool findExit(const std::array<double, 3>& x0, const Vector3D& v, double& t_exit, std::array<double, 3>& x_exit, int& exit_face_id) const;
+    bool findExit(const Vector3D& x0, const Vector3D& v, double& t_exit, Vector3D& x_exit, int& exit_face_id) const;
 
 private:
     std::array<Vector3D, 4> vertices; // Fully qualified with SNSolver
