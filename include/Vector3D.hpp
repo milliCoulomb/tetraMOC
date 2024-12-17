@@ -5,8 +5,6 @@
 #include <cmath>
 #include <iostream>
 
-namespace SNSolver {
-
 class Vector3D {
 public:
     double x, y, z;
@@ -95,7 +93,5 @@ public:
         return !(*this == v);
     }
 };
-
-} // namespace SNSolver
 
 #endif // VECTOR3D_HPP
