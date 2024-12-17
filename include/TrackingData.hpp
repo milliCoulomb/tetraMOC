@@ -3,19 +3,20 @@
 #define TRACKINGDATA_HPP
 
 #include <vector>
-#include <array>
+#include "Vector3D.hpp"
+
 // Structure to store information about a single cell traversal
 struct CellTrace {
     int cell_id;
     double time_spent;
-    std::array<double, 3> start_point;
-    std::array<double, 3> end_point;
+    Vector3D start_point;
+    Vector3D end_point;
 };
 
 // Structure to store tracking data for a single ray
 struct TrackingData {
     int ray_id;
-    std::array<double, 3> direction;
+    Vector3D direction; // Added direction for better traceability
     std::vector<CellTrace> cell_traces;
 };
 
