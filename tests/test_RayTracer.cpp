@@ -105,7 +105,8 @@ TEST_F(RayTracerTest, TraceRayBasicTest) {
     
     // Define starting cell and point
     int start_cell_id = 0;
-    std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    // std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    Vector3D start_point(0.1, 0.1, 0.1);
     
     // Trace the ray with max_iter = 1
     std::vector<CellTrace> pathline = ray_tracer.traceRay(start_cell_id, start_point, 1);
@@ -135,7 +136,8 @@ TEST_F(RayTracerTest, TraceRayThroughTwoCells) {
     
     // Define starting cell and point
     int start_cell_id = 0;
-    std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    // std::array<double, 3> start_point = {0.1, 0.1, 0.1};
+    Vector3D start_point(0.1, 0.1, 0.1);
     
     // Trace the ray with higher max_iter
     std::vector<CellTrace> pathline = ray_tracer.traceRay(start_cell_id, start_point, 10);
@@ -166,7 +168,8 @@ TEST_F(RayTracerTest, TraceRayExitsDomain) {
     
     // Define starting cell and point
     int start_cell_id = 1; // Starting from Cell 1, which is adjacent to Cell 0
-    std::array<double, 3> start_point = {0.9, 0.9, 0.9};
+    // std::array<double, 3> start_point = {0.9, 0.9, 0.9};
+    Vector3D start_point(0.9, 0.9, 0.9);
     
     // Trace the ray
     std::vector<CellTrace> pathline = ray_tracer.traceRay(start_cell_id, start_point, 10);
