@@ -10,12 +10,6 @@
 #include <mutex>
 #include <atomic>
 
-namespace SNSolver {
-
-struct Face {
-    int n0, n1, n2;
-};
-
 class RayTracerManager {
 public:
     RayTracerManager(const MeshHandler& mesh,
@@ -44,7 +38,4 @@ private:
                           const Direction& dir,
                           double angle_threshold_deg) const;
 };
-
-} // namespace SNSolver
-
 #endif // RAYTRACERMANAGER_HPP
