@@ -108,7 +108,7 @@ TEST_F(RayTracerTest, TraceRayBasicTest) {
     std::array<double, 3> start_point = {0.1, 0.1, 0.1};
     
     // Trace the ray with max_iter = 1
-    std::vector<DirectionData> pathline = ray_tracer.traceRay(start_cell_id, start_point, 1);
+    std::vector<CellTrace> pathline = ray_tracer.traceRay(start_cell_id, start_point, 1);
     
     // Assertions
     ASSERT_FALSE(pathline.empty()) << "Pathline should not be empty";
@@ -138,7 +138,7 @@ TEST_F(RayTracerTest, TraceRayThroughTwoCells) {
     std::array<double, 3> start_point = {0.1, 0.1, 0.1};
     
     // Trace the ray with higher max_iter
-    std::vector<DirectionData> pathline = ray_tracer.traceRay(start_cell_id, start_point, 10);
+    std::vector<CellTrace> pathline = ray_tracer.traceRay(start_cell_id, start_point, 10);
     
     // Assertions
     ASSERT_FALSE(pathline.empty()) << "Pathline should not be empty";
@@ -169,7 +169,7 @@ TEST_F(RayTracerTest, TraceRayExitsDomain) {
     std::array<double, 3> start_point = {0.9, 0.9, 0.9};
     
     // Trace the ray
-    std::vector<DirectionData> pathline = ray_tracer.traceRay(start_cell_id, start_point, 10);
+    std::vector<CellTrace> pathline = ray_tracer.traceRay(start_cell_id, start_point, 10);
     
     // Assertions
     ASSERT_FALSE(pathline.empty()) << "Pathline should not be empty";
