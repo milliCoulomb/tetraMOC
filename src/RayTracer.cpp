@@ -15,8 +15,8 @@ RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler
 }
 
 // Implementation of traceRay
-std::vector<DirectionData> RayTracer::traceRay(int start_cell_id, const std::array<double, 3>& start_point, int max_iter) const {
-    std::vector<DirectionData> pathline;
+std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const std::array<double, 3>& start_point, int max_iter) const {
+    std::vector<CellTrace> pathline;
     int current_cell_id = start_cell_id;
     std::array<double, 3> current_point = start_point;
     double total_time = 0.0;
@@ -50,7 +50,7 @@ std::vector<DirectionData> RayTracer::traceRay(int start_cell_id, const std::arr
         }
 
         // Record the traversal segment
-        DirectionData segment;
+        CellTrace segment;
         segment.cell_id = current_cell_id;
         segment.time_spent = t_exit;
         segment.start_point = current_point;
