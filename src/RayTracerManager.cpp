@@ -105,10 +105,8 @@ void RayTracerManager::generateTrackingData(int rays_per_face) {
             };
 
             // Compute face normal
-            std::array<double, 3> face_normal = computeFaceNormal(face_nodes);
-            double norm = std::sqrt(face_normal[0]*face_normal[0] +
-                                    face_normal[1]*face_normal[1] +
-                                    face_normal[2]*face_normal[2]);
+            Vector3D face_normal = computeFaceNormal(face_nodes);
+            double norm = face_normal.norm();
             if(norm == 0) {
                 std::cerr << "Warning: Degenerate face encountered. Face ID: " << i << std::endl;
                 continue; // Skip degenerate face
@@ -123,7 +121,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face) {
 
             // Sample starting points on the face
             for(int ray = 0; ray < rays_per_face; ++ray) {
-                std::array<double, 3> start_point = samplePointOnTriangle(face_nodes);
+                Vector3D start_point = samplePointOnTriangle(face_nodes);
 
                 // Iterate over half directions
                 for(int d = 0; d < half_directions; ++d) {

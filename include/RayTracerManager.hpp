@@ -5,6 +5,7 @@
 #include "RayTracer.hpp"
 #include "AngularQuadrature.hpp"
 #include "TrackingData.hpp"
+#include "Vector3D.hpp"
 #include <vector>
 #include <array>
 #include <mutex>
@@ -34,7 +35,7 @@ private:
     std::atomic<int> ray_counter_{0};
 
     // Function to determine if a direction is valid (not parallel)
-    bool isValidDirection(const std::array<double, 3>& face_normal,
+    bool isValidDirection(const Vector3D& face_normal,
                           const Direction& dir,
                           double angle_threshold_deg) const;
 };
