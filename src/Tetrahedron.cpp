@@ -12,7 +12,7 @@ Tetrahedron::Tetrahedron(const TetraCell& cell, const std::vector<Vector3D>& nod
         vertices[i] = Vector3D(nodes[cell.node_ids[i]].x, nodes[cell.node_ids[i]].y, nodes[cell.node_ids[i]].z);
     }
     // Initialize the velocity vector
-    velocity = Vector3D(field.vx, field.vy, field.vz);
+    velocity = Vector3D(field.x, field.y, field.z);
 }
 
 bool Tetrahedron::findExit(const Vector3D& x0, const Vector3D& v, double& t_exit, Vector3D& x_exit, int& exit_face_id) const {
