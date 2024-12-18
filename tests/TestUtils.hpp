@@ -6,8 +6,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cstdlib>
-
-namespace SNSolver {
+#include "Vector3D.hpp"
 
 // Utility function to create a temporary file with given content
 inline bool createTempFile(const std::string& filename, const std::string& content) {
@@ -27,6 +26,9 @@ inline std::string generateUniqueFilename(const std::string& prefix = "temp_", c
     return filename;
 }
 
-} // namespace SNSolver
+// Helper function to compare two Vector3D instances with a tolerance
+inline bool vectorsAlmostEqual(const Vector3D& v1, const Vector3D& v2, double tol = 1e-6) {
+    return v1.isAlmostEqual(v2, tol);
+}
 
 #endif // TEST_UTILS_HPP
