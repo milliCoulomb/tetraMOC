@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 #include <cmath>
 #include <vector>
+#include "Vector3D.hpp"
 
 // angular quadrature (theta_order = 2, phi_order = 4)
 TEST(AngularQuadratureTest, GenerateQuadratureSnOrder2) {
@@ -97,6 +98,33 @@ TEST(AngularQuadratureTest, ConsistencyWithQuadratureSnOrder4) {
 TEST(AngularQuadratureTest, InvalidSnOrder) {
     EXPECT_THROW(AngularQuadrature aq(0, 4), std::invalid_argument);
     EXPECT_THROW(AngularQuadrature aq(-2, 4), std::invalid_argument);
+}
+
+// we need to check if the angular quadrature is symmetric
+TEST(AngularQuadratureTest, Symmetry) {
+    int n_theta = 2;
+    int n_phi = 2;
+    AngularQuadrature aq(n_theta, n_phi);
+    const std::vector<Direction>& directions = aq.getDirections();
+    std::vector<Vector3D> directions_3D;
+    // Vérifier la symétrie par rapport à l'axe z
+    for(int i = 0; i < n_theta; ++i) {
+        for(int j = 0; j < n_phi; ++j) {
+            int index = i * n_phi + j;
+            // build the 3D direction vector
+            Vector3D direction(std::sqrt(1 - directions[index].mu * directions[index].mu) * std::cos(directions[index].phi),
+                                 std::sqrt(1 - directions[index].mu * directions[index].mu) * std::sin(directions[index].phi),
+                                 directions[index].mu);
+            directions_3D.push_back(direction);
+        }
+    }
+    // then we loop on half of the directions
+    for(int i = 0; i < directions_3D.size() / 2; ++i) {
+        // we check if the direction is the opposite of the other
+        EXPECT_NEAR(directions_3D[i].x, -directions_3D[directions_3D.size() - i - 1].x, 1e-10);
+        EXPECT_NEAR(directions_3D[i].y, -directions_3D[directions_3D.size() - i - 1].y, 1e-10);
+        EXPECT_NEAR(directions_3D[i].z, -directions_3D[directions_3D.size() - i - 1].z, 1e-10);
+    }
 }
 
 // // main.cpp pour les tests (si nécessaire)
