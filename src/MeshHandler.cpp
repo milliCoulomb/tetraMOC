@@ -1,6 +1,7 @@
 // src/MeshHandler.cpp
 
 #include "MeshHandler.hpp"
+#include "Vector3D.hpp"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -31,7 +32,7 @@ bool MeshHandler::loadNodes(const std::string& filename) {
             std::cerr << "Error: Invalid node format in line: " << (i + 2) << std::endl;
             return false;
         }
-        nodes.emplace_back(Node{ x, y, z });
+        nodes.emplace_back(Vector3D(x, y, z));
     }
     
     // Optional: Verify no extra data

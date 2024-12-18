@@ -7,12 +7,13 @@
 #include <string>
 #include <array>
 #include <tuple>
+#include "Vector3D.hpp"
 #include <unordered_map>
 
 // Structure to store node coordinates
-struct Node {
-    double x, y, z;
-};
+// struct Node {
+//     double x, y, z;
+// };
 
 // Structure to store tetrahedral cell connectivity
 struct TetraCell {
@@ -49,7 +50,7 @@ public:
     bool loadFaceConnectivity(const std::string& filename);
     
     // Getters for accessing mesh data
-    const std::vector<Node>& getNodes() const { return nodes; }
+    const std::vector<Vector3D>& getNodes() const { return nodes; }
     const std::vector<TetraCell>& getCells() const { return cells; }
     const std::vector<Face>& getFaces() const { return faces; }
 
@@ -64,7 +65,7 @@ public:
     int getNeighborCell(int current_cell_id, int exit_face_id) const;
 
 private:
-    std::vector<Node> nodes;
+    std::vector<Vector3D> nodes;
     std::vector<TetraCell> cells;
     std::vector<Face> faces; // Changed from tuple to Face struct
 
