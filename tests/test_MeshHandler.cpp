@@ -6,8 +6,6 @@
 #include "Vector3D.hpp"
 #include "TestUtils.hpp"
 
-using namespace SNSolver;
-
 // Test Fixture for MeshHandler
 class MeshHandlerTest : public ::testing::Test {
 protected:
