@@ -16,7 +16,9 @@ bool Field::loadVectorField(const std::string& filename) {
         std::cerr << "Error: Unable to read number of vectors from " << filename << std::endl;
         return false;
     }
-    vectorFields.resize(num_cells);
+
+    // Initialize shared CellVectorField
+    sharedVectorFields = std::make_shared<std::vector<CellVectorField>>(num_cells);
 
     std::string line;
     std::getline(infile, line); // Consume the rest of the first line
@@ -27,11 +29,13 @@ bool Field::loadVectorField(const std::string& filename) {
             return false;
         }
         std::istringstream iss(line);
-        iss >> vectorFields[i].vx >> vectorFields[i].vy >> vectorFields[i].vz;
+        double vx, vy, vz;
+        iss >> vx >> vy >> vz;
         if(iss.fail()) {
             std::cerr << "Error: Invalid format in vector field file at line " << i + 2 << std::endl;
             return false;
         }
+        (*sharedVectorFields)[i] = Vector3D(vx, vy, vz); // Utilize Vector3D
         // Check for extra data on the line
         double extra;
         if(iss >> extra) {
@@ -69,11 +73,13 @@ bool Field::loadScalarField(const std::string& filename) {
             return false;
         }
         std::istringstream iss(line);
-        iss >> scalarFields[i].value;
+        double value;
+        iss >> value;
         if(iss.fail()) {
             std::cerr << "Error: Invalid format in scalar field file at line " << i + 2 << std::endl;
             return false;
         }
+        scalarFields[i].value = value;
         // Check for extra data on the line
         double extra;
         if(iss >> extra) {
