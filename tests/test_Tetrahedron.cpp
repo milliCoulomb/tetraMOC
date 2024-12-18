@@ -13,11 +13,11 @@ TetraCell createSimpleTetraCell(int cell_id, const std::array<int, 4>& node_ids)
 
 TEST(TetrahedronTest, FindExitBasicTest) {
     // Define nodes
-    std::vector<Node> nodes = {
-        {0.0, 0.0, 0.0}, // Node 0
-        {1.0, 0.0, 0.0}, // Node 1
-        {0.0, 1.0, 0.0}, // Node 2
-        {0.0, 0.0, 1.0}  // Node 3
+    std::vector<Vector3D> nodes = {
+        Vector3D(0.0, 0.0, 0.0), // Node 0
+        Vector3D(1.0, 0.0, 0.0), // Node 1
+        Vector3D(0.0, 1.0, 0.0), // Node 2
+        Vector3D(0.0, 0.0, 1.0)  // Node 3
     };
     
     // Define a single tetrahedron
@@ -58,11 +58,11 @@ TEST(TetrahedronTest, FindExitBasicTest) {
 
 TEST(TetrahedronTest, NoExitTest) {
     // Define nodes
-    std::vector<Node> nodes = {
-        {0.0, 0.0, 0.0}, // Node 0
-        {1.0, 0.0, 0.0}, // Node 1
-        {0.0, 1.0, 0.0}, // Node 2
-        {0.0, 0.0, 1.0}  // Node 3
+    std::vector<Vector3D> nodes = {
+        Vector3D(0.0, 0.0, 0.0), // Node 0
+        Vector3D(1.0, 0.0, 0.0), // Node 1
+        Vector3D(0.0, 1.0, 0.0), // Node 2
+        Vector3D(0.0, 0.0, 1.0)  // Node 3
     };
     
     // Define a single tetrahedron
