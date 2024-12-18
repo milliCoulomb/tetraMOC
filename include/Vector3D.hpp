@@ -92,6 +92,10 @@ public:
     bool operator!=(const Vector3D& v) const {
         return !(*this == v);
     }
+
+    bool isAlmostEqual(const Vector3D& v, double tol = 1e-6) const {
+        return ((*this) - v).norm() < tol;
+    }
 };
 
 #endif // VECTOR3D_HPP
