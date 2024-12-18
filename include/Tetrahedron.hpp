@@ -18,7 +18,7 @@
 class Tetrahedron {
 public:
     // Constructor accepting CellVectorField from Field class
-    Tetrahedron(const TetraCell& cell, const std::vector<Node>& nodes, const CellVectorField& field);
+    Tetrahedron(const TetraCell& cell, const std::vector<Vector3D>& nodes, const CellVectorField& field);
 
     // findExit method using Vector3D
     bool findExit(const Vector3D& x0, const Vector3D& v, double& t_exit, Vector3D& x_exit, int& exit_face_id) const;
