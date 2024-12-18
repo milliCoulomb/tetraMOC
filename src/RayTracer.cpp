@@ -7,14 +7,28 @@
 #include <sstream>
 #include <algorithm>
 #include <limits>
+#include <cassert>
 
-// Implementation of RayTracer constructor
+// Constructor for variable direction tracing
 RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler)
-    : mesh(mesh_handler), field(field_handler) {
+    : mesh_(mesh_handler),
+      mode_(RayTracerMode::VARIABLE_DIRECTION),
+      field_ptr_(&field_handler),
+      fixed_direction_(0.0, 0.0, 0.0) // Initialize to zero vector (unused)
+{
     // Initialization if needed
 }
 
-// Implementation of traceRay
+// Constructor for constant direction tracing
+RayTracer::RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_direction)
+    : mesh_(mesh_handler),
+      mode_(RayTracerMode::CONSTANT_DIRECTION),
+      field_ptr_(nullptr),
+      fixed_direction_(fixed_direction.normalized()) // Normalize the fixed direction
+{
+    // Initialization if needed
+}
+
 std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& start_point, int max_iter) const {
     std::vector<CellTrace> pathline;
     int current_cell_id = start_cell_id;
@@ -23,20 +37,26 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
 
     for(int iter = 0; iter < max_iter; ++iter) {
         // Validate current_cell_id
-        if(current_cell_id < 0 || current_cell_id >= static_cast<int>(mesh.getCells().size())) {
+        if(current_cell_id < 0 || current_cell_id >= static_cast<int>(mesh_.getCells().size())) {
             std::cerr << "Error: Invalid current cell ID: " << current_cell_id << std::endl;
             break;
         }
 
-        // Retrieve the current cell and its associated vector field
-        const TetraCell& cell = mesh.getCells()[current_cell_id];
-        const CellVectorField& field_val = field.getVectorFields()[current_cell_id];
+        // Retrieve the current cell
+        const TetraCell& cell = mesh_.getCells()[current_cell_id];
+
+        // Determine the velocity vector based on mode
+        Vector3D v;
+        if(mode_ == RayTracerMode::VARIABLE_DIRECTION) {
+            // Retrieve the velocity from the field's vector field
+            const Vector3D& field_val = field_ptr_->getVectorFields()[current_cell_id];
+            v = field_val;
+        } else { // CONSTANT_DIRECTION
+            v = fixed_direction_;
+        }
 
         // Initialize the Tetrahedron with current cell data
-        Tetrahedron tetra(cell, mesh.getNodes(), field_val);
-
-        // Define the velocity vector
-        Vector3D v(field_val.vx, field_val.vy, field_val.vz);
+        Tetrahedron tetra(cell, mesh_.getNodes(), v);
 
         double t_exit;
         Vector3D x_exit;
@@ -59,7 +79,7 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         total_time += t_exit;
 
         // Retrieve the neighboring cell using MeshHandler's method
-        int neighbor_cell_id = mesh.getNeighborCell(current_cell_id, exit_face_id);
+        int neighbor_cell_id = mesh_.getNeighborCell(current_cell_id, exit_face_id);
         if(neighbor_cell_id == -1) {
             // Ray has exited the domain
             std::cout << "Info: Ray exited the domain at iteration " << iter << std::endl;
