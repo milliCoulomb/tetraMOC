@@ -7,9 +7,9 @@
 #include "Vector3D.hpp"    // Include Vector3D to access the Vector3D class
 
 // Function to compute the normal of a triangle face
-Vector3D computeFaceNormal(const std::array<Node, 3>& triangle);
+Vector3D computeFaceNormal(const std::array<Vector3D, 3>& triangle);
 
 // Function to sample a point uniformly within a triangle
-Vector3D samplePointOnTriangle(const std::array<Node, 3>& triangle);
+Vector3D samplePointOnTriangle(const std::array<Vector3D, 3>& triangle);
 
 #endif // GEOMETRY_UTILS_HPP 
