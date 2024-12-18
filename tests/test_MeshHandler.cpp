@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdio> // For std::remove
 #include "MeshHandler.hpp"
+#include "Vector3D.hpp"
 #include "TestUtils.hpp"
 
 using namespace SNSolver;
@@ -40,7 +41,7 @@ TEST_F(MeshHandlerTest, LoadNodes_Success) {
     EXPECT_TRUE(mesh.loadNodes(nodes_file)) << "MeshHandler failed to load nodes.txt";
 
     // Verify loaded nodes
-    const std::vector<Node>& nodes = mesh.getNodes();
+    const std::vector<Vector3D>& nodes = mesh.getNodes();
     ASSERT_EQ(nodes.size(), 4) << "Number of loaded nodes mismatch";
 
     EXPECT_DOUBLE_EQ(nodes[0].x, 0.0);
