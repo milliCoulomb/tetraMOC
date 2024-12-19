@@ -1,6 +1,3 @@
 [submodule "external/googletest"]
 	path = external/googletest
 	url = https://github.com/google/googletest.git
-[submodule "external/medcoupling"]
-	path = external/medcoupling
-	url = https://github.com/SalomePlatform/medcoupling.git
