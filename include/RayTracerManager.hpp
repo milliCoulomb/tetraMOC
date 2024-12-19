@@ -15,8 +15,6 @@
 #include <array>
 #include <omp.h>
 
-namespace SNSolver {
-
 class RayTracerManager {
 public:
     // Constructor for managing variable direction RayTracers
@@ -44,13 +42,13 @@ private:
     // Aggregated tracking data
     std::vector<TrackingData> tracking_data_;
 
+    bool isValidDirection(const Vector3D& face_normal, const Direction& direction, double threshold) const;
+
     // Helper method to initialize RayTracers
     void initializeRayTracers();
 
     // Helper method to initialize RayTracers with constant directions
     void initializeConstantDirectionRayTracers(const std::vector<Vector3D>& constant_directions);
 };
-
-} // namespace SNSolver
 
 #endif // RAY_TRACER_MANAGER_HPP

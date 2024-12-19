@@ -2,12 +2,14 @@
 
 #include "RayTracerManager.hpp"
 #include "GeometryUtils.hpp"
+
 #include <cmath>
 #include <omp.h>
 #include <iostream> // For logging purposes
 
+// Constructor for managing variable direction RayTracers
 RayTracerManager::RayTracerManager(const MeshHandler& mesh,
-                                   const Field& base_field,
+                                   const Field& base_field, // Pass a base Field
                                    AngularQuadrature& angular_quadrature)
     : mesh_(mesh),
       base_field_(base_field),
@@ -16,10 +18,11 @@ RayTracerManager::RayTracerManager(const MeshHandler& mesh,
     initializeRayTracers();
 }
 
+// Overloaded Constructor for managing both variable and constant direction RayTracers
 RayTracerManager::RayTracerManager(const MeshHandler& mesh,
-                                   const Field& base_field,
+                                   const Field& base_field, // Pass a base Field
                                    AngularQuadrature& angular_quadrature,
-                                   const std::vector<Vector3D>& constant_directions)
+                                   const std::vector<Vector3D>& constant_directions) // Additional constant directions
     : mesh_(mesh),
       base_field_(base_field),
       angular_quadrature_(angular_quadrature)
@@ -54,13 +57,12 @@ void RayTracerManager::initializeRayTracers()
             dir.mu
         );
         
-        // Create a new Field instance sharing the same CellVectorField but with unique direction
-        // Note: Since RayTracer in VARIABLE_DIRECTION mode uses Field's vector field, direction_vector can be arbitrary or set as needed
-        // For this example, we assume direction_vector is used elsewhere or integrated into Field as per previous refactoring
-        // Therefore, we initialize RayTracer in VARIABLE_DIRECTION mode without modifying the Field's direction
-        
-        // Create a RayTracer in VARIABLE_DIRECTION mode
-        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, base_field_));
+        // Normalize the direction vector to ensure consistency
+        Vector3D normalized_direction = direction_vector.normalized();
+
+        // Create a new RayTracer instance in VARIABLE_DIRECTION mode
+        // Ensure that the RayTracer constructor matches these parameters
+        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, base_field_, normalized_direction, RayTracerMode::VARIABLE_DIRECTION));
     }
 }
 
@@ -71,7 +73,8 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<V
         Vector3D normalized_dir = dir.normalized();
 
         // Create a RayTracer in CONSTANT_DIRECTION mode
-        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir));
+        // Ensure that the RayTracer constructor matches these parameters
+        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir, RayTracerMode::CONSTANT_DIRECTION));
     }
 }
 
@@ -189,23 +192,19 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                     // Determine direction based on RayTracer mode
                     Vector3D direction;
                     if(ray_tracer.getMode() == RayTracerMode::VARIABLE_DIRECTION) {
-                        direction = ray_tracer.getField().getVectorFields()[start_cell_id];
+                        direction = ray_tracer.getFixedDirection(); // Ensure RayTracer has getDirection()
                     } else { // CONSTANT_DIRECTION
-                        direction = ray_tracer.getFixedDirection();
+                        direction = ray_tracer.getFixedDirection(); // Ensure RayTracer has getFixedDirection()
                     }
 
                     // Check if direction is valid (not parallel and outward)
-                    // For VARIABLE_DIRECTION mode, retrieve corresponding Direction struct
-                    // For CONSTANT_DIRECTION mode, direction is already defined
                     bool is_valid = false;
                     if(ray_tracer.getMode() == RayTracerMode::VARIABLE_DIRECTION) {
-                        // Assuming the order in ray_tracers_ matches the directions used to initialize them
-                        // Otherwise, store Direction information within RayTracer
-                        const std::vector<Direction>& directions = angular_quadrature_.getDirections();
-                        int direction_index = d < (directions.size() / 2) ? d : d - (directions.size() / 2);
-                        if(direction_index < directions.size()) {
-                            is_valid = isValidDirection(face_normal, directions[direction_index], /*threshold=*/1.0);
-                        }
+                        // Retrieve the corresponding Direction struct from angular_quadrature_
+                        // Assuming RayTracerManager has access to the direction indices or can retrieve them
+                        // For simplicity, we assume that each RayTracer in variable direction mode has its direction aligned with the angular_quadrature_ directions
+                        // Otherwise, store additional metadata within RayTracer
+                        is_valid = isValidDirection(face_normal, angular_quadrature_.getDirection(d), /*threshold=*/1.0);
                     } else { // CONSTANT_DIRECTION
                         // Compute the angle between face_normal and direction
                         double dot = face_normal.normalized().dot(direction.normalized());
@@ -226,9 +225,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                         TrackingData data;
                         // Assign a unique ray_id based on thread and local counter
                         data.ray_id = thread_id * (rays_per_face * num_ray_tracers) + ray * num_ray_tracers + d;
-                        data.direction = (ray_tracer.getMode() == RayTracerMode::VARIABLE_DIRECTION) ?
-                                         direction :
-                                         direction; // Both modes assign the direction used
+                        data.direction = direction;
                         data.cell_traces = std::move(cell_traces);
 
                         // Add to local tracking data
