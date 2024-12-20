@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <atomic>
+#include <iostream> // For debugging purposes
 
 // Constructor for managing variable direction RayTracers
 RayTracerManager::RayTracerManager(const MeshHandler& mesh,
@@ -19,8 +20,7 @@ RayTracerManager::RayTracerManager(const MeshHandler& mesh,
     initializeRayTracers();
 }
 
-// Overloaded Constructor for managing both variable and constant direction RayTracers
-// The boolean flag indicates whether to use half of the quadrature for constant directions
+// Overloaded Constructor for managing constant direction RayTracers only
 RayTracerManager::RayTracerManager(const MeshHandler& mesh,
                                    const Field& base_field,
                                    AngularQuadrature& angular_quadrature,
@@ -29,15 +29,18 @@ RayTracerManager::RayTracerManager(const MeshHandler& mesh,
       base_field_(base_field),
       angular_quadrature_(angular_quadrature)
 {
-    initializeRayTracers();
-
     if (use_half_quadrature_for_constant)
     {
         // Get all directions from AngularQuadrature
         const std::vector<Direction>& all_directions = angular_quadrature_.getDirections();
 
-        // Initialize constant direction RayTracers using half of the directions (e.g., mu >= 0)
+        // Initialize constant direction RayTracers using half of the directions
         initializeConstantDirectionRayTracers(all_directions);
+    }
+    else
+    {
+        // If not using half quadrature for constant directions, initialize variable direction RayTracer
+        initializeRayTracers();
     }
 }
 
@@ -48,31 +51,41 @@ void RayTracerManager::initializeRayTracers()
     ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, base_field_));
 }
 
-// Helper method to initialize RayTracers with constant directions based on hemisphere
+// Helper method to initialize RayTracers with constant directions
 void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<Direction>& quadrature_directions)
 {
-    // Reserve additional space to avoid reallocations
-    ray_tracers_.reserve(ray_tracers_.size() + (quadrature_directions.size() / 2));
+    // Determine half of the quadrature directions
+    size_t half_size = quadrature_directions.size() / 2;
+    size_t added_tracers = 0;
 
-    for (const auto& dir : quadrature_directions)
+    for (size_t i = 0; i < half_size; ++i)
     {
-        // Select directions from one hemisphere (e.g., mu >= 0)
-        if (dir.mu >= 0.0)
+        const auto& dir = quadrature_directions[i];
+
+        // Convert Direction to Vector3D
+        double sqrt_term = std::sqrt(1.0 - dir.mu * dir.mu);
+        double x = sqrt_term * std::cos(dir.phi);
+        double y = sqrt_term * std::sin(dir.phi);
+        double z = dir.mu;
+
+        Vector3D vector_dir(x, y, z);
+
+        // Check if vector_dir is zero
+        if (vector_dir.x == 0.0 && vector_dir.y == 0.0 && vector_dir.z == 0.0)
         {
-            // Convert Direction to Vector3D
-            Vector3D vector_dir(
-                std::sqrt(1.0 - dir.mu * dir.mu) * std::cos(dir.phi),
-                std::sqrt(1.0 - dir.mu * dir.mu) * std::sin(dir.phi),
-                dir.mu
-            );
-
-            // Normalize the direction vector
-            Vector3D normalized_dir = vector_dir.normalized();
-
-            // Instantiate a RayTracer in CONSTANT_DIRECTION mode
-            ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir));
+            std::cerr << "Warning: Zero direction vector encountered. Skipping this direction." << std::endl;
+            continue; // Skip adding this RayTracer
         }
+
+        // Normalize the direction vector
+        Vector3D normalized_dir = vector_dir.normalized();
+
+        // Instantiate a RayTracer in CONSTANT_DIRECTION mode
+        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir));
+        added_tracers++;
     }
+
+    std::cout << "Initialized " << added_tracers << " constant direction RayTracers." << std::endl;
 }
 
 // Method to check if a direction is valid (incoming) for a given face normal
@@ -85,14 +98,34 @@ bool RayTracerManager::isValidDirection(const Vector3D& face_normal, const Vecto
     return dot_product < -threshold;
 }
 
-// Method to generate tracking data by tracing rays
 void RayTracerManager::generateTrackingData(int rays_per_face)
 {
+    // Set number of threads to 1 for debugging
+    omp_set_num_threads(1);
+
     // Clear previous tracking data
     tracking_data_.clear();
+    std::cout << "Tracking data cleared." << std::endl;
 
     // Retrieve all boundary faces
     const auto& boundary_faces = mesh_.getBoundaryFaces();
+    std::cout << "Boundary faces: " << boundary_faces.size() << std::endl;
+    std::cout << "Number of RayTracers: " << ray_tracers_.size() << std::endl;
+
+    // Showcase direction of all RayTracers
+    for (size_t i = 0; i < ray_tracers_.size(); ++i)
+    {
+        RayTracer* tracer = ray_tracers_[i].get();
+        RayTracerMode mode = tracer->getMode();
+        std::cout << "RayTracer " << i << " Mode: " << (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION") << std::endl;
+        if(mode == RayTracerMode::CONSTANT_DIRECTION) {
+            Vector3D dir = tracer->getFixedDirection();
+            std::cout << "Direction: (" << dir.x << ", " << dir.y << ", " << dir.z << ")" << std::endl;
+        }
+        else if(mode == RayTracerMode::VARIABLE_DIRECTION) {
+            std::cout << "Direction: (Variable Direction)" << std::endl;
+        }
+    }
 
     // Initialize an atomic counter for unique ray IDs
     std::atomic<int> ray_id_counter(0);
@@ -101,8 +134,6 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
     #pragma omp parallel
     {
         std::vector<TrackingData> local_tracking_data;
-        // Optionally reserve space to improve performance
-        // local_tracking_data.reserve(boundary_faces.size() * rays_per_face);
 
         // Iterate over each RayTracer
         #pragma omp for nowait
@@ -124,20 +155,24 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                 const Vector3D& v1 = mesh_.getNodes()[n1];
                 const Vector3D& v2 = mesh_.getNodes()[n2];
 
-                // Compute the face normal using GeometryUtils
+                // Compute the cell center
+                int adjacent_cell_id = mesh_.getFaceAdjacentCell(face, true); // true for boundary face
+                Vector3D cell_center = mesh_.getCellCenter(adjacent_cell_id);
+
+                // Compute the face normal using GeometryUtils with cell center
                 std::array<Vector3D, 3> triangle = { v0, v1, v2 };
-                Vector3D face_normal = computeFaceNormal(triangle);
+                Vector3D face_normal = computeFaceNormal(triangle, cell_center);
 
                 // Determine the direction based on RayTracer mode
                 Vector3D direction;
                 if (mode == RayTracerMode::VARIABLE_DIRECTION)
                 {
                     // Retrieve the direction from the Field based on the adjacent cell
-                    int adjacent_cell_id = mesh_.getFaceAdjacentCell(face, true); // true for boundary face
                     Vector3D field_direction = base_field_.getVectorFields()[adjacent_cell_id];
                     if (field_direction.x == 0.0 && field_direction.y == 0.0 && field_direction.z == 0.0)
                     {
                         // Skip rays with zero direction
+                        std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
                         continue;
                     }
                     direction = field_direction.normalized();
@@ -148,6 +183,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                     if (fixed_direction.x == 0.0 && fixed_direction.y == 0.0 && fixed_direction.z == 0.0)
                     {
                         // Skip rays with zero direction
+                        std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
                         continue;
                     }
                     direction = fixed_direction.normalized();
@@ -167,10 +203,10 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                         Vector3D start_point = samplePointOnTriangle(triangle);
 
                         // Get the adjacent cell ID (assuming rays start from the boundary face into the adjacent cell)
-                        int start_cell_id = mesh_.getFaceAdjacentCell(face, true); // true for boundary face
+                        // Already have adjacent_cell_id
 
                         // Trace the ray through the mesh
-                        std::vector<CellTrace> cell_traces = tracer->traceRay(start_cell_id, start_point, 100);
+                        std::vector<CellTrace> cell_traces = tracer->traceRay(adjacent_cell_id, start_point, 100);
 
                         // Assign a unique ray_id
                         int ray_id = ray_id_counter.fetch_add(1, std::memory_order_relaxed);
