@@ -26,8 +26,10 @@ RayTracer::RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_dire
       field_ptr_(nullptr),
       fixed_direction_(fixed_direction.normalized()) // Normalize the fixed direction
 {
-    // Initialization if needed
+    // Ensure fixed_direction is not zero
+    assert(!(fixed_direction_.x == 0.0 && fixed_direction_.y == 0.0 && fixed_direction_.z == 0.0) && "Fixed direction cannot be zero.");
 }
+
 
 std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& start_point, int max_iter) const {
     std::vector<CellTrace> pathline;
@@ -66,6 +68,9 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         bool has_exit = tetra.findExit(current_point, v, t_exit, x_exit, exit_face_id);
         if(!has_exit) {
             std::cerr << "Warning: No exit found for cell " << current_cell_id << " at iteration " << iter << std::endl;
+            // also cout the current point and velocity
+            std::cout << "Current point: " << current_point << std::endl;
+            std::cout << "Velocity: " << v << std::endl;
             break;
         }
 
