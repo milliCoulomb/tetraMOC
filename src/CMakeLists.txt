@@ -10,7 +10,7 @@ set(SOURCE_FILES
     Field.cpp
     RayTracer.cpp
     GeometryUtils.cpp
-    RayTracerManager.cpp
+    # // RayTracerManager.cpp
 )
 
 # Créer une bibliothèque statique
