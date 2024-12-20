@@ -230,3 +230,45 @@ TEST_F(MeshHandlerTest, LoadFaces_BeforeNodesAndCells) {
     // Optionally, verify node IDs if nodes are loaded
     // In this test, nodes are not loaded, so node IDs may not correspond to actual nodes
 }
+
+// add a unit test for MeshHandler::getCellCenter(int cell_id), (two tetrahedra with nodes at (0,0,0), (1,0,0), (0,1,0), (0,0,1) and (1,0,0), (0,1,0), (0,0,1), (0,1,1))
+
+TEST_F(MeshHandlerTest, GetCellCenter_Success) {
+    // Define content for nodes.txt with node IDs
+    std::string nodes_content = "5\n"
+                                 "0 0.0 0.0 0.0\n"
+                                 "1 1.0 0.0 0.0\n"
+                                 "2 0.0 1.0 0.0\n"
+                                 "3 0.0 0.0 1.0\n"
+                                 "4 0.0 1.0 1.0\n"; // Additional node for second cell
+    
+    // Create temporary nodes.txt
+    ASSERT_TRUE(createTempFile(nodes_file, nodes_content)) << "Failed to create temporary nodes.txt";
+
+    MeshHandler mesh;
+    EXPECT_TRUE(mesh.loadNodes(nodes_file)) << "MeshHandler failed to load nodes.txt";
+
+    // Define content for cells.txt with cell IDs and four node IDs per cell
+    std::string cells_content = "2\n"
+                                 "0 0 1 2 3\n"
+                                 "1 1 2 3 4\n"; // Assuming node IDs up to 4
+    
+    // Create temporary cells.txt
+    ASSERT_TRUE(createTempFile(cells_file, cells_content)) << "Failed to create temporary cells.txt";
+
+    EXPECT_TRUE(mesh.loadCells(cells_file)) << "MeshHandler failed to load cells.txt";
+
+    // Verify cell centers
+    Vector3D center0 = mesh.getCellCenter(0);
+    Vector3D center1 = mesh.getCellCenter(1);
+
+    // Cell 0: Nodes at (0,0,0), (1,0,0), (0,1,0), (0,0,1)
+    EXPECT_DOUBLE_EQ(center0.x, 0.25);
+    EXPECT_DOUBLE_EQ(center0.y, 0.25);
+    EXPECT_DOUBLE_EQ(center0.z, 0.25);
+
+    // Cell 1: Nodes at (1,0,0), (0,1,0), (0,0,1), (0,1,1)
+    EXPECT_DOUBLE_EQ(center1.x, 0.25);
+    EXPECT_DOUBLE_EQ(center1.y, 0.5);
+    EXPECT_DOUBLE_EQ(center1.z, 0.5);
+}
