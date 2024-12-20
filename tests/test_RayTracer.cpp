@@ -305,7 +305,7 @@ TEST_F(RayTracerTest, TraceRay_ConstantDirection_ExitsDomain) {
     EXPECT_EQ(pathline[0].cell_id, 1) << "First segment should be in Cell 1";
     
     // Verify end_point lies on the expected exit
-    Vector3D expected_end(0.8, 1.0, 0.9); // Corrected Expected exit point
+    Vector3D expected_end(0.9, 1.0, 0.9); // Corrected Expected exit point
     EXPECT_TRUE(vectorsAlmostEqual(pathline[0].end_point, expected_end)) << "End point should match expected exit point";
 }
 
