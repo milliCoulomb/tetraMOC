@@ -135,6 +135,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_BasicTest) {
     EXPECT_LE(tracking_data.size(), expected_rays) 
         << "Tracking data size should be less than or equal to the expected number of rays due to direction filtering";
     
+    std::cout << "Number of rays: " << tracking_data.size() << std::endl;
+    
     // Further assertions...
 }
 
