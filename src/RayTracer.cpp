@@ -82,7 +82,7 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         int neighbor_cell_id = mesh_.getNeighborCell(current_cell_id, exit_face_id);
         if(neighbor_cell_id == -1) {
             // Ray has exited the domain
-            std::cout << "Info: Ray exited the domain at iteration " << iter << std::endl;
+            // std::cout << "Info: Ray exited the domain at iteration " << iter << std::endl;
             break;
         }
 
@@ -91,6 +91,6 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         current_point = x_exit;
     }
 
-    std::cout << "Info: Ray tracing completed. Total time elapsed: " << total_time << std::endl;
+    // std::cout << "Info: Ray tracing completed. Total time elapsed: " << total_time << std::endl;
     return pathline;
 }
