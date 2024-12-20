@@ -31,6 +31,8 @@ public:
         return Vector3D(x - v.x, y - v.y, z - v.z);
     }
 
+    Vector3D operator-() const { return Vector3D(-x, -y, -z); }
+
     // right multiplication by scalar
     Vector3D operator*(double scalar) const {
         return Vector3D(x * scalar, y * scalar, z * scalar);
