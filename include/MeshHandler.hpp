@@ -33,20 +33,20 @@ struct TetraCell {
 };
 
 // Structure to represent a face
-struct Face {
+struct MeshFace {
     int n0 = 0, n1 = 0, n2 = 0; // Node indices
-    std::vector<int> adjacent_cell_ids; // Adjacent cell IDs
+    std::array<int, 2> adjacent_cell_ids = {-1, -1}; // Adjacent cell IDs
 
     // Constructors
-    Face() = default;
-    Face(int node0, int node1, int node2, const std::vector<int>& adj_cells)
+    MeshFace() = default;
+    MeshFace(int node0, int node1, int node2, const std::array<int, 2>& adj_cells)
         : n0(node0), n1(node1), n2(node2), adjacent_cell_ids(adj_cells) {}
 
     // Defaulted copy and move constructors and assignments
-    Face(const Face&) = default;
-    Face(Face&&) = default;
-    Face& operator=(const Face&) = default;
-    Face& operator=(Face&&) = default;
+    MeshFace(const MeshFace&) = default;
+    MeshFace(MeshFace&&) = default;
+    MeshFace& operator=(const MeshFace&) = default;
+    MeshFace& operator=(MeshFace&&) = default;
 };
 
 // Custom hash function for tuple<int, int, int>
@@ -74,14 +74,14 @@ public:
     // Getters for accessing mesh data
     const std::vector<Vector3D>& getNodes() const { return nodes; }
     const std::vector<TetraCell>& getCells() const { return cells; }
-    const std::vector<Face>& getFaces() const { return faces; }
+    const std::vector<MeshFace>& getFaces() const { return faces; }
 
     // Method to retrieve boundary faces (faces with only one adjacent cell)
-    std::vector<Face> getBoundaryFaces() const;
+    std::vector<MeshFace> getBoundaryFaces() const;
 
     // Method to retrieve the adjacent cell for a given face
     // If only_one is true, assumes the face is a boundary face with only one adjacent cell
-    int getFaceAdjacentCell(const Face& face, bool only_one = false) const;
+    int getFaceAdjacentCell(const MeshFace& face, bool only_one = false) const;
 
     // Method to find the neighboring cell given current cell and exit face
     int getNeighborCell(int current_cell_id, int exit_face_id) const;
@@ -92,7 +92,7 @@ public:
 private:
     std::vector<Vector3D> nodes;
     std::vector<TetraCell> cells;
-    std::vector<Face> faces; // Changed from tuple to Face struct
+    std::vector<MeshFace> faces; // Changed from tuple to Face struct
 
     // For efficient face lookup
     std::unordered_map<std::tuple<int, int, int>, std::vector<int>, TupleHash> face_to_cells;
