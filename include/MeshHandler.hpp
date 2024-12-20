@@ -64,6 +64,9 @@ public:
     // Method to find the neighboring cell given current cell and exit face
     int getNeighborCell(int current_cell_id, int exit_face_id) const;
 
+    // calculate the centroid of a tetrahedron
+    Vector3D getCellCenter(int cell_id) const;
+
 private:
     std::vector<Vector3D> nodes;
     std::vector<TetraCell> cells;
