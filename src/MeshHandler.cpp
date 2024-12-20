@@ -233,3 +233,18 @@ int MeshHandler::getNeighborCell(int current_cell_id, int exit_face_id) const {
 
     return -1; // No neighboring cell found
 }
+
+Vector3D MeshHandler::getCellCenter(int cell_id) const {
+    if(cell_id < 0 || cell_id >= static_cast<int>(cells.size())) {
+        throw std::out_of_range("Invalid cell ID");
+    }
+
+    const TetraCell& cell = cells[cell_id];
+    double x = 0.0, y = 0.0, z = 0.0;
+    for(int i = 0; i < 4; ++i) {
+        x += nodes[cell.node_ids[i]].x;
+        y += nodes[cell.node_ids[i]].y;
+        z += nodes[cell.node_ids[i]].z;
+    }
+    return Vector3D(x / 4.0, y / 4.0, z / 4.0);
+}
