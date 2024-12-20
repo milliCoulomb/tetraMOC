@@ -5,31 +5,28 @@
 #include <random>
 #include <thread>
 
-Vector3D computeFaceNormal(const std::array<Vector3D, 3>& triangle) {
-    // Vectors from the first node
-    // double ux = triangle[1].x - triangle[0].x;
-    // double uy = triangle[1].y - triangle[0].y;
-    // double uz = triangle[1].z - triangle[0].z;
-
+// Modified computeFaceNormal to ensure outward pointing normals
+Vector3D computeFaceNormal(const std::array<Vector3D, 3>& triangle, const Vector3D& cell_center) {
     Vector3D u = triangle[1] - triangle[0];
     Vector3D v = triangle[2] - triangle[0];
     Vector3D n = u.cross(v);
 
-    // double vx = triangle[2].x - triangle[0].x;
-    // double vy = triangle[2].y - triangle[0].y;
-    // double vz = triangle[2].z - triangle[0].z;
-
-    // // Cross product to get normal
-    // double nx = uy * vz - uz * vy;
-    // double ny = uz * vx - ux * vz;
-    // double nz = ux * vy - uy * vx;
-
-    // // Normalize the normal vector
     double norm = n.norm();
     if(norm == 0) return {0.0, 0.0, 0.0}; // Degenerate triangle
 
-    return n.normalized();
+    n = n.normalized();
+
+    // Compute a vector from the cell center to a point on the face
+    Vector3D vector_to_face = triangle[0] - cell_center;
+
+    // If the dot product is positive, the normal points outward; if negative, flip it
+    if(n.dot(vector_to_face) < 0) {
+        n = -n;
+    }
+
+    return n;
 }
+
 
 Vector3D samplePointOnTriangle(const std::array<Vector3D, 3>& triangle) {
     // Thread-local random number generator for thread safety
