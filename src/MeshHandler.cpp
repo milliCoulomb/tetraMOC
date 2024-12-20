@@ -108,7 +108,7 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
             return false;
         }
 
-        std::vector<int> cell_ids;
+        std::array<int, 2> cell_ids = {-1, -1};
         for(int j = 0; j < count; ++j){
             int cell_id;
             infile >> cell_id;
@@ -116,9 +116,9 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
                 std::cerr << "Error: Unable to read cell_id for face in line: " << (i + 2) << std::endl;
                 return false;
             }
-            cell_ids.push_back(cell_id);
+            cell_ids[j] = cell_id;
         }
-        Face face(n0, n1, n2, cell_ids);
+        MeshFace face(n0, n1, n2, cell_ids);
         faces.push_back(face);
 
         // Sort the node indices to create a unique key
@@ -126,7 +126,7 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
         std::sort(sorted_nodes.begin(), sorted_nodes.end());
         std::tuple<int, int, int> face_key = std::make_tuple(sorted_nodes[0], sorted_nodes[1], sorted_nodes[2]);
 
-        face_to_cells[face_key] = face.adjacent_cell_ids;
+        face_to_cells[face_key] = std::vector<int>(face.adjacent_cell_ids.begin(), face.adjacent_cell_ids.end());
     }
 
     // Check for extra data
@@ -141,10 +141,11 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
 }
 
 // Implementation of getBoundaryFaces
-std::vector<Face> MeshHandler::getBoundaryFaces() const {
-    std::vector<Face> boundary_faces;
+std::vector<MeshFace> MeshHandler::getBoundaryFaces() const {
+    std::vector<MeshFace> boundary_faces;
     for(const auto& face : faces) {
-        if(face.adjacent_cell_ids.size() == 1) {
+        // because we are using array instead of vector, size of adjacent_cell_ids is fixed to 2, a face is a boundary face if only one element is different from -1
+        if(face.adjacent_cell_ids[0] != -1 && face.adjacent_cell_ids[1] == -1) {
             boundary_faces.push_back(face);
         }
     }
@@ -152,7 +153,7 @@ std::vector<Face> MeshHandler::getBoundaryFaces() const {
 }
 
 // Implementation of getFaceAdjacentCell
-int MeshHandler::getFaceAdjacentCell(const Face& face, bool only_one) const {
+int MeshHandler::getFaceAdjacentCell(const MeshFace& face, bool only_one) const {
     // Sort the node indices to create a unique key
     std::array<int, 3> sorted_nodes = {face.n0, face.n1, face.n2};
     std::sort(sorted_nodes.begin(), sorted_nodes.end());
@@ -166,17 +167,19 @@ int MeshHandler::getFaceAdjacentCell(const Face& face, bool only_one) const {
     const std::vector<int>& adj_cells = it->second;
 
     if(only_one) {
-        if(adj_cells.size() == 1) {
-            return adj_cells[0];
-        } else {
-            return -1; // Not a boundary face
+        for(const auto& cell_id : adj_cells) {
+            if(cell_id != -1) {
+                return cell_id;
+            }
         }
+        return -1; // No valid adjacent cell found
     } else {
-        if(!adj_cells.empty()) {
-            return adj_cells[0]; // Return the first adjacent cell
-        } else {
-            return -1; // No adjacent cells
+        for(const auto& cell_id : adj_cells) {
+            if(cell_id != -1) {
+                return cell_id; // Return the first valid adjacent cell
+            }
         }
+        return -1; // No valid adjacent cells
     }
 }
 
