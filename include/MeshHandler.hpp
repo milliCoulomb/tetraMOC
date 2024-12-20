@@ -17,14 +17,36 @@
 
 // Structure to store tetrahedral cell connectivity
 struct TetraCell {
-    std::array<int, 4> node_ids;
-    int cell_id;
+    std::array<int, 4> node_ids = {0, 0, 0, 0};
+    int cell_id = -1;
+
+    // Constructors
+    TetraCell() = default;
+    TetraCell(const std::array<int, 4>& nodes, int id)
+        : node_ids(nodes), cell_id(id) {}
+
+    // Defaulted copy and move constructors and assignments
+    TetraCell(const TetraCell&) = default;
+    TetraCell(TetraCell&&) = default;
+    TetraCell& operator=(const TetraCell&) = default;
+    TetraCell& operator=(TetraCell&&) = default;
 };
 
 // Structure to represent a face
 struct Face {
-    int n0, n1, n2; // Node indices
+    int n0 = 0, n1 = 0, n2 = 0; // Node indices
     std::vector<int> adjacent_cell_ids; // Adjacent cell IDs
+
+    // Constructors
+    Face() = default;
+    Face(int node0, int node1, int node2, const std::vector<int>& adj_cells)
+        : n0(node0), n1(node1), n2(node2), adjacent_cell_ids(adj_cells) {}
+
+    // Defaulted copy and move constructors and assignments
+    Face(const Face&) = default;
+    Face(Face&&) = default;
+    Face& operator=(const Face&) = default;
+    Face& operator=(Face&&) = default;
 };
 
 // Custom hash function for tuple<int, int, int>

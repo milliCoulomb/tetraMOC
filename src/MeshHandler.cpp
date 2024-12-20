@@ -68,7 +68,8 @@ bool MeshHandler::loadCells(const std::string& filename) {
             std::cerr << "Error: Invalid cell format in line: " << (i + 2) << std::endl;
             return false;
         }
-        cells.emplace_back(TetraCell{ {n0, n1, n2, n3}, cell_id });
+        TetraCell cell = TetraCell({n0, n1, n2, n3}, cell_id);
+        cells.emplace_back(cell);
     }
     
     // Optional: Verify no extra data
@@ -100,7 +101,6 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
     }
 
     for(int i = 0; i < num_faces; ++i){
-        Face face;
         int n0, n1, n2, count;
         infile >> n0 >> n1 >> n2 >> count;
         if(infile.fail() || count < 1){
@@ -108,10 +108,7 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
             return false;
         }
 
-        face.n0 = n0;
-        face.n1 = n1;
-        face.n2 = n2;
-
+        std::vector<int> cell_ids;
         for(int j = 0; j < count; ++j){
             int cell_id;
             infile >> cell_id;
@@ -119,9 +116,9 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
                 std::cerr << "Error: Unable to read cell_id for face in line: " << (i + 2) << std::endl;
                 return false;
             }
-            face.adjacent_cell_ids.push_back(cell_id);
+            cell_ids.push_back(cell_id);
         }
-
+        Face face(n0, n1, n2, cell_ids);
         faces.push_back(face);
 
         // Sort the node indices to create a unique key
