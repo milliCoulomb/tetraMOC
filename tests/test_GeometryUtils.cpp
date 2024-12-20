@@ -22,7 +22,7 @@ TEST(GeometryUtilsTest, ComputeFaceNormal_StandardTriangle) {
     
     std::array<Vector3D, 3> triangle = {n0, n1, n2};
     
-    Vector3D normal = computeFaceNormal(triangle);
+    Vector3D normal = computeFaceNormal(triangle, Vector3D(0.0, 0.0, 0.0));
     
     // Expected normal is along +Z axis
     Vector3D expected_normal(0.0, 0.0, 1.0);
@@ -38,7 +38,7 @@ TEST(GeometryUtilsTest, ComputeFaceNormal_DegenerateTriangle) {
     
     std::array<Vector3D, 3> triangle = {n0, n1, n2};
     
-    Vector3D normal = computeFaceNormal(triangle);
+    Vector3D normal = computeFaceNormal(triangle, Vector3D(0.0, 0.0, 0.0));
     
     // Expected normal is zero vector
     Vector3D expected_normal(0.0, 0.0, 0.0);
