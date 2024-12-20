@@ -157,6 +157,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
                 // Compute the cell center
                 int adjacent_cell_id = mesh_.getFaceAdjacentCell(face, true); // true for boundary face
+                std::cout << "Adjacent Cell ID: " << adjacent_cell_id << std::endl;
                 Vector3D cell_center = mesh_.getCellCenter(adjacent_cell_id);
 
                 // Compute the face normal using GeometryUtils with cell center
