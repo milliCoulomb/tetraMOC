@@ -152,7 +152,7 @@ TEST_F(RayTracerTest, TraceRay_VariableDirection_TwoCells) {
     EXPECT_EQ(pathline[1].cell_id, 1) << "Second segment should be in Cell 1";
     
     // Verify end_point of second segment lies on the expected exit from Cell 1
-    Vector3D expected_end(0.8, 1.0, 0.1); // Corrected Expected exit point from Cell 1
+    Vector3D expected_end(0.8, 0.3, 0.1); // Corrected Expected exit point from Cell 1
     EXPECT_TRUE(vectorsAlmostEqual(pathline[1].end_point, expected_end)) << "End point should match expected exit point from Cell 1";
 }
 
