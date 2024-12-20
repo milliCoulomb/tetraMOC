@@ -160,6 +160,8 @@ TEST_F(MeshHandlerTest, LoadFaces_Success) {
     const auto& faces = mesh.getFaces();
     ASSERT_EQ(faces.size(), 3) << "Number of loaded faces mismatch";
 
+    // because we are using array instead of vector, size of adjacent_cell_ids is fixed to 2
+
     // Face 0
     EXPECT_EQ(faces[0].n0, 0);
     EXPECT_EQ(faces[0].n1, 1);
@@ -172,14 +174,14 @@ TEST_F(MeshHandlerTest, LoadFaces_Success) {
     EXPECT_EQ(faces[1].n0, 0);
     EXPECT_EQ(faces[1].n1, 1);
     EXPECT_EQ(faces[1].n2, 3);
-    ASSERT_EQ(faces[1].adjacent_cell_ids.size(), 1);
+    ASSERT_EQ(faces[1].adjacent_cell_ids.size(), 2);
     EXPECT_EQ(faces[1].adjacent_cell_ids[0], 0);
 
     // Face 2
     EXPECT_EQ(faces[2].n0, 1);
     EXPECT_EQ(faces[2].n1, 2);
     EXPECT_EQ(faces[2].n2, 3);
-    ASSERT_EQ(faces[2].adjacent_cell_ids.size(), 1);
+    ASSERT_EQ(faces[2].adjacent_cell_ids.size(), 2);
     EXPECT_EQ(faces[2].adjacent_cell_ids[0], 1);
 }
 
@@ -224,7 +226,8 @@ TEST_F(MeshHandlerTest, LoadFaces_BeforeNodesAndCells) {
     // Access face data, but nodes and cells may not exist
     const auto& faces = mesh.getFaces();
     ASSERT_EQ(faces.size(), 1) << "Number of loaded faces mismatch";
-    EXPECT_EQ(faces[0].adjacent_cell_ids.size(), 1);
+    // because we are using array instead of vector, size of adjacent_cell_ids is fixed to 2
+    EXPECT_EQ(faces[0].adjacent_cell_ids.size(), 2);
     EXPECT_EQ(faces[0].adjacent_cell_ids[0], 0);
     
     // Optionally, verify node IDs if nodes are loaded
