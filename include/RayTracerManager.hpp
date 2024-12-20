@@ -23,10 +23,11 @@ public:
                     AngularQuadrature& angular_quadrature);
 
     // Overloaded Constructor for managing both variable and constant direction RayTracers
+    // The boolean flag indicates whether to use half of the quadrature for constant directions
     RayTracerManager(const MeshHandler& mesh,
                     const Field& base_field, // Pass a base Field
                     AngularQuadrature& angular_quadrature,
-                    const std::vector<Vector3D>& constant_directions); // Additional constant directions
+                    bool use_half_quadrature_for_constant); // Use half quadrature directions
 
     void generateTrackingData(int rays_per_face);
     const std::vector<TrackingData>& getTrackingData() const { return tracking_data_; }
@@ -42,13 +43,13 @@ private:
     // Aggregated tracking data
     std::vector<TrackingData> tracking_data_;
 
-    bool isValidDirection(const Vector3D& face_normal, const Direction& direction, double threshold) const;
+    bool isValidDirection(const Vector3D& face_normal, const Vector3D& direction, double threshold) const;
 
     // Helper method to initialize RayTracers
     void initializeRayTracers();
 
-    // Helper method to initialize RayTracers with constant directions
-    void initializeConstantDirectionRayTracers(const std::vector<Vector3D>& constant_directions);
+    // Helper method to initialize RayTracers with constant directions based on hemisphere
+    void initializeConstantDirectionRayTracers(const std::vector<Direction>& quadrature_directions);
 };
 
 #endif // RAY_TRACER_MANAGER_HPP
