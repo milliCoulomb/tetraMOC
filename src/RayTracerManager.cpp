@@ -9,6 +9,8 @@
 #include <atomic>
 #include <iostream> // For debugging purposes
 
+const Vector3D ZERO_VECTOR(0.0, 0.0, 0.0);
+
 // Constructor for managing variable direction RayTracers
 RayTracerManager::RayTracerManager(const MeshHandler& mesh,
                                    const Field& base_field,
@@ -81,7 +83,7 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
     size_t half_size = quadrature_directions.size();
     if (use_half_quadrature_for_constant)
     {
-        size_t half_size = quadrature_directions.size() / 2;
+        half_size = quadrature_directions.size() / 2;
     }
     // Determine half of the quadrature directions
     size_t added_tracers = 0;
@@ -99,7 +101,7 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
         Vector3D vector_dir(x, y, z);
 
         // Check if vector_dir is zero
-        if (vector_dir.x == 0.0 && vector_dir.y == 0.0 && vector_dir.z == 0.0)
+        if (vector_dir.isAlmostEqual(ZERO_VECTOR))
         {
             // std::cerr << "Warning: Zero direction vector encountered. Skipping this direction." << std::endl;
             Logger::warning("Zero direction vector encountered. Skipping this direction.");
@@ -202,7 +204,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                 {
                     // Retrieve the direction from the Field based on the adjacent cell
                     Vector3D field_direction = base_field_.getVectorFields()[adjacent_cell_id];
-                    if (field_direction.x == 0.0 && field_direction.y == 0.0 && field_direction.z == 0.0)
+                    if (field_direction.isAlmostEqual(ZERO_VECTOR))
                     {
                         // Skip rays with zero direction
                         // std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
@@ -214,7 +216,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                 else if (mode == RayTracerMode::CONSTANT_DIRECTION)
                 {
                     Vector3D fixed_direction = tracer->getFixedDirection();
-                    if (fixed_direction.x == 0.0 && fixed_direction.y == 0.0 && fixed_direction.z == 0.0)
+                    if (fixed_direction.isAlmostEqual(ZERO_VECTOR))
                     {
                         // Skip rays with zero direction
                         // std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
