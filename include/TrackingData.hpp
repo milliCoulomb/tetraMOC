@@ -17,6 +17,7 @@ struct CellTrace {
 struct TrackingData {
     int ray_id;
     Vector3D direction; // Added direction for better traceability
+    double direction_weight; // Added direction weight for better traceability
     std::vector<CellTrace> cell_traces;
 };
 
