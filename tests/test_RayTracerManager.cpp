@@ -8,6 +8,7 @@
 #include "TrackingData.hpp"
 #include "Vector3D.hpp"
 #include "TestUtils.hpp" // Contains createTempFile and vectorsAlmostEqual
+#include "Logger.hpp"
 #include <fstream>
 #include <cstdio> // For std::remove
 #include <cmath>
@@ -136,7 +137,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_BasicTest) {
     EXPECT_LE(tracking_data.size(), expected_rays) 
         << "Tracking data size should be less than or equal to the expected number of rays due to direction filtering";
     
-    std::cout << "Number of rays: " << tracking_data.size() << std::endl;
+    // std::cout << "Number of rays: " << tracking_data.size() << std::endl;
+    Logger::info("Number of rays: " + std::to_string(tracking_data.size()));
     
     // Further assertions...
 }
