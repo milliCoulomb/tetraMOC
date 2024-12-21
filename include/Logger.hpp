@@ -5,8 +5,6 @@
 #include <string>
 #include <iostream>
 
-namespace SNSolver {
-
 enum class LogLevel { INFO, WARNING, ERROR };
 
 class Logger {
@@ -16,7 +14,5 @@ public:
     static void warning(const std::string& message);
     static void error(const std::string& message);
 };
-
-} // namespace SNSolver
 
 #endif // LOGGER_HPP
