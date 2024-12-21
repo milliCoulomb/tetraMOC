@@ -40,7 +40,8 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
     for(int iter = 0; iter < max_iter; ++iter) {
         // Validate current_cell_id
         if(current_cell_id < 0 || current_cell_id >= static_cast<int>(mesh_.getCells().size())) {
-            std::cerr << "Error: Invalid current cell ID: " << current_cell_id << std::endl;
+            // std::cerr << "Error: Invalid current cell ID: " << current_cell_id << std::endl;
+            Logger::error("Invalid current cell ID: " + std::to_string(current_cell_id));
             break;
         }
 
@@ -67,10 +68,12 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         // Find the exit point and corresponding face
         bool has_exit = tetra.findExit(current_point, v, t_exit, x_exit, exit_face_id);
         if(!has_exit) {
-            std::cerr << "Warning: No exit found for cell " << current_cell_id << " at iteration " << iter << std::endl;
+            // std::cerr << "Warning: No exit found for cell " << current_cell_id << " at iteration " << iter << std::endl;
             // also cout the current point and velocity
-            std::cout << "Current point: " << current_point << std::endl;
-            std::cout << "Velocity: " << v << std::endl;
+            Logger::error("No exit found for cell " + std::to_string(current_cell_id) + " at iteration " + std::to_string(iter));
+            // Logger::info("Current point " + std::to_string(current_point));
+            // std::cout << "Current point: " << current_point << std::endl;
+            // std::cout << "Velocity: " << v << std::endl;
             break;
         }
 
