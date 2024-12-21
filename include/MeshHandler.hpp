@@ -9,6 +9,7 @@
 #include <tuple>
 #include "Vector3D.hpp"
 #include <unordered_map>
+#include "Logger.hpp"
 
 // Structure to store node coordinates
 // struct Node {
