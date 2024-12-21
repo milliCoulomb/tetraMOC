@@ -27,6 +27,7 @@ public:
     RayTracerManager(const MeshHandler& mesh,
                     const Field& base_field, // Pass a base Field
                     AngularQuadrature& angular_quadrature,
+                    bool constant_directions,
                     bool use_half_quadrature_for_constant); // Use half quadrature directions
 
     void generateTrackingData(int rays_per_face);
@@ -49,7 +50,7 @@ private:
     void initializeRayTracers();
 
     // Helper method to initialize RayTracers with constant directions based on hemisphere
-    void initializeConstantDirectionRayTracers(const std::vector<Direction>& quadrature_directions);
+    void initializeConstantDirectionRayTracers(const std::vector<Direction>& quadrature_directions, bool use_half_quadrature_for_constant);
 };
 
 #endif // RAY_TRACER_MANAGER_HPP
