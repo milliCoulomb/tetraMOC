@@ -5,6 +5,8 @@
 #include <cmath>
 #include <iostream>
 
+constexpr double EPSILON = 1e-12;
+
 class Vector3D {
 public:
     double x, y, z;
@@ -70,7 +72,7 @@ public:
     // normalisation
     Vector3D normalized() const {
         double n = norm();
-        if (n == 0.0) {
+        if (n < EPSILON) {
             // std::cerr << "Warning: Attempt to normalize a zero vector.\n";
             return Vector3D(0.0, 0.0, 0.0);
         }
@@ -84,7 +86,7 @@ public:
 
     // test of equality
     bool operator==(const Vector3D& v) const {
-        const double epsilon = 1e-12;
+        const double epsilon = EPSILON;
         return (std::abs(x - v.x) < epsilon) &&
                (std::abs(y - v.y) < epsilon) &&
                (std::abs(z - v.z) < epsilon);
@@ -95,7 +97,7 @@ public:
         return !(*this == v);
     }
 
-    bool isAlmostEqual(const Vector3D& v, double tol = 1e-6) const {
+    bool isAlmostEqual(const Vector3D& v, double tol = EPSILON) const {
         return ((*this) - v).norm() < tol;
     }
 };
