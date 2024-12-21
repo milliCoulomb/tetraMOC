@@ -51,7 +51,7 @@ bool Tetrahedron::findExit(const Vector3D& x0, const Vector3D& v, double& t_exit
         double D = normal.dot(p1);
 
         double denom = normal.dot(v);
-        if(std::abs(denom) < 1e-12) {
+        if(std::abs(denom) < EPSILON) {
             continue; // Ray parallel to face
         }
 
@@ -75,7 +75,7 @@ bool Tetrahedron::findExit(const Vector3D& x0, const Vector3D& v, double& t_exit
         double dot12 = v1.dot(v2);
 
         double denom_bary = dot00 * dot11 - dot01 * dot01;
-        if(denom_bary == 0.0) {
+        if(denom_bary < EPSILON) {
             continue; // Degenerate triangle
         }
 
