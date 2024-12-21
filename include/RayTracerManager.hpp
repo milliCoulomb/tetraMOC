@@ -32,7 +32,9 @@ public:
                     bool use_half_quadrature_for_constant); // Use half quadrature directions
 
     void generateTrackingData(int rays_per_face);
+    // void symmetrizeTrackingData(); // double the tracking data by symmetry by reversing the direction and ray data
     const std::vector<TrackingData>& getTrackingData() const { return tracking_data_; }
+    // add a method to sum up the direction weights of RayTracers in RayTracerManager
 
 private:
     const MeshHandler& mesh_;
