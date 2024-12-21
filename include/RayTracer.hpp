@@ -7,6 +7,7 @@
 #include "Field.hpp"
 #include "Vector3D.hpp"
 #include "TrackingData.hpp"
+#include "Logger.hpp"
 
 #include <vector>
 #include <memory>
