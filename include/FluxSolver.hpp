@@ -21,7 +21,7 @@ struct CellFlux {
 class FluxSolver {
 public:
     // Constructor
-    FluxSolver(const Mesh::MeshHandler& mesh,
+    FluxSolver(const MeshHandler& mesh,
                const Field& field,
                const std::vector<TrackingData>& tracking_data,
                const AngularQuadrature& angular_quadrature,
@@ -34,7 +34,7 @@ public:
     const std::vector<std::vector<CellFlux>>& getFluxData() const { return flux_data_; }
 
 private:
-    const Mesh::MeshHandler& mesh_;
+    const MeshHandler& mesh_;
     const Field& field_;
     const std::vector<TrackingData>& tracking_data_;
     const AngularQuadrature& angular_quadrature_;
