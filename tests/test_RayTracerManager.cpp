@@ -459,55 +459,50 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_ZeroDirection) {
     }
 }
 
-// unit test for the sum up the direction weights of RayTracers in RayTracerManager
-// TEST_F(RayTracerManagerTest, SumUpDirectionWeights) {
-//     MeshHandler mesh;
-//     ASSERT_TRUE(setupSimpleMesh(mesh)) << "Failed to setup simple mesh";
+// unit test for the symmetry doubling of the tracking data (doubleTrackingDataByReversing())
+TEST_F(RayTracerManagerTest, SymmetrizeTrackingData) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupSimpleMesh(mesh)) << "Failed to setup simple mesh";
     
-//     Field field;
-//     ASSERT_TRUE(setupSimpleField(field)) << "Failed to setup simple field";
+    Field field;
+    ASSERT_TRUE(setupSimpleField(field)) << "Failed to setup simple field";
     
-//     ASSERT_TRUE(setupSimpleFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    ASSERT_TRUE(setupSimpleFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
-//     // Initialize AngularQuadrature with specific orders
-//     int theta_order = 2;
-//     int phi_order = 4;
-//     AngularQuadrature angular_quadrature(theta_order, phi_order);
+    // Initialize AngularQuadrature with specific orders
+    int theta_order = 2;
+    int phi_order = 4;
+    AngularQuadrature angular_quadrature(theta_order, phi_order);
     
-//     // Initialize RayTracerManager with only constant directions (using half quadrature)
-//     bool use_half_quadrature_for_constant = true;
-//     bool constant_dir_bool = true;
-//     RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
+    // Initialize RayTracerManager with only constant directions (using half quadrature)
+    bool use_half_quadrature_for_constant = true;
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
-//     // Generate tracking data with a specified number of rays per face
-//     int rays_per_face = 1;
-//     manager.generateTrackingData(rays_per_face);
+    // Generate tracking data with a specified number of rays per face
+    int rays_per_face = 1;
+    manager.generateTrackingData(rays_per_face);
     
-//     // Retrieve tracking data
-//     const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
+    // Retrieve tracking data
+    const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
     
-//     // Compute expected number of rays
-//     size_t boundary_faces = 6;
-//     size_t directions = angular_quadrature.getDirections().size() / 2; // Half directions
-//     size_t expected_rays = boundary_faces * rays_per_face * directions;
+    // Compute expected number of rays
+    size_t boundary_faces = 6;
+    size_t directions = angular_quadrature.getDirections().size() / 2; // Half directions because the two tetra forms a cube
+    size_t expected_rays = boundary_faces * rays_per_face * directions;
+
+    size_t size_before = tracking_data.size();
+    Logger::info("Number of rays before symmetrization: " + std::to_string(size_before));
     
-//     // Verify that tracking_data size is as expected
-//     EXPECT_LE(tracking_data.size() / 2, expected_rays) << "Tracking data size should be less than or equal to the expected number of rays due to geometry";
+    // Verify that tracking_data size is as expected
+    EXPECT_LE(tracking_data.size(), expected_rays) << "Tracking data size should be less than or equal to the expected number of rays due to geometry";
     
-//     // we loop over the tracking_data and sum up the direction weights and divide it by the total number of rays
-//     double total_weight = 0.0;
-//     for(const auto& data : tracking_data) {
-//         total_weight += data.direction_weight;
-//     }
-    
-//     // Compute expected total weight
-//     double expected_total_weight = 0.0;
-//     for(const auto& dir : angular_quadrature.getDirections()) {
-//         expected_total_weight += dir.weight;
-//     }
-//     // Verify that total weight matches expected
-//     EXPECT_DOUBLE_EQ(total_weight, expected_total_weight) << "Total weight should match sum of direction weights";
-// }
+    // Symmetrize the tracking data
+    manager.doubleTrackingDataByReversing();
+    size_t size_after = tracking_data.size();
+
+    EXPECT_EQ(size_after, 2 * size_before) << "Symmetrized tracking data size should be double the original";
+}
 
 // // unit test for RayTracerManager::symmetrizeTrackingData()
 // TEST_F(RayTracerManagerTest, SymmetrizeTrackingData) {
