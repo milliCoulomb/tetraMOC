@@ -9,6 +9,7 @@
 #include "AngularQuadrature.hpp"
 #include "TrackingData.hpp"
 #include "Vector3D.hpp"
+#include "Logger.hpp"
 
 #include <vector>
 #include <memory>
