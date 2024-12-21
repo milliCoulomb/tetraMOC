@@ -35,7 +35,7 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
     std::vector<CellTrace> pathline;
     int current_cell_id = start_cell_id;
     Vector3D current_point = start_point;
-    double total_time = 0.0;
+    // double total_time = 0.0;
 
     for(int iter = 0; iter < max_iter; ++iter) {
         // Validate current_cell_id
@@ -84,7 +84,7 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         segment.start_point = current_point;
         segment.end_point = x_exit;
         pathline.push_back(segment);
-        total_time += t_exit;
+        // total_time += t_exit;
 
         // Retrieve the neighboring cell using MeshHandler's method
         int neighbor_cell_id = mesh_.getNeighborCell(current_cell_id, exit_face_id);
