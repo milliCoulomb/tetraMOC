@@ -86,7 +86,6 @@ TEST(TetrahedronTest, NoExitTest) {
     
     // Call findExit
     bool has_exit = tetra.findExit(start_point, velocity, t_exit, x_exit, exit_face_id);
-    std::cout << "t_exit: " << t_exit << std::endl;
     // Assertions
     EXPECT_FALSE(has_exit);
 }
