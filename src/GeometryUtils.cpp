@@ -12,7 +12,7 @@ Vector3D computeFaceNormal(const std::array<Vector3D, 3>& triangle, const Vector
     Vector3D n = u.cross(v);
 
     double norm = n.norm();
-    if(norm == 0) return {0.0, 0.0, 0.0}; // Degenerate triangle
+    if(norm < EPSILON) return {0.0, 0.0, 0.0}; // Degenerate triangle
 
     n = n.normalized();
 
