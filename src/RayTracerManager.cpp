@@ -24,24 +24,47 @@ RayTracerManager::RayTracerManager(const MeshHandler& mesh,
 RayTracerManager::RayTracerManager(const MeshHandler& mesh,
                                    const Field& base_field,
                                    AngularQuadrature& angular_quadrature,
+                                   bool constant_directions,
                                    bool use_half_quadrature_for_constant)
     : mesh_(mesh),
       base_field_(base_field),
       angular_quadrature_(angular_quadrature)
 {
-    if (use_half_quadrature_for_constant)
+    if (!constant_directions)
     {
-        // Get all directions from AngularQuadrature
-        const std::vector<Direction>& all_directions = angular_quadrature_.getDirections();
-
-        // Initialize constant direction RayTracers using half of the directions
-        initializeConstantDirectionRayTracers(all_directions);
+        // If not using constant directions, initialize variable direction RayTracer
+        initializeRayTracers();
     }
     else
     {
-        // If not using half quadrature for constant directions, initialize variable direction RayTracer
-        initializeRayTracers();
+        if (use_half_quadrature_for_constant)
+        {
+            // Get all directions from AngularQuadrature
+            const std::vector<Direction>& all_directions = angular_quadrature_.getDirections();
+
+            // Initialize constant direction RayTracers using half of the directions
+            initializeConstantDirectionRayTracers(all_directions, use_half_quadrature_for_constant);
+        }
+        else
+        {
+            // if not, we use all directions
+            const std::vector<Direction>& all_directions = angular_quadrature_.getDirections();
+            initializeConstantDirectionRayTracers(all_directions, use_half_quadrature_for_constant);
+        }
     }
+    // if (use_half_quadrature_for_constant)
+    // {
+    //     // Get all directions from AngularQuadrature
+    //     const std::vector<Direction>& all_directions = angular_quadrature_.getDirections();
+
+    //     // Initialize constant direction RayTracers using half of the directions
+    //     initializeConstantDirectionRayTracers(all_directions);
+    // }
+    // else
+    // {
+    //     // If not using half quadrature for constant directions, initialize variable direction RayTracer
+    //     initializeRayTracers();
+    // }
 }
 
 // Helper method to initialize RayTracers for variable directions
@@ -52,10 +75,15 @@ void RayTracerManager::initializeRayTracers()
 }
 
 // Helper method to initialize RayTracers with constant directions
-void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<Direction>& quadrature_directions)
+void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<Direction>& quadrature_directions, bool use_half_quadrature_for_constant)
 {
+    // check if we use half or full quadrature
+    size_t half_size = quadrature_directions.size();
+    if (use_half_quadrature_for_constant)
+    {
+        size_t half_size = quadrature_directions.size() / 2;
+    }
     // Determine half of the quadrature directions
-    size_t half_size = quadrature_directions.size() / 2;
     size_t added_tracers = 0;
 
     for (size_t i = 0; i < half_size; ++i)
@@ -105,12 +133,12 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
     // Clear previous tracking data
     tracking_data_.clear();
-    std::cout << "Tracking data cleared." << std::endl;
+    // std::cout << "Tracking data cleared." << std::endl;
 
     // Retrieve all boundary faces
     const auto& boundary_faces = mesh_.getBoundaryFaces();
-    std::cout << "Boundary faces: " << boundary_faces.size() << std::endl;
-    std::cout << "Number of RayTracers: " << ray_tracers_.size() << std::endl;
+    // std::cout << "Boundary faces: " << boundary_faces.size() << std::endl;
+    // std::cout << "Number of RayTracers: " << ray_tracers_.size() << std::endl;
 
     // Showcase direction of all RayTracers
     for (size_t i = 0; i < ray_tracers_.size(); ++i)
@@ -157,7 +185,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
                 // Compute the cell center
                 int adjacent_cell_id = mesh_.getFaceAdjacentCell(face, true); // true for boundary face
-                std::cout << "Adjacent Cell ID: " << adjacent_cell_id << std::endl;
+                // std::cout << "Adjacent Cell ID: " << adjacent_cell_id << std::endl;
                 Vector3D cell_center = mesh_.getCellCenter(adjacent_cell_id);
 
                 // Compute the face normal using GeometryUtils with cell center
