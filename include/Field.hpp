@@ -10,6 +10,7 @@
 #include <sstream>
 #include <memory> // For std::shared_ptr
 #include "Vector3D.hpp"
+#include "Logger.hpp"
 
 // Structure to store cell scalar field data (for future extension)
 struct CellScalarField {
