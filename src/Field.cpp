@@ -6,14 +6,16 @@
 bool Field::loadVectorField(const std::string& filename) {
     std::ifstream infile(filename);
     if (!infile.is_open()) {
-        std::cerr << "Error: Unable to open vector field file " << filename << std::endl;
+        // std::cerr << "Error: Unable to open vector field file " << filename << std::endl;
+        Logger::error("Unable to open vector field file " + filename);
         return false;
     }
 
     int num_cells;
     infile >> num_cells;
     if (infile.fail()) {
-        std::cerr << "Error: Unable to read number of vectors from " << filename << std::endl;
+        // std::cerr << "Error: Unable to read number of vectors from " << filename << std::endl;
+        Logger::error("Unable to read number of vectors from " + filename);
         return false;
     }
 
@@ -25,21 +27,24 @@ bool Field::loadVectorField(const std::string& filename) {
 
     for(int i = 0; i < num_cells; ++i) {
         if (!std::getline(infile, line)) {
-            std::cerr << "Error: Unexpected end of vector field file at line " << i + 2 << std::endl;
+            // std::cerr << "Error: Unexpected end of vector field file at line " << i + 2 << std::endl;
+            Logger::error("Unexpected end of vector field file at line " + std::to_string(i + 2));
             return false;
         }
         std::istringstream iss(line);
         double vx, vy, vz;
         iss >> vx >> vy >> vz;
         if(iss.fail()) {
-            std::cerr << "Error: Invalid format in vector field file at line " << i + 2 << std::endl;
+            // std::cerr << "Error: Invalid format in vector field file at line " << i + 2 << std::endl;
+            Logger::error("Invalid format in vector field file at line " + std::to_string(i + 2));
             return false;
         }
         (*sharedVectorFields)[i] = Vector3D(vx, vy, vz); // Utilize Vector3D
         // Check for extra data on the line
         double extra;
         if(iss >> extra) {
-            std::cerr << "Error: Extra data found in vector field file at line " << i + 2 << ": " << extra << std::endl;
+            // std::cerr << "Error: Extra data found in vector field file at line " << i + 2 << ": " << extra << std::endl;
+            Logger::error("Extra data found in vector field file at line " + std::to_string(i + 2) + ": " + std::to_string(extra));
             return false;
         }
     }
@@ -52,14 +57,16 @@ bool Field::loadVectorField(const std::string& filename) {
 bool Field::loadScalarField(const std::string& filename) {
     std::ifstream infile(filename);
     if (!infile.is_open()) {
-        std::cerr << "Error: Unable to open scalar field file " << filename << std::endl;
+        // std::cerr << "Error: Unable to open scalar field file " << filename << std::endl;
+        Logger::error("Unable to open scalar field file " + filename);
         return false;
     }
 
     int num_cells;
     infile >> num_cells;
     if (infile.fail()) {
-        std::cerr << "Error: Unable to read number of scalar values from " << filename << std::endl;
+        // std::cerr << "Error: Unable to read number of scalar values from " << filename << std::endl;
+        Logger::error("Unable to read number of scalar values from " + filename);
         return false;
     }
     scalarFields.resize(num_cells);
@@ -69,21 +76,24 @@ bool Field::loadScalarField(const std::string& filename) {
 
     for(int i = 0; i < num_cells; ++i) {
         if (!std::getline(infile, line)) {
-            std::cerr << "Error: Unexpected end of scalar field file at line " << i + 2 << std::endl;
+            // std::cerr << "Error: Unexpected end of scalar field file at line " << i + 2 << std::endl;
+            Logger::error("Unexpected end of scalar field file at line " + std::to_string(i + 2));
             return false;
         }
         std::istringstream iss(line);
         double value;
         iss >> value;
         if(iss.fail()) {
-            std::cerr << "Error: Invalid format in scalar field file at line " << i + 2 << std::endl;
+            // std::cerr << "Error: Invalid format in scalar field file at line " << i + 2 << std::endl;
+            Logger::error("Invalid format in scalar field file at line " + std::to_string(i + 2));
             return false;
         }
         scalarFields[i].value = value;
         // Check for extra data on the line
         double extra;
         if(iss >> extra) {
-            std::cerr << "Error: Extra data found in scalar field file at line " << i + 2 << ": " << extra << std::endl;
+            // std::cerr << "Error: Extra data found in scalar field file at line " << i + 2 << ": " << extra << std::endl;
+            Logger::error("Extra data found in scalar field file at line " + std::to_string(i + 2) + ": " + std::to_string(extra));
             return false;
         }
     }
