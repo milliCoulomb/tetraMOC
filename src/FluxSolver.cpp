@@ -3,7 +3,7 @@
 #include <cmath>
 
 // Constructor
-FluxSolver::FluxSolver(const Mesh::MeshHandler& mesh,
+FluxSolver::FluxSolver(const MeshHandler& mesh,
                        const Field& field,
                        const std::vector<TrackingData>& tracking_data,
                        const AngularQuadrature& angular_quadrature,
@@ -56,7 +56,7 @@ size_t FluxSolver::findDirectionIndex(const Vector3D& direction) const {
 
 // Method to compute flux
 void FluxSolver::computeFlux() {
-    size_t num_threads = omp_get_max_threads();
+    int num_threads = omp_get_max_threads();
 
     // Create a local flux_data buffer for each thread
     std::vector<std::vector<std::vector<CellFlux>>> local_flux_data(num_threads,
@@ -116,7 +116,7 @@ void FluxSolver::computeFlux() {
     }
 
     // Combine local_flux_data into global flux_data_ with parallelization
-    #pragma omp parallel for schedule(static) collapse(2) // Parallelize over cells and directions
+    #pragma omp parallel for schedule(static) // Parallelize over cells
     for (size_t cell = 0; cell < flux_data_.size(); ++cell) {
         for (size_t dir = 0; dir < flux_data_[cell].size(); ++dir) {
             double total_flux = 0.0;
