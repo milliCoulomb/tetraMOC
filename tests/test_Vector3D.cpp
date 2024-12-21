@@ -38,6 +38,15 @@ TEST(Vector3DTest, Subtraction) {
     EXPECT_DOUBLE_EQ(v3.z, 6.0);
 }
 
+// test the self-minus operator
+TEST(Vector3DTest, SelfMinus) {
+    Vector3D v(1.0, 2.0, 3.0);
+    Vector3D v2 = -v;
+    EXPECT_DOUBLE_EQ(v2.x, -1.0);
+    EXPECT_DOUBLE_EQ(v2.y, -2.0);
+    EXPECT_DOUBLE_EQ(v2.z, -3.0);
+}
+
 // test of the multiplication of a vector by a scalar
 TEST(Vector3DTest, ScalarMultiplication) {
     Vector3D v(1.0, -2.0, 3.0);
@@ -99,6 +108,13 @@ TEST(Vector3DTest, Inequality) {
     Vector3D v1(1.0, 2.0, 3.0);
     Vector3D v2(1.0, 2.1, 3.0);
     EXPECT_TRUE(v1 != v2);
+}
+
+// test the isAlmostEqual method
+TEST(Vector3DTest, IsAlmostEqual) {
+    Vector3D v1(1.0, 2.0, 3.0);
+    Vector3D v2(1.0, 2.00000001, 3.0);
+    EXPECT_TRUE(v1.isAlmostEqual(v2, 1e-6));
 }
 
 // // main.cpp for tests (optional if using gtest_main)
