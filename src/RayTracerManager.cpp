@@ -97,6 +97,7 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
         double x = sqrt_term * std::cos(dir.phi);
         double y = sqrt_term * std::sin(dir.phi);
         double z = dir.mu;
+        double direction_weight = dir.weight;
 
         Vector3D vector_dir(x, y, z);
 
@@ -112,7 +113,7 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
         Vector3D normalized_dir = vector_dir.normalized();
 
         // Instantiate a RayTracer in CONSTANT_DIRECTION mode
-        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir));
+        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir, direction_weight));
         added_tracers++;
     }
     Logger::info("Initialized " + std::to_string(added_tracers) + " constant direction RayTracers.");
@@ -132,7 +133,7 @@ bool RayTracerManager::isValidDirection(const Vector3D& face_normal, const Vecto
 void RayTracerManager::generateTrackingData(int rays_per_face)
 {
     // Set number of threads to 1 for debugging
-    omp_set_num_threads(1);
+    // omp_set_num_threads(1);
 
     // Clear previous tracking data
     tracking_data_.clear();
@@ -148,7 +149,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
     {
         RayTracer* tracer = ray_tracers_[i].get();
         RayTracerMode mode = tracer->getMode();
-        Logger::info("RayTracer" + std::to_string(i) + " Mode: " + (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION"));
+        Logger::info("RayTracer " + std::to_string(i) + " Mode: " + (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION"));
         // std::cout << "RayTracer " << i << " Mode: " << (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION") << std::endl;
         if(mode == RayTracerMode::CONSTANT_DIRECTION) {
             Vector3D dir = tracer->getFixedDirection();
@@ -200,6 +201,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
                 // Determine the direction based on RayTracer mode
                 Vector3D direction;
+                double direction_weight = 1.0; // Default weight
                 if (mode == RayTracerMode::VARIABLE_DIRECTION)
                 {
                     // Retrieve the direction from the Field based on the adjacent cell
@@ -216,6 +218,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                 else if (mode == RayTracerMode::CONSTANT_DIRECTION)
                 {
                     Vector3D fixed_direction = tracer->getFixedDirection();
+                    direction_weight = tracer->getDirectionWeight();
                     if (fixed_direction.isAlmostEqual(ZERO_VECTOR))
                     {
                         // Skip rays with zero direction
@@ -252,6 +255,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                         TrackingData data;
                         data.ray_id = ray_id;
                         data.direction = direction;
+                        data.direction_weight = direction_weight;
 
                         // Populate cell_traces
                         data.cell_traces = cell_traces;
@@ -272,5 +276,41 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
     }
 }
 
-// Getter for tracking data (already provided in the header)
-// const std::vector<TrackingData>& RayTracerManager::getTrackingData() const { return tracking_data_; }
+// void RayTracerManager::symmetrizeTrackingData()
+// {
+//     std::vector<TrackingData> symmetrized_data;
+//     symmetrized_data.reserve(tracking_data_.size() * 2);
+
+//     // Atomic counter for unique ray IDs
+//     std::atomic<int> new_ray_id_counter(tracking_data_.size());
+
+//     for (const auto& data : tracking_data_)
+//     {
+//         // Original ray
+//         symmetrized_data.push_back(data);
+
+//         // Create reversed ray
+//         TrackingData reversed_data;
+//         reversed_data.ray_id = new_ray_id_counter.fetch_add(1);
+//         reversed_data.direction = -data.direction;
+//         reversed_data.cell_traces = data.cell_traces;
+//         std::reverse(reversed_data.cell_traces.begin(), reversed_data.cell_traces.end());
+
+//         // Reverse time_spent if it exists
+//         if (!data.time_spent.empty())
+//         {
+//             reversed_data.time_spent = data.time_spent;
+//             std::reverse(reversed_data.time_spent.begin(), reversed_data.time_spent.end());
+//         }
+
+//         // Swap start and end points
+//         reversed_data.start_point = data.end_point;
+//         reversed_data.end_point = data.start_point;
+
+//         symmetrized_data.push_back(reversed_data);
+//     }
+
+//     tracking_data_ = std::move(symmetrized_data);
+// }
+        
+
