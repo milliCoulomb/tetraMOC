@@ -35,7 +35,8 @@ std::vector<double> legendreRoots(int n) {
         }
         double Pn_final = legendre(n, x);
         if (std::abs(Pn_final) > tol) {
-            std::cerr << "Warning: Gauss-Legendre root " << i+1 << " did not converge.\n";
+            //std::cerr << "Warning: Gauss-Legendre root " << i+1 << " did not converge.\n";
+            Logger::warning("Gauss-Legendre root " + std::to_string(i+1) + " did not converge.");
         }
         roots[i] = x;
     }
