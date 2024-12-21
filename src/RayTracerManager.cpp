@@ -101,7 +101,8 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
         // Check if vector_dir is zero
         if (vector_dir.x == 0.0 && vector_dir.y == 0.0 && vector_dir.z == 0.0)
         {
-            std::cerr << "Warning: Zero direction vector encountered. Skipping this direction." << std::endl;
+            // std::cerr << "Warning: Zero direction vector encountered. Skipping this direction." << std::endl;
+            Logger::warning("Zero direction vector encountered. Skipping this direction.");
             continue; // Skip adding this RayTracer
         }
 
@@ -112,8 +113,8 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
         ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir));
         added_tracers++;
     }
-
-    std::cout << "Initialized " << added_tracers << " constant direction RayTracers." << std::endl;
+    Logger::info("Initialized " + std::to_string(added_tracers) + " constant direction RayTracers.");
+    // std::cout << "Initialized " << added_tracers << " constant direction RayTracers." << std::endl;
 }
 
 // Method to check if a direction is valid (incoming) for a given face normal
@@ -145,13 +146,16 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
     {
         RayTracer* tracer = ray_tracers_[i].get();
         RayTracerMode mode = tracer->getMode();
-        std::cout << "RayTracer " << i << " Mode: " << (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION") << std::endl;
+        Logger::info("RayTracer" + std::to_string(i) + " Mode: " + (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION"));
+        // std::cout << "RayTracer " << i << " Mode: " << (mode == RayTracerMode::VARIABLE_DIRECTION ? "VARIABLE_DIRECTION" : "CONSTANT_DIRECTION") << std::endl;
         if(mode == RayTracerMode::CONSTANT_DIRECTION) {
             Vector3D dir = tracer->getFixedDirection();
-            std::cout << "Direction: (" << dir.x << ", " << dir.y << ", " << dir.z << ")" << std::endl;
+            Logger::info("Direction: (" + std::to_string(dir.x) + ", " + std::to_string(dir.y) + ", " + std::to_string(dir.z) + ")");
+            // std::cout << "Direction: (" << dir.x << ", " << dir.y << ", " << dir.z << ")" << std::endl;
         }
         else if(mode == RayTracerMode::VARIABLE_DIRECTION) {
-            std::cout << "Direction: (Variable Direction)" << std::endl;
+            // std::cout << "Direction: (Variable Direction)" << std::endl;
+            Logger::info("Direction: (Variable Direction)");
         }
     }
 
@@ -201,7 +205,8 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                     if (field_direction.x == 0.0 && field_direction.y == 0.0 && field_direction.z == 0.0)
                     {
                         // Skip rays with zero direction
-                        std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
+                        // std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
+                        Logger::warning("Skipping RayTracer " + std::to_string(i) + " for face due to zero direction.");
                         continue;
                     }
                     direction = field_direction.normalized();
@@ -212,7 +217,8 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                     if (fixed_direction.x == 0.0 && fixed_direction.y == 0.0 && fixed_direction.z == 0.0)
                     {
                         // Skip rays with zero direction
-                        std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
+                        // std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
+                        Logger::warning("Skipping RayTracer " + std::to_string(i) + " for face due to zero direction.");
                         continue;
                     }
                     direction = fixed_direction.normalized();
