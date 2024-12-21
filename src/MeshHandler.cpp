@@ -11,14 +11,16 @@
 bool MeshHandler::loadNodes(const std::string& filename) {
     std::ifstream infile(filename);
     if(!infile.is_open()) {
-        std::cerr << "Error: Unable to open nodes file: " << filename << std::endl;
+        // std::cerr << "Error: Unable to open nodes file: " << filename << std::endl;
+        Logger::error("Unable to open nodes file: " + filename);
         return false;
     }
     
     int num_nodes;
     infile >> num_nodes;
     if(infile.fail()) {
-        std::cerr << "Error: Failed to read the number of nodes from: " << filename << std::endl;
+        // std::cerr << "Error: Failed to read the number of nodes from: " << filename << std::endl;
+        Logger::error("Failed to read the number of nodes from: " + filename);
         return false;
     }
     
@@ -29,7 +31,8 @@ bool MeshHandler::loadNodes(const std::string& filename) {
         double x, y, z;
         infile >> node_id >> x >> y >> z;
         if(infile.fail()) {
-            std::cerr << "Error: Invalid node format in line: " << (i + 2) << std::endl;
+            //std::cerr << "Error: Invalid node format in line: " << (i + 2) << std::endl;
+            Logger::error("Invalid node format in line: " + std::to_string(i + 2));
             return false;
         }
         nodes.emplace_back(Vector3D(x, y, z));
@@ -38,7 +41,8 @@ bool MeshHandler::loadNodes(const std::string& filename) {
     // Optional: Verify no extra data
     std::string extra;
     if(infile >> extra) {
-        std::cerr << "Error: Extra data found in nodes file after expected nodes." << std::endl;
+        // std::cerr << "Error: Extra data found in nodes file after expected nodes." << std::endl;
+        Logger::error("Extra data found in nodes file after expected nodes.");
         return false;
     }
     
@@ -48,14 +52,16 @@ bool MeshHandler::loadNodes(const std::string& filename) {
 bool MeshHandler::loadCells(const std::string& filename) {
     std::ifstream infile(filename);
     if(!infile.is_open()) {
-        std::cerr << "Error: Unable to open cells file: " << filename << std::endl;
+        // std::cerr << "Error: Unable to open cells file: " << filename << std::endl;
+        Logger::error("Unable to open cells file: " + filename);
         return false;
     }
     
     int num_cells;
     infile >> num_cells;
     if(infile.fail()) {
-        std::cerr << "Error: Failed to read the number of cells from: " << filename << std::endl;
+        // std::cerr << "Error: Failed to read the number of cells from: " << filename << std::endl;
+        Logger::error("Failed to read the number of cells from: " + filename);
         return false;
     }
     
@@ -65,7 +71,8 @@ bool MeshHandler::loadCells(const std::string& filename) {
         int cell_id, n0, n1, n2, n3;
         infile >> cell_id >> n0 >> n1 >> n2 >> n3;
         if(infile.fail()) {
-            std::cerr << "Error: Invalid cell format in line: " << (i + 2) << std::endl;
+            // std::cerr << "Error: Invalid cell format in line: " << (i + 2) << std::endl;
+            Logger::error("Invalid cell format in line: " + std::to_string(i + 2));
             return false;
         }
         TetraCell cell = TetraCell({n0, n1, n2, n3}, cell_id);
@@ -75,7 +82,8 @@ bool MeshHandler::loadCells(const std::string& filename) {
     // Optional: Verify no extra data
     std::string extra;
     if(infile >> extra) {
-        std::cerr << "Error: Extra data found in cells file after expected cells." << std::endl;
+        // std::cerr << "Error: Extra data found in cells file after expected cells." << std::endl;
+        Logger::error("Extra data found in cells file after expected cells.");
         return false;
     }
     
@@ -86,7 +94,8 @@ bool MeshHandler::loadCells(const std::string& filename) {
 bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
     std::ifstream infile(filename);
     if (!infile.is_open()) {
-        std::cerr << "Error: Unable to open face connectivity file " << filename << std::endl;
+        // std::cerr << "Error: Unable to open face connectivity file " << filename << std::endl;
+        Logger::error("Unable to open face connectivity file " + filename);
         return false;
     }
 
@@ -96,7 +105,8 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
     int num_faces;
     infile >> num_faces;
     if(infile.fail()){
-        std::cerr << "Error: Unable to read number of faces from " << filename << std::endl;
+        // std::cerr << "Error: Unable to read number of faces from " << filename << std::endl;
+        Logger::error("Unable to read number of faces from " + filename);
         return false;
     }
 
@@ -104,7 +114,8 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
         int n0, n1, n2, count;
         infile >> n0 >> n1 >> n2 >> count;
         if(infile.fail() || count < 1){
-            std::cerr << "Error: Invalid face format in line: " << (i + 2) << std::endl;
+            // std::cerr << "Error: Invalid face format in line: " << (i + 2) << std::endl;
+            Logger::error("Invalid face format in line: " + std::to_string(i + 2));
             return false;
         }
 
@@ -113,7 +124,8 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
             int cell_id;
             infile >> cell_id;
             if(infile.fail()){
-                std::cerr << "Error: Unable to read cell_id for face in line: " << (i + 2) << std::endl;
+                // std::cerr << "Error: Unable to read cell_id for face in line: " << (i + 2) << std::endl;
+                Logger::error("Unable to read cell_id for face in line: " + std::to_string(i + 2));
                 return false;
             }
             cell_ids[j] = cell_id;
@@ -132,7 +144,8 @@ bool MeshHandler::loadFaceConnectivity(const std::string& filename) {
     // Check for extra data
     std::string extra;
     if(infile >> extra){
-        std::cerr << "Error: Extra data found in faces file after expected faces." << std::endl;
+        // std::cerr << "Error: Extra data found in faces file after expected faces." << std::endl;
+        Logger::error("Extra data found in faces file after expected faces.");
         return false;
     }
 
@@ -187,7 +200,8 @@ int MeshHandler::getFaceAdjacentCell(const MeshFace& face, bool only_one) const 
 int MeshHandler::getNeighborCell(int current_cell_id, int exit_face_id) const {
     // Validate current_cell_id
     if(current_cell_id < 0 || current_cell_id >= static_cast<int>(cells.size())) {
-        std::cerr << "Error: Invalid current cell ID: " << current_cell_id << std::endl;
+        // std::cerr << "Error: Invalid current cell ID: " << current_cell_id << std::endl;
+        Logger::error("Invalid current cell ID: " + std::to_string(current_cell_id));
         return -1;
     }
 
@@ -209,7 +223,8 @@ int MeshHandler::getNeighborCell(int current_cell_id, int exit_face_id) const {
             face_nodes = {cell.node_ids[1], cell.node_ids[2], cell.node_ids[3]};
             break;
         default:
-            std::cerr << "Error: Invalid exit face ID: " << exit_face_id << std::endl;
+            // std::cerr << "Error: Invalid exit face ID: " << exit_face_id << std::endl;
+            Logger::error("Invalid exit face ID: " + std::to_string(exit_face_id));
             return -1;
     }
 
