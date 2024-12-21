@@ -1,8 +1,6 @@
 // Utilities/Logger.cpp
 #include "Logger.hpp"
 
-namespace SNSolver {
-
 void Logger::log(const std::string& message, LogLevel level) {
     switch(level) {
         case LogLevel::INFO:
@@ -27,6 +25,4 @@ void Logger::warning(const std::string& message) {
 
 void Logger::error(const std::string& message) {
     log(message, LogLevel::ERROR);
-}
-
 }
