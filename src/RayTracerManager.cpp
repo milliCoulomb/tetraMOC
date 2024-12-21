@@ -276,6 +276,53 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
     }
 }
 
+void RayTracerManager::doubleTrackingDataByReversing() {
+    std::vector<TrackingData> reversed_tracking_data;
+    reversed_tracking_data.reserve(tracking_data_.size());
+
+    // Determine the current maximum ray_id to ensure uniqueness
+    int max_ray_id = 0;
+    for (const auto& ray : tracking_data_) {
+        if (ray.ray_id > max_ray_id) {
+            max_ray_id = ray.ray_id;
+        }
+    }
+
+    // Start assigning new ray_ids from max_ray_id + 1
+    int new_ray_id = max_ray_id + 1;
+
+    for (const auto& original_ray : tracking_data_) {
+        TrackingData reversed_ray = original_ray; // Copy existing data
+
+        // Assign a new unique ray_id
+        reversed_ray.ray_id = new_ray_id++;
+
+        // Reverse the direction
+        reversed_ray.direction = reversed_ray.direction * -1.0;
+
+        // Reverse the order of cell_traces
+        std::reverse(reversed_ray.cell_traces.begin(), reversed_ray.cell_traces.end());
+
+        // Swap start_point and end_point in each CellTrace
+        for (auto& trace : reversed_ray.cell_traces) {
+            std::swap(trace.start_point, trace.end_point);
+        }
+
+        // Optionally, adjust direction_weight if necessary
+        // For this example, we'll keep it the same
+        // reversed_ray.direction_weight = reversed_ray.direction_weight;
+
+        reversed_tracking_data.push_back(reversed_ray);
+    }
+
+    // Append the reversed tracking data to the original tracking_data_
+    tracking_data_.insert(tracking_data_.end(),
+                          reversed_tracking_data.begin(),
+                          reversed_tracking_data.end());
+
+    Logger::info("Tracking data doubled by reversing each ray.");
+}
+
 // void RayTracerManager::symmetrizeTrackingData()
 // {
 //     std::vector<TrackingData> symmetrized_data;
