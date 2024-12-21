@@ -111,7 +111,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_BasicTest) {
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // **Check that tracking_data is initially empty**
     EXPECT_EQ(manager.getTrackingData().size(), 0) << "Tracking data should be empty initially";
@@ -157,7 +158,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_MultipleDirections) {
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // Check initial tracking_data is empty
     EXPECT_EQ(manager.getTrackingData().size(), 0) << "Tracking data should be empty initially";
@@ -207,7 +209,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_InvalidCellID) {
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // Manually add an invalid ray by manipulating RayTracerManager (if possible)
     // Alternatively, ensure that generateTrackingData skips invalid cell IDs
@@ -259,7 +262,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_ExitsDomain) {
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // Generate tracking data with a specified number of rays per face
     int rays_per_face = 1;
@@ -285,7 +289,7 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_ExitsDomain) {
 }
 
 // Test case: Symmetry Verification - Only Half Directions Used
-TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_SymmetryVerification) {
+TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_NoSymmetryVerification) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSimpleMesh(mesh)) << "Failed to setup simple mesh";
     
@@ -300,8 +304,9 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_SymmetryVerification) {
     AngularQuadrature angular_quadrature(theta_order, phi_order);
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
-    bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool use_half_quadrature_for_constant = false;
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // Count the number of constant direction RayTracers
     size_t expected_constant_tracers = angular_quadrature.getDirections().size() / 2;
@@ -315,7 +320,7 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_SymmetryVerification) {
     
     // Compute expected number of rays
     size_t boundary_faces = 6;
-    size_t directions = angular_quadrature.getDirections().size() / 2;
+    size_t directions = angular_quadrature.getDirections().size() / 2; // Half directions because only half of boundary are going to be crossed
     size_t expected_rays = boundary_faces * rays_per_face * directions;
     
     EXPECT_EQ(tracking_data.size(), expected_rays) << "Tracking data should have rays only for half the directions due to symmetry";
@@ -340,7 +345,7 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_SymmetryVerification) {
         }
     }
     
-    EXPECT_EQ(unique_directions.size(), angular_quadrature.getDirections().size() / 2)
+    EXPECT_EQ(unique_directions.size(), angular_quadrature.getDirections().size())
         << "Only half of the angular quadrature directions should be used for constant directions";
 }
 
@@ -374,7 +379,9 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_NoValidDirections) {
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool constant_dir_bool = true;
+
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // Overwrite constant directions to be parallel to face normals (assuming mu = 1)
     // This would result in dot_product = face_normal.dot(direction) = 1 > -threshold
@@ -423,7 +430,8 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_ZeroDirection) {
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     // Include the zero direction manually
     bool use_half_quadrature_for_constant = true;
-    RayTracerManager manager(mesh, field, angular_quadrature, use_half_quadrature_for_constant);
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     
     // Manually add a RayTracer with zero direction
     // Note: RayTracerManager does not provide a direct method to add RayTracers externally
