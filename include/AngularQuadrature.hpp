@@ -19,6 +19,8 @@ public:
 
     const std::vector<Direction>& getDirections() const;
 
+    void addDirection(const Direction& direction);
+
 private:
     int thetaOrder_;
     int phiOrder_;
