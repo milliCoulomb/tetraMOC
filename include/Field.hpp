@@ -34,6 +34,10 @@ public:
     // Constructor with shared CellVectorField and direction vector
     Field(std::shared_ptr<std::vector<CellVectorField>> shared_vector_fields, const Vector3D& direction)
         : sharedVectorFields(shared_vector_fields), direction_(direction) {}
+    
+    // Constructor for scalar field
+    Field(const std::vector<CellScalarField>& scalar_fields)
+        : scalarFields(scalar_fields) {}
 
     // Load a vector field from a file (initializes shared CellVectorField)
     bool loadVectorField(const std::string& filename);
@@ -44,6 +48,9 @@ public:
     // Getters for field data
     const std::vector<CellVectorField>& getVectorFields() const { return *sharedVectorFields; }
     const std::vector<CellScalarField>& getScalarFields() const { return scalarFields; }
+
+    // Setter for scalar field
+    void setScalarField(const std::vector<CellScalarField>& scalar_fields) { scalarFields = scalar_fields; }
 
     // Getter and Setter for direction
     const Vector3D& getDirection() const { return direction_; }
