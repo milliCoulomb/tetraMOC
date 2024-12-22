@@ -127,6 +127,18 @@ TEST(AngularQuadratureTest, Symmetry) {
     }
 }
 
+// add a unit test for the addDirection method
+TEST(AngularQuadratureTest, AddDirection) {
+    AngularQuadrature aq(2, 4);
+    Direction d = {0.5, 0.5, 0.5};
+    aq.addDirection(d);
+    const std::vector<Direction>& directions = aq.getDirections();
+    EXPECT_EQ(directions.size(), 9);
+    EXPECT_EQ(directions[8].mu, 0.5);
+    EXPECT_EQ(directions[8].phi, 0.5);
+    EXPECT_EQ(directions[8].weight, 0.5);
+}
+
 // // main.cpp pour les tests (si nécessaire)
 // int main(int argc, char **argv) {
 //     ::testing::InitGoogleTest(&argc, argv);
