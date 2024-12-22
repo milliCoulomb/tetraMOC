@@ -33,6 +33,9 @@ public:
     // Getter for flux data
     const std::vector<std::vector<CellFlux>>& getFluxData() const { return flux_data_; }
 
+    // Method to collapse the flux in all directions to a scalar flux by using the angular quadrature weights
+    std::vector<double> collapseFlux() const;
+
 private:
     const MeshHandler& mesh_;
     const Field& field_;
