@@ -802,7 +802,7 @@ TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
     ASSERT_EQ(flux_data[0].size(), 1) << "There should be flux data for 1 direction";
     
     EXPECT_NEAR(flux_data[0][0].flux, 0.28083614827344205, 1e-6) << "Flux should match the expected normalized value";
-    EXPECT_NEAR(flux_data[0][0].weight, 7e-1, 1e-6) << "Weight should be equal to total L_k (2.0)";
+    EXPECT_NEAR(flux_data[0][0].weight, 7e-1, 1e-6) << "Weight should be equal to total L_k (7e-1)";
 }
 
 // Test case: Flux Normalization
@@ -909,3 +909,70 @@ TEST_F(FluxSolverTest, RaysWithZeroDirection) {
     EXPECT_DOUBLE_EQ(flux_data[0][0].flux, 0.0) << "Flux should be zero for zero direction";
     EXPECT_DOUBLE_EQ(flux_data[0][0].weight, 0.0) << "Weight should be zero for zero direction";
 }
+
+// Test case: std::vector<double> collapseFlux() const, 1 cell, 2 directions, 1 ray per direction
+TEST_F(FluxSolverTest, CollapseFlux) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
+    
+    Field field;
+    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
+    
+    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    
+    // Initialize AngularQuadrature with one direction
+    std::vector<Direction> predefined_directions;
+    Direction dir;
+    dir.mu = 0.0;
+    dir.phi = 0.0;
+    dir.weight = 3.0; // Weight for direction 0
+    predefined_directions.push_back(dir);
+    Direction dir2;
+    dir2.mu = 0.0;
+    dir2.phi = M_PI / 2.0;
+    dir2.weight = 1.0; // Weight for direction 1
+    predefined_directions.push_back(dir2);
+    AngularQuadrature angular_quadrature(predefined_directions);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(predefined_directions.size(), 2) << "There should be 2 directions";
+    // test if sum of weights is 4
+    ASSERT_EQ(predefined_directions[0].weight + predefined_directions[1].weight, 4.0) << "Sum of weights should be 4.0";
+
+    // Create TrackingData with two rays: one in each direction
+    std::vector<TrackingData> tracking_data;
+    Vector3D dir_vector = directionVector(dir.mu, dir.phi);
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e-1, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    tracking_data.push_back(ray1);
+    Vector3D dir_vector2 = directionVector(dir2.mu, dir2.phi);
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e-1, Vector3D(0.0, 0.0, 0.0), Vector3D(0.0, 1.0, 0.0));
+    tracking_data.push_back(ray2);
+    // test if size of tracking_data is 2
+    ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
+
+    // Initialize FluxSolver
+    double sigma_t = 1.0; // Total cross section
+    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    // test if size of flux_data_ is 1
+    ASSERT_EQ(flux_solver.getFluxData().size(), 1) << "There should be flux data for 1 cell";
+    // test if size of flux_data_[0] is 2
+    ASSERT_EQ(flux_solver.getFluxData()[0].size(), 2) << "There should be flux data for 2 directions";
+
+    // Compute flux
+    flux_solver.computeFlux();
+    // get flux data
+    const auto& flux_data = flux_solver.getFluxData();
+    const double expected_flux_dir0 = 0.048374180359595176;
+    const double expected_flux_dir1 = 0.0936537653899091;
+    // test if flux_data_[0][0].flux is expected_flux_dir0
+    EXPECT_NEAR(flux_data[0][0].flux, expected_flux_dir0, 1e-6) << "Flux for Direction 0 should match expected value";
+    // test if flux_data_[0][1].flux is expected_flux_dir1
+    EXPECT_NEAR(flux_data[0][1].flux, expected_flux_dir1, 1e-6) << "Flux for Direction 1 should match expected value";
+    // collapse flux
+    std::vector<double> collapsed_flux = flux_solver.collapseFlux();
+    // test if size of collapsed_flux is 1
+    ASSERT_EQ(collapsed_flux.size(), 1) << "There should be 1 collapsed flux value";
+    // test if collapsed_flux[0] is the weighted sum of fluxes
+    const double expected_collapsed_flux = (expected_flux_dir0 * dir.weight + expected_flux_dir1 * dir2.weight);
+    EXPECT_NEAR(collapsed_flux[0], expected_collapsed_flux, 1e-6) << "Collapsed flux should match the weighted sum of fluxes";
+}
+
