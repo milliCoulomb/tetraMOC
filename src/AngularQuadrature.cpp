@@ -12,6 +12,10 @@ const std::vector<Direction>& AngularQuadrature::getDirections() const {
     return directions_;
 }
 
+void AngularQuadrature::addDirection(const Direction& direction) {
+    directions_.push_back(direction);
+}
+
 void AngularQuadrature::generateQuadrature() {
     int n_theta = thetaOrder_;
     if (n_theta < 1) {
