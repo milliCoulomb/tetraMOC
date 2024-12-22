@@ -27,10 +27,22 @@ void FluxSolver::initializeFluxData() {
 // Compute line-averaged flux for a single CellTrace
 std::pair<double, double> FluxSolver::computeLineAveragedFlux(double Q_k, double psi_in, double sigma_t, double L_k) const {
     // Compute psi_out using the provided formula
-    double psi_out = psi_in + (Q_k / sigma_t - psi_in) * (1.0 - std::exp(-sigma_t * L_k));
-
-    // Compute line-averaged flux
-    double line_avg_flux = (Q_k / sigma_t) - (psi_out - psi_in) / (sigma_t * L_k);
+    double psi_out;
+    double line_avg_flux = 0.0;
+    if (L_k < EPSILON) {
+        psi_out = psi_in;
+        line_avg_flux = 0.0;
+    } else {
+        // Check if sigma_t is zero
+        if (std::abs(sigma_t) < EPSILON) {
+            Logger::warning("Sigma_t is zero. Setting psi_out = psi_in + Q_k L_k.");
+            psi_out = psi_in + Q_k * L_k;
+            line_avg_flux = psi_in + (Q_k * L_k) / 2.0;
+        } else {
+            psi_out = psi_in + (Q_k / sigma_t - psi_in) * (1.0 - std::exp(-sigma_t * L_k));
+            line_avg_flux = (Q_k / sigma_t) - (psi_out - psi_in) / (sigma_t * L_k);
+        }
+    }
 
     return {line_avg_flux, psi_out};
 }
