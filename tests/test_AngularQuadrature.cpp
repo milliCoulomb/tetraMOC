@@ -139,6 +139,20 @@ TEST(AngularQuadratureTest, AddDirection) {
     EXPECT_EQ(directions[8].weight, 0.5);
 }
 
+// test the overloaded constructor with a vector of directions
+TEST(AngularQuadratureTest, OverloadedConstructor) {
+    std::vector<Direction> directions = {{0.5, 0.5, 0.5}, {0.3, 0.3, 0.3}};
+    AngularQuadrature aq(directions);
+    const std::vector<Direction>& directions_ = aq.getDirections();
+    EXPECT_EQ(directions_.size(), 2);
+    EXPECT_EQ(directions_[0].mu, 0.5);
+    EXPECT_EQ(directions_[0].phi, 0.5);
+    EXPECT_EQ(directions_[0].weight, 0.5);
+    EXPECT_EQ(directions_[1].mu, 0.3);
+    EXPECT_EQ(directions_[1].phi, 0.3);
+    EXPECT_EQ(directions_[1].weight, 0.3);
+}
+
 // // main.cpp pour les tests (si nécessaire)
 // int main(int argc, char **argv) {
 //     ::testing::InitGoogleTest(&argc, argv);
