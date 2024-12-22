@@ -31,4 +31,14 @@ inline bool vectorsAlmostEqual(const Vector3D& v1, const Vector3D& v2, double to
     return v1.isAlmostEqual(v2, tol);
 }
 
+// Converts mu and phi to a normalized Vector3D
+inline Vector3D directionVector(double mu, double phi) {
+    double theta = std::acos(mu);
+    double sin_theta = std::sin(theta);
+    double x = sin_theta * std::cos(phi);
+    double y = sin_theta * std::sin(phi);
+    double z = mu;
+    return Vector3D(x, y, z);
+}
+
 #endif // TEST_UTILS_HPP
