@@ -57,6 +57,32 @@ protected:
         return true;
     }
 
+    // helper function to create two cells mesh
+    bool setupTwoCellMesh(MeshHandler& mesh) {
+        // Define nodes content with node IDs
+        std::string nodes_content = "5\n"
+                                    "0 0.0 0.0 0.0\n" // Node 0
+                                    "1 1.0 0.0 0.0\n" // Node 1
+                                    "2 0.0 1.0 0.0\n" // Node 2
+                                    "3 0.0 0.0 1.0\n" // Node 3
+                                    "4 1.0 1.0 1.0\n"; // Node 4
+
+        // Create temporary nodes.txt
+        if(!createTempFile(nodes_file, nodes_content)) return false;
+        if(!mesh.loadNodes(nodes_file)) return false;
+
+        // Define cells content with cell IDs and four node IDs per cell
+        std::string cells_content = "2\n"
+                                    "0 0 1 2 3\n" // Cell 0: Nodes 0,1,2,3
+                                    "1 1 2 3 4\n"; // Cell 1: Nodes 1,2,3,4
+
+        // Create temporary cells.txt
+        if(!createTempFile(cells_file, cells_content)) return false;
+        if(!mesh.loadCells(cells_file)) return false;
+
+        return true;
+    }
+
     // Helper function to setup a simple field with a single source term
     bool setupSingleCellField(Field& field) {
         // Define scalar fields content
@@ -64,6 +90,22 @@ protected:
         // Followed by lines: cell_id Q_k
         std::string field_content = "1\n" // Number of scalar fields
                                     "1.0\n"; // Cell 0: Q_k = 1.0
+
+        // Create temporary field.txt
+        if(!createTempFile(field_file, field_content)) return false;
+        if(!field.loadScalarField(field_file)) return false;
+
+        return true;
+    }
+
+    // Helper function to setup a simple field with two source terms
+    bool setupTwoCellField(Field& field) {
+        // Define scalar fields content
+        // Assuming the first number is the number of scalar fields
+        // Followed by lines: cell_id Q_k
+        std::string field_content = "2\n" // Number of scalar fields
+                                    "1.0\n" // Cell 0: Q_k = 1.0
+                                    "2.0\n"; // Cell 1: Q_k = 2.0
 
         // Create temporary field.txt
         if(!createTempFile(field_file, field_content)) return false;
@@ -90,18 +132,39 @@ protected:
         return true;
     }
 
+    // Helper function to setup simple face connectivity for two cells
+    bool setupTwoCellFaceConnectivity(MeshHandler& mesh) {
+        // Define face connectivity with counts of adjacent cells
+        // Each line: n0 n1 n2 <count> <cell_id0> [<cell_id1> ...]
+        std::string faces_content = 
+            "7\n" // Number of faces
+            "0 1 2 1 0\n"  // Face 0: Nodes 0,1,2 adjacent to Cell 0
+            "0 1 3 1 0\n"  // Face 1: Nodes 0,1,3 adjacent to Cell 0
+            "0 2 3 1 0\n"  // Face 2: Nodes 0,2,3 adjacent to Cell 0
+            "1 2 3 2 0 1\n"// Face 3: Nodes 1,2,3 adjacent to Cell 0 and Cell 1
+            "1 2 4 1 1\n"  // Face 4: Nodes 1,2,4 adjacent to Cell 1
+            "1 3 4 1 1\n"  // Face 5: Nodes 1,3,4 adjacent to Cell 1
+            "2 3 4 1 1\n"; // Face 6: Nodes 2,3,4 adjacent to Cell 1
+
+        // Create temporary faces.txt
+        if(!createTempFile(faces_file, faces_content)) return false;
+        if(!mesh.loadFaceConnectivity(faces_file)) return false;
+
+        return true;
+    }
+
     // Helper function to create a ray traversing the single cell in a specific direction
-    TrackingData createSingleRay(int ray_id, const Vector3D& direction) {
+    TrackingData createSingleRay(int ray_id, const Vector3D& direction, const int cell_id = 0, const double L_k = 1.0, Vector3D start_point = Vector3D(0.0, 0.0, 0.0), Vector3D end_point = Vector3D(1.0, 0.0, 0.0)) {
         TrackingData ray;
         ray.ray_id = ray_id;
         ray.direction = direction.normalized(); // Ensure direction is unit vector
 
         // Single CellTrace: traversing Cell 0
         CellTrace trace;
-        trace.cell_id = 0;
-        trace.time_spent = 1.0; // Arbitrary path length
-        trace.start_point = Vector3D(0.0, 0.0, 0.0); // Entry point
-        trace.end_point = Vector3D(1.0, 0.0, 0.0);   // Exit point (assuming L_k = 1.0)
+        trace.cell_id = cell_id;
+        trace.time_spent = L_k; // Time spent in the cell
+        trace.start_point = start_point; // Entry point
+        trace.end_point = end_point; // Exit point
 
         ray.cell_traces.push_back(trace);
 
@@ -130,7 +193,7 @@ TEST_F(FluxSolverTest, SingleCellSingleDirectionSingleRay) {
     
     // Create TrackingData with a single ray in the x-direction
     Vector3D dir_vector = directionVector(dir.mu, dir.phi);
-    TrackingData ray = createSingleRay(0, dir_vector);
+    TrackingData ray = createSingleRay(0, dir_vector, 0, 1.0, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
     std::vector<TrackingData> tracking_data = { ray };
     
     // Initialize FluxSolver
@@ -230,30 +293,14 @@ TEST_F(FluxSolverTest, SingleCellMultipleDirectionsMultipleRays) {
 // Test case: Multiple Cells, Single Direction, Multiple Rays
 TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     MeshHandler mesh;
-    ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    // Modify the mesh to add a second cell
-    std::string cells_content = "2\n"
-                                "0 0 1 2 3\n" // Cell 0: Nodes 0,1,2,3
-                                "1 1 2 3 0\n"; // Cell 1: Nodes 1,2,3,0 (overlapping for simplicity)
-    
-    // Create temporary cells.txt
-    if(!createTempFile(cells_file, cells_content)) return;
-    if(!mesh.loadCells(cells_file)) return;
+    ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
 
     // Initialize Field with Q_k for both cells
     Field field;
-    // Define scalar fields content
-    std::string field_content = "2\n" // Number of scalar fields
-                                "1.0\n" // Cell 0: Q_k = 1.0
-                                "2.0\n"; // Cell 1: Q_k = 2.0
+    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
 
-    // Create temporary field.txt
-    if(!createTempFile(field_file, field_content)) return;
-    if(!field.loadScalarField(field_file)) return;
-
-    // Face connectivity remains the same
-    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    // Setup face connectivity for two cells
+    ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
 
     // Initialize AngularQuadrature with one direction: +x
     std::vector<Direction> predefined_directions;
@@ -268,7 +315,7 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     Vector3D dir_vector = directionVector(dir.mu, dir.phi);
     
     // Ray 1
-    TrackingData ray1 = createSingleRay(0, dir_vector);
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
     // Add second CellTrace traversing Cell1
     CellTrace trace1_1;
     trace1_1.cell_id = 1;
@@ -278,7 +325,7 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     ray1.cell_traces.push_back(trace1_1);
 
     // Ray 2
-    TrackingData ray2 = createSingleRay(1, dir_vector);
+    TrackingData ray2 = createSingleRay(1, dir_vector, 0, 1.0, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
     // Add second CellTrace traversing Cell1
     CellTrace trace2_1;
     trace2_1.cell_id = 1;
@@ -315,14 +362,14 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
 
     // Cell1:
     //   psi_in = 0.6321205588
-    //   psi_out = (2.0 / 1.0 - 0.6321205588) * (1 - e^{-1}) ≈ (2.0 - 0.6321205588) * 0.6321205588 ≈ 1.3678794412 * 0.6321205588 ≈ 0.8652559794
-    //   line_avg_flux = (2.0 / 1.0) - (0.8652559794 - 0.6321205588) / (1.0 * 1.0) ≈ 2.0 - 0.2331354206 ≈ 1.7668645794
-    //   flux = 1.7668645794 * 1.0 = 1.7668645794
+    //   psi_out = 0.6321205588 * exp(-1.0) + 2.0 * (1.0 - exp(-1.0)) ≈ 1.4967852755919449
+    //   line_avg_flux = (2.0 / 1.0) - (1.4967852755919449 - 0.6321205588) / (1.0 * 1.0) ≈ 1.1353352832366128
+    //   flux = 1.1353352832366128 * 1.0 = 1.1353352832366128
     //   weight = 1.0
 
-    //   For two rays, total flux for Cell1, Direction0: 1.7668645794 * 2 = 3.5337291588
+    //   For two rays, total flux for Cell1, Direction0: 1.1353352832366128 * 2 = 2.2706705664732256
     //   Total weight for Cell1, Direction0: 1.0 * 2 = 2.0
-    //   Normalized flux: 3.5337291588 / 2.0 = 1.7668645794
+    //   Normalized flux: 2.2706705664732256 / 2.0 = 1.1353352832366128
 
     // Verify flux_data_[cell][direction]
     ASSERT_EQ(flux_data.size(), 2) << "There should be flux data for 2 cells";
@@ -330,13 +377,83 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     ASSERT_EQ(flux_data[1].size(), 1) << "There should be flux data for 1 direction per cell";
 
     double expected_flux_cell0_dir0 = 0.3678794412;
-    double expected_flux_cell1_dir0 = 1.7668645794;
-
+    double expected_flux_cell1_dir0 = 1.1353352832366128;
     EXPECT_NEAR(flux_data[0][0].flux, expected_flux_cell0_dir0, 1e-6) << "Flux for Cell 0, Direction 0 should match expected value";
     EXPECT_NEAR(flux_data[0][0].weight, 2.0, 1e-6) << "Weight for Cell 0, Direction 0 should be 2.0";
 
     EXPECT_NEAR(flux_data[1][0].flux, expected_flux_cell1_dir0, 1e-6) << "Flux for Cell 1, Direction 0 should match expected value";
     EXPECT_NEAR(flux_data[1][0].weight, 2.0, 1e-6) << "Weight for Cell 1, Direction 0 should be 2.0";
+}
+
+// Test case: Multiple Cells, Single Direction, Multiple Rays
+TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRaysDifferentLengths) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
+
+    // Initialize Field with Q_k for both cells
+    Field field;
+    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
+
+    // Setup face connectivity for two cells
+    ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+
+    // Initialize AngularQuadrature with one direction: +x
+    std::vector<Direction> predefined_directions;
+    Direction dir;
+    dir.mu = 0.0;
+    dir.phi = 0.0;
+    dir.weight = 1.0;
+    predefined_directions.push_back(dir);
+    AngularQuadrature angular_quadrature(predefined_directions);
+
+    // Create TrackingData with two rays in +x direction traversing Cell 0 and Cell 1
+    Vector3D dir_vector = directionVector(dir.mu, dir.phi);
+    
+    // Ray 1
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 2.0, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    // Add second CellTrace traversing Cell1
+    CellTrace trace1_1;
+    trace1_1.cell_id = 1;
+    trace1_1.time_spent = 1.0;
+    trace1_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    trace1_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+    ray1.cell_traces.push_back(trace1_1);
+
+    // Ray 2
+    TrackingData ray2 = createSingleRay(1, dir_vector, 0, 1.0, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    // Add second CellTrace traversing Cell1
+    CellTrace trace2_1;
+    trace2_1.cell_id = 1;
+    trace2_1.time_spent = 3.0;
+    trace2_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    trace2_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+    ray2.cell_traces.push_back(trace2_1);
+
+    std::vector<TrackingData> tracking_data = { ray1, ray2 };
+
+    // Initialize FluxSolver
+    double sigma_t = 1.0; // Total cross section
+    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+
+    // Compute flux
+    flux_solver.computeFlux();
+
+    // Retrieve flux data
+    const auto& flux_data = flux_solver.getFluxData();
+
+
+    // Verify flux_data_[cell][direction]
+    ASSERT_EQ(flux_data.size(), 2) << "There should be flux data for 2 cells";
+    ASSERT_EQ(flux_data[0].size(), 1) << "There should be flux data for 1 direction per cell";
+    ASSERT_EQ(flux_data[1].size(), 1) << "There should be flux data for 1 direction per cell";
+
+    double expected_flux_cell0_dir0 = 0.501071574802685;
+    double expected_flux_cell1_dir0 = 1.4956386230969625;
+    EXPECT_NEAR(flux_data[0][0].flux, expected_flux_cell0_dir0, 1e-6) << "Flux for Cell 0, Direction 0 should match expected value";
+    EXPECT_NEAR(flux_data[0][0].weight, 3.0, 1e-6) << "Weight for Cell 0, Direction 0 should be 2.0";
+
+    EXPECT_NEAR(flux_data[1][0].flux, expected_flux_cell1_dir0, 1e-6) << "Flux for Cell 1, Direction 0 should match expected value";
+    EXPECT_NEAR(flux_data[1][0].weight, 4.0, 1e-6) << "Weight for Cell 1, Direction 0 should be 2.0";
 }
 
 // Test case: Rays with Invalid Direction
@@ -453,30 +570,11 @@ TEST_F(FluxSolverTest, RaysWithInvalidCellIDs) {
 // Test case: Multiple Cells, Multiple Directions, Multiple Rays
 TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     MeshHandler mesh;
-    ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    // Modify the mesh to add a second cell
-    std::string cells_content = "2\n"
-                                "0 0 1 2 3\n" // Cell 0: Nodes 0,1,2,3
-                                "1 1 2 3 0\n"; // Cell 1: Nodes 1,2,3,0 (overlapping for simplicity)
-    
-    // Create temporary cells.txt
-    if(!createTempFile(cells_file, cells_content)) return;
-    if(!mesh.loadCells(cells_file)) return;
-
-    // Initialize Field with Q_k for both cells
+    ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
     Field field;
-    // Define scalar fields content
-    std::string field_content = "2\n" // Number of scalar fields
-                                "1.0\n" // Cell 0: Q_k = 1.0
-                                "2.0\n"; // Cell 1: Q_k = 2.0
-
-    // Create temporary field.txt
-    if(!createTempFile(field_file, field_content)) return;
-    if(!field.loadScalarField(field_file)) return;
-
-    // Face connectivity remains the same
-    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
+    ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    
 
     // Initialize AngularQuadrature with two directions: +x and +y
     std::vector<Direction> predefined_directions;
@@ -540,51 +638,16 @@ TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
 
-    // Expected calculations:
-    // For each ray traversing two cells in a given direction:
-    // Cell 0:
-    //   psi_in = 0
-    //   psi_out = (1.0 / 1.0 - 0) * (1 - e^{-1}) ≈ 0.6321205588
-    //   line_avg_flux = (1.0 / 1.0) - (0.6321205588 - 0) / (1.0 * 1.0) ≈ 0.3678794412
-    //   flux = 0.3678794412 * 1.0 = 0.3678794412
-    //   weight = 1.0
-    //   psi_in for Cell 1 = 0.6321205588
-
-    //   For two rays, total flux for Cell0, Direction0: 0.3678794412 * 2 = 0.7357588824
-    //   Total weight for Cell0, Direction0: 1.0 * 2 = 2.0
-    //   Normalized flux: 0.7357588824 / 2.0 = 0.3678794412
-
-    // Cell1:
-    //   psi_in = 0.6321205588
-    //   psi_out = (2.0 / 1.0 - 0.6321205588) * (1 - e^{-1}) ≈ 1.3678794412 * 0.6321205588 ≈ 0.8652559794
-    //   line_avg_flux = (2.0 / 1.0) - (0.8652559794 - 0.6321205588) / (1.0 * 1.0) ≈ 2.0 - 0.2331354206 ≈ 1.7668645794
-    //   flux = 1.7668645794 * 1.0 = 1.7668645794
-    //   weight = 1.0
-
-    //   For two rays, total flux for Cell1, Direction0: 1.7668645794 * 2 = 3.5337291588
-    //   Total weight for Cell1, Direction0: 1.0 * 2 = 2.0
-    //   Normalized flux: 3.5337291588 / 2.0 = 1.7668645794
-
-    // Similarly for Direction1 (+y):
-    // Repeat the same calculations since directions are orthogonal and independent
-    // Total flux for Cell0, Direction1: 0.3678794412 * 2 = 0.7357588824
-    // Total weight for Cell0, Direction1: 1.0 * 2 = 2.0
-    // Normalized flux: 0.3678794412
-
-    // Total flux for Cell1, Direction1: 1.7668645794 * 2 = 3.5337291588
-    // Total weight for Cell1, Direction1: 1.0 * 2 = 2.0
-    // Normalized flux: 1.7668645794
-
     // Verify flux_data_[cell][direction]
     ASSERT_EQ(flux_data.size(), 2) << "There should be flux data for 2 cells";
     ASSERT_EQ(flux_data[0].size(), 2) << "There should be flux data for 2 directions per cell";
     ASSERT_EQ(flux_data[1].size(), 2) << "There should be flux data for 2 directions per cell";
 
     double expected_flux_cell0_dir0 = 0.3678794412;
-    double expected_flux_cell1_dir0 = 1.7668645794;
+    double expected_flux_cell1_dir0 = 1.1353352832366128;
 
     double expected_flux_cell0_dir1 = 0.3678794412;
-    double expected_flux_cell1_dir1 = 1.7668645794;
+    double expected_flux_cell1_dir1 = 1.1353352832366128;
 
     EXPECT_NEAR(flux_data[0][0].flux, expected_flux_cell0_dir0, 1e-6) << "Flux for Cell 0, Direction 0 should match expected value";
     EXPECT_NEAR(flux_data[0][0].weight, 2.0, 1e-6) << "Weight for Cell 0, Direction 0 should be 2.0";
@@ -712,19 +775,12 @@ TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
     
     // Create TrackingData with a single ray traversing the same cell twice
     Vector3D dir_vector = directionVector(dir.mu, dir.phi);
-    TrackingData ray = createSingleRay(0, dir_vector);
-    
-    // First traversal of Cell 0
-    CellTrace trace1;
-    trace1.cell_id = 0;
-    trace1.time_spent = 1.0;
-    trace1.start_point = Vector3D(0.0, 0.0, 0.0);
-    trace1.end_point = Vector3D(1.0, 0.0, 0.0);
+    TrackingData ray = createSingleRay(0, dir_vector, 0, 6.0e-1, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
     
     // Second traversal of Cell 0
     CellTrace trace2;
     trace2.cell_id = 0;
-    trace2.time_spent = 1.0;
+    trace2.time_spent = 1.0e-1;
     trace2.start_point = Vector3D(1.0, 0.0, 0.0);
     trace2.end_point = Vector3D(0.0, 0.0, 0.0);
     
@@ -741,35 +797,12 @@ TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
-    
-    // Expected calculations:
-    // For each traversal:
-    // Traversal 1:
-    //   psi_in = 0
-    //   psi_out = (1.0 / 1.0 - 0) * (1 - e^{-1}) ≈ 0.6321205588
-    //   line_avg_flux = (1.0 / 1.0) - (0.6321205588 - 0) / (1.0 * 1.0) ≈ 0.3678794412
-    //   flux = 0.3678794412 * 1.0 = 0.3678794412
-    //   weight = 1.0
-    //   psi_in for Traversal 2 = 0.6321205588
-
-    // Traversal 2:
-    //   psi_out = (1.0 / 1.0 - 0.6321205588) * (1 - e^{-1}) ≈ 0.3678794412 * 0.6321205588 ≈ 0.2325441585
-    //   line_avg_flux = (1.0 / 1.0) - (0.2325441585 - 0.6321205588) / (1.0 * 1.0) ≈ 1.0 - (-0.3995764003) ≈ 1.3995764003
-    //   flux = 1.3995764003 * 1.0 = 1.3995764003
-    //   weight = 1.0
-
-    // Total flux for Cell0:
-    //   Traversal 1: 0.3678794412
-    //   Traversal 2: 1.3995764003
-    //   Total flux: 1.7674558415
-    //   Total weight: 2.0
-    //   Normalized flux: 1.7674558415 / 2.0 ≈ 0.8837279208
 
     EXPECT_EQ(flux_data.size(), 1) << "There should be flux data for 1 cell";
     ASSERT_EQ(flux_data[0].size(), 1) << "There should be flux data for 1 direction";
     
-    EXPECT_NEAR(flux_data[0][0].flux, 0.8837279208, 1e-6) << "Flux should match the expected normalized value";
-    EXPECT_NEAR(flux_data[0][0].weight, 2.0, 1e-6) << "Weight should be equal to total L_k (2.0)";
+    EXPECT_NEAR(flux_data[0][0].flux, 0.28083614827344205, 1e-6) << "Flux should match the expected normalized value";
+    EXPECT_NEAR(flux_data[0][0].weight, 7e-1, 1e-6) << "Weight should be equal to total L_k (2.0)";
 }
 
 // Test case: Flux Normalization
