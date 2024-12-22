@@ -155,3 +155,20 @@ void FluxSolver::computeFlux() {
         }
     }
 }
+
+// Method to collapse the flux in all directions to a scalar flux by using the angular quadrature weights
+std::vector<double> FluxSolver::collapseFlux() const {
+    std::vector<double> scalar_flux(mesh_.getCells().size(), 0.0);
+    // Initialize scalar flux values
+    // Iterate over cells in parallel
+    #pragma omp parallel for schedule(static)
+    for(size_t cell = 0; cell < flux_data_.size(); ++cell) {
+        double sum = 0.0;
+        // Iterate over directions
+        for(size_t dir = 0; dir < flux_data_[cell].size(); ++dir) {
+            sum += flux_data_[cell][dir].flux * angular_quadrature_.getDirections()[dir].weight;
+        }
+        scalar_flux[cell] = sum;
+    }
+    return scalar_flux;
+}
