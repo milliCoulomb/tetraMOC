@@ -15,6 +15,9 @@ struct Direction {
 class AngularQuadrature {
 public:
     AngularQuadrature(int theta_order, int phi_order);
+    // surcharge constructor to be able to build an angular quadrature with a std vector of directions
+    AngularQuadrature(std::vector<Direction> directions);
+    
     ~AngularQuadrature() = default;
 
     const std::vector<Direction>& getDirections() const;
