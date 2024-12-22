@@ -8,6 +8,10 @@ AngularQuadrature::AngularQuadrature(int theta_order, int phi_order) : thetaOrde
     generateQuadrature();
 }
 
+AngularQuadrature::AngularQuadrature(std::vector<Direction> directions) : directions_(std::move(directions)) {
+    // Logger::info("Angular quadrature created with " + std::to_string(directions_.size()) + " directions.");
+}
+
 const std::vector<Direction>& AngularQuadrature::getDirections() const {
     return directions_;
 }
