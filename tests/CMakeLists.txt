@@ -20,6 +20,7 @@ set(TEST_SOURCES
     test_RayTracer.cpp
     test_GeometryUtils.cpp
     test_RayTracerManager.cpp
+    test_FluxSolver.cpp
 )
 
 # Créer l'exécutable des tests
