@@ -19,6 +19,7 @@ set(SOURCE_FILES
     RayTracer.cpp
     GeometryUtils.cpp
     RayTracerManager.cpp
+    FluxSolver.cpp
 )
 
 # Create a static library
