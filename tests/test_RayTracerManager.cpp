@@ -428,6 +428,7 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_ZeroDirection) {
     
     // Define a constant direction with zero vector
     Vector3D zero_direction(0.0, 0.0, 0.0);
+    angular_quadrature.addDirection({0.0, 0.0, 1.0}); // Add zero direction
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
     // Include the zero direction manually
