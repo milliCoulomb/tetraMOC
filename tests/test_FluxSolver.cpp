@@ -84,34 +84,19 @@ protected:
     }
 
     // Helper function to setup a simple field with a single source term
-    bool setupSingleCellField(Field& field) {
+    std::vector<double> setupSingleCellField() {
         // Define scalar fields content
-        // Assuming the first number is the number of scalar fields
-        // Followed by lines: cell_id Q_k
-        std::string field_content = "1\n" // Number of scalar fields
-                                    "1.0\n"; // Cell 0: Q_k = 1.0
-
-        // Create temporary field.txt
-        if(!createTempFile(field_file, field_content)) return false;
-        if(!field.loadScalarField(field_file)) return false;
-
-        return true;
+        // returns a std::vector<double> with a single source term, 1.0
+        std::vector<double> source = {1.0};
+        return source;
     }
 
     // Helper function to setup a simple field with two source terms
-    bool setupTwoCellField(Field& field) {
+    std::vector<double> setupTwoCellField() {
         // Define scalar fields content
-        // Assuming the first number is the number of scalar fields
-        // Followed by lines: cell_id Q_k
-        std::string field_content = "2\n" // Number of scalar fields
-                                    "1.0\n" // Cell 0: Q_k = 1.0
-                                    "2.0\n"; // Cell 1: Q_k = 2.0
-
-        // Create temporary field.txt
-        if(!createTempFile(field_file, field_content)) return false;
-        if(!field.loadScalarField(field_file)) return false;
-
-        return true;
+        // returns a std::vector<double> with two source terms, 1.0 and 2.0
+        std::vector<double> source = {1.0, 2.0};
+        return source;
     }
 
     // Helper function to setup simple face connectivity
@@ -177,9 +162,6 @@ TEST_F(FluxSolverTest, SingleCellSingleDirectionSingleRay) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
     
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
-    
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
     // Initialize AngularQuadrature with one direction
@@ -198,10 +180,14 @@ TEST_F(FluxSolverTest, SingleCellSingleDirectionSingleRay) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -226,9 +212,6 @@ TEST_F(FluxSolverTest, SingleCellSingleDirectionSingleRay) {
 TEST_F(FluxSolverTest, SingleCellMultipleDirectionsMultipleRays) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -261,10 +244,13 @@ TEST_F(FluxSolverTest, SingleCellMultipleDirectionsMultipleRays) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     
+    // create source term
+    std::vector<double> source = setupSingleCellField();
+
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -294,10 +280,6 @@ TEST_F(FluxSolverTest, SingleCellMultipleDirectionsMultipleRays) {
 TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     MeshHandler mesh;
     ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
-
-    // Initialize Field with Q_k for both cells
-    Field field;
-    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
 
     // Setup face connectivity for two cells
     ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
@@ -338,10 +320,12 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
 
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
 
+    // create source term
+    std::vector<double> source = setupTwoCellField();
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
 
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -390,10 +374,6 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRaysDifferentLengths)
     MeshHandler mesh;
     ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
 
-    // Initialize Field with Q_k for both cells
-    Field field;
-    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
-
     // Setup face connectivity for two cells
     ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
 
@@ -433,10 +413,13 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRaysDifferentLengths)
 
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupTwoCellField();
 
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
 
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -460,9 +443,6 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRaysDifferentLengths)
 TEST_F(FluxSolverTest, RaysWithInvalidDirection) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -488,10 +468,13 @@ TEST_F(FluxSolverTest, RaysWithInvalidDirection) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -513,9 +496,6 @@ TEST_F(FluxSolverTest, RaysWithInvalidDirection) {
 TEST_F(FluxSolverTest, RaysWithInvalidCellIDs) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -546,10 +526,13 @@ TEST_F(FluxSolverTest, RaysWithInvalidCellIDs) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -571,8 +554,7 @@ TEST_F(FluxSolverTest, RaysWithInvalidCellIDs) {
 TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     MeshHandler mesh;
     ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
-    Field field;
-    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
+    
     ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
 
@@ -630,10 +612,13 @@ TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
 
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupTwoCellField();
 
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
 
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -667,9 +652,6 @@ TEST_F(FluxSolverTest, NoRays) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
     
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
-    
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
     // Initialize AngularQuadrature with one direction
@@ -686,10 +668,13 @@ TEST_F(FluxSolverTest, NoRays) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -706,9 +691,6 @@ TEST_F(FluxSolverTest, NoRays) {
 TEST_F(FluxSolverTest, RaysWithZeroPathLength) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -731,10 +713,13 @@ TEST_F(FluxSolverTest, RaysWithZeroPathLength) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -758,9 +743,6 @@ TEST_F(FluxSolverTest, RaysWithZeroPathLength) {
 TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -790,10 +772,13 @@ TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -809,9 +794,6 @@ TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
 TEST_F(FluxSolverTest, FluxNormalization) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -834,10 +816,13 @@ TEST_F(FluxSolverTest, FluxNormalization) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -868,9 +853,6 @@ TEST_F(FluxSolverTest, RaysWithZeroDirection) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
     
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
-    
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
     // Initialize AngularQuadrature with one direction
@@ -894,10 +876,13 @@ TEST_F(FluxSolverTest, RaysWithZeroDirection) {
     
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     
     // Retrieve flux data
     const auto& flux_data = flux_solver.getFluxData();
@@ -914,9 +899,6 @@ TEST_F(FluxSolverTest, RaysWithZeroDirection) {
 TEST_F(FluxSolverTest, CollapseFlux) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSingleCellMesh(mesh)) << "Failed to setup single cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupSingleCellField(field)) << "Failed to setup single cell field";
     
     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -951,14 +933,16 @@ TEST_F(FluxSolverTest, CollapseFlux) {
 
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // test if size of flux_data_ is 1
     ASSERT_EQ(flux_solver.getFluxData().size(), 1) << "There should be flux data for 1 cell";
     // test if size of flux_data_[0] is 2
     ASSERT_EQ(flux_solver.getFluxData()[0].size(), 2) << "There should be flux data for 2 directions";
 
+    // create source term
+    std::vector<double> source = setupSingleCellField();
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     // get flux data
     const auto& flux_data = flux_solver.getFluxData();
     const double expected_flux_dir0 = 0.048374180359595176;
@@ -980,9 +964,6 @@ TEST_F(FluxSolverTest, CollapseFlux) {
 TEST_F(FluxSolverTest, CollapseFluxMultipleCells) {
     MeshHandler mesh;
     ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
-    
-    Field field;
-    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
     
     ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
     
@@ -1047,16 +1028,17 @@ TEST_F(FluxSolverTest, CollapseFluxMultipleCells) {
 
     // Initialize FluxSolver
     double sigma_t = 1.0; // Total cross section
-    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // test if size of flux_data_ is 2
     ASSERT_EQ(flux_solver.getFluxData().size(), 2) << "There should be flux data for 2 cells";
     // test if size of flux_data_[0] is 2
     ASSERT_EQ(flux_solver.getFluxData()[0].size(), 2) << "There should be flux data for 2 directions";
     // test if size of flux_data_[1] is 2
     ASSERT_EQ(flux_solver.getFluxData()[1].size(), 2) << "There should be flux data for 2 directions";
-
+    // set source term
+    std::vector<double> source = setupTwoCellField();
     // Compute flux
-    flux_solver.computeFlux();
+    flux_solver.computeFlux(source);
     // get flux data
     const auto& flux_data = flux_solver.getFluxData();
     const double expected_angular_flux_cell0_dir0 = 0.07856057037980445;
