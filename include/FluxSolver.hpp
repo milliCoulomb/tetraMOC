@@ -22,13 +22,12 @@ class FluxSolver {
 public:
     // Constructor
     FluxSolver(const MeshHandler& mesh,
-               const Field& field,
                const std::vector<TrackingData>& tracking_data,
                const AngularQuadrature& angular_quadrature,
                double sigma_t);
 
     // Method to compute flux
-    void computeFlux();
+    void computeFlux(const std::vector<double>& source);
 
     // Getter for flux data
     const std::vector<std::vector<CellFlux>>& getFluxData() const { return flux_data_; }
@@ -38,7 +37,6 @@ public:
 
 private:
     const MeshHandler& mesh_;
-    const Field& field_;
     const std::vector<TrackingData>& tracking_data_;
     const AngularQuadrature& angular_quadrature_;
     double sigma_t_; // Total cross section
