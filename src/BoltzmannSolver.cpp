@@ -20,6 +20,7 @@ BoltzmannSolver::BoltzmannSolver(const InputHandler& input_handler,
       k_eff_old_(params.initial_k_eff) {
     num_groups_ = input_.getNumGroups();
     num_cells_ = static_cast<int>(mesh_.getCells().size());
+    QuadratureTotalWeight_ = angular_quadrature_.getTotalWeight();
     Logger::info("BoltzmannSolver initialized with " + std::to_string(num_groups_) + " groups and " + 
                  std::to_string(num_cells_) + " cells.");
 }
@@ -32,7 +33,7 @@ std::vector<double> BoltzmannSolver::computeScatteringSource(const std::vector<d
 
     #pragma omp parallel for
     for (int cell = 0; cell < num_cells_; ++cell) {
-        scat_source[cell] = sigma_s * scalar_flux[cell];
+        scat_source[cell] = sigma_s * scalar_flux[cell] / QuadratureTotalWeight_;
     }
 
     return scat_source;
@@ -63,7 +64,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<d
 
         #pragma omp parallel for
         for (int cell = 0; cell < num_cells_; ++cell) {
-            total_source[cell] = scat_source[cell] + external_source[cell];
+            total_source[cell] = scat_source[cell] + external_source[cell] / QuadratureTotalWeight_;
         }
 
         // Compute flux using FluxSolver
