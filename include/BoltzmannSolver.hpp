@@ -60,6 +60,13 @@ public:
      */
     double getKEff() const;
 
+    /**
+     * @brief Retrieves the total weight of the angular quadrature.
+     * 
+     * @return double Total weight.
+     */
+    double getQuadratureTotalWeight() const { return QuadratureTotalWeight_; }
+
 private:
     const InputHandler& input_;
     const MeshHandler& mesh_;
@@ -69,6 +76,7 @@ private:
 
     int num_groups_;
     int num_cells_;
+    double QuadratureTotalWeight_;
 
     double k_eff_;
     double k_eff_old_;
