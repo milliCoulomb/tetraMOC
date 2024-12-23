@@ -976,3 +976,109 @@ TEST_F(FluxSolverTest, CollapseFlux) {
     EXPECT_NEAR(collapsed_flux[0], expected_collapsed_flux, 1e-6) << "Collapsed flux should match the weighted sum of fluxes";
 }
 
+// Test case: std::vector<double> collapseFlux() const, 2 cells, 2 directions, 2 rays per direction
+TEST_F(FluxSolverTest, CollapseFluxMultipleCells) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupTwoCellMesh(mesh)) << "Failed to setup two cell mesh";
+    
+    Field field;
+    ASSERT_TRUE(setupTwoCellField(field)) << "Failed to setup two cell field";
+    
+    ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    
+    // Initialize AngularQuadrature with two directions
+    std::vector<Direction> predefined_directions;
+    Direction dir;
+    dir.mu = 0.0;
+    dir.phi = 0.0;
+    dir.weight = 3.0; // Weight for direction 0
+    predefined_directions.push_back(dir);
+    Direction dir2;
+    dir2.mu = 0.0;
+    dir2.phi = M_PI / 2.0;
+    dir2.weight = 1.0; // Weight for direction 1
+    predefined_directions.push_back(dir2);
+    AngularQuadrature angular_quadrature(predefined_directions);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(predefined_directions.size(), 2) << "There should be 2 directions";
+    // test if sum of weights is 4
+    ASSERT_EQ(predefined_directions[0].weight + predefined_directions[1].weight, 4.0) << "Sum of weights should be 4.0";
+
+    // Create TrackingData with four rays: two in each direction
+    std::vector<TrackingData> tracking_data;
+    // Rays in direction 0
+    Vector3D dir_vector = directionVector(dir.mu, dir.phi);
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e-1, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    CellTrace trace1_1;
+    trace1_1.cell_id = 1; // ray cross cells 0 and 1
+    trace1_1.time_spent = 5e-1;
+    trace1_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    trace1_1.end_point = Vector3D(0.0, 0.0, 0.0);   // Exit from Cell0
+    ray1.cell_traces.push_back(trace1_1);
+    tracking_data.push_back(ray1);
+    TrackingData ray2 = createSingleRay(1, dir_vector, 0, 2.0e-1, Vector3D(1.0, 0.0, 0.0), Vector3D(2.0, 0.0, 0.0));
+    CellTrace trace1_2;
+    trace1_2.cell_id = 1; // ray cross cells 1 and 0
+    trace1_2.time_spent = 4e-1;
+    trace1_2.start_point = Vector3D(2.0, 0.0, 0.0); // Entry to Cell1
+    trace1_2.end_point = Vector3D(0.0, 0.0, 0.0);   // Exit from Cell1
+    ray2.cell_traces.push_back(trace1_2);
+    tracking_data.push_back(ray2);
+    // Rays in direction 1
+    Vector3D dir_vector2 = directionVector(dir2.mu, dir2.phi);
+    TrackingData ray3 = createSingleRay(2, dir_vector2, 1, 3.0e-1, Vector3D(0.0, 0.0, 0.0), Vector3D(0.0, 1.0, 0.0));
+    CellTrace trace2_1;
+    trace2_1.cell_id = 0; // ray cross cells 0 and 1
+    trace2_1.time_spent = 3e-1;
+    trace2_1.start_point = Vector3D(0.0, 1.0, 0.0); // Entry to Cell1
+    trace2_1.end_point = Vector3D(0.0, 0.0, 0.0);   // Exit from Cell0
+    ray3.cell_traces.push_back(trace2_1);
+    tracking_data.push_back(ray3);
+    TrackingData ray4 = createSingleRay(3, dir_vector2, 1, 4.0e-1, Vector3D(0.0, 1.0, 0.0), Vector3D(0.0, 2.0, 0.0));
+    CellTrace trace2_2;
+    trace2_2.cell_id = 0; // ray cross cells 1 and 0
+    trace2_2.time_spent = 2e-1;
+    trace2_2.start_point = Vector3D(0.0, 2.0, 0.0); // Entry to Cell1
+    trace2_2.end_point = Vector3D(0.0, 0.0, 0.0);   // Exit from Cell1
+    ray4.cell_traces.push_back(trace2_2);
+    tracking_data.push_back(ray4);
+    // test if size of tracking_data is 4
+    ASSERT_EQ(tracking_data.size(), 4) << "There should be 4 rays";
+
+    // Initialize FluxSolver
+    double sigma_t = 1.0; // Total cross section
+    FluxSolver flux_solver(mesh, field, tracking_data, angular_quadrature, sigma_t);
+    // test if size of flux_data_ is 2
+    ASSERT_EQ(flux_solver.getFluxData().size(), 2) << "There should be flux data for 2 cells";
+    // test if size of flux_data_[0] is 2
+    ASSERT_EQ(flux_solver.getFluxData()[0].size(), 2) << "There should be flux data for 2 directions";
+    // test if size of flux_data_[1] is 2
+    ASSERT_EQ(flux_solver.getFluxData()[1].size(), 2) << "There should be flux data for 2 directions";
+
+    // Compute flux
+    flux_solver.computeFlux();
+    // get flux data
+    const auto& flux_data = flux_solver.getFluxData();
+    const double expected_angular_flux_cell0_dir0 = 0.07856057037980445;
+    const double expected_angular_flux_cell0_dir1 = 0.31753790490673484;
+    const double expected_angular_flux_cell1_dir0 = 0.5010064520248714;
+    const double expected_angular_flux_cell1_dir1 = 0.6268420743633834;
+    // test if flux_data_[0][0].flux is expected_angular_flux_cell0_dir0
+    EXPECT_NEAR(flux_data[0][0].flux, expected_angular_flux_cell0_dir0, 1e-6) << "Flux for Cell 0, Direction 0 should match expected value";
+    // test if flux_data_[0][1].flux is expected_angular_flux_cell0_dir1
+    EXPECT_NEAR(flux_data[0][1].flux, expected_angular_flux_cell0_dir1, 1e-6) << "Flux for Cell 0, Direction 1 should match expected value";
+    // test if flux_data_[1][0].flux is expected_angular_flux_cell1_dir0
+    EXPECT_NEAR(flux_data[1][0].flux, expected_angular_flux_cell1_dir0, 1e-6) << "Flux for Cell 1, Direction 0 should match expected value";
+    // test if flux_data_[1][1].flux is expected_angular_flux_cell1_dir1
+    EXPECT_NEAR(flux_data[1][1].flux, expected_angular_flux_cell1_dir1, 1e-6) << "Flux for Cell 1, Direction 1 should match expected value";
+    const double expected_collapsed_flux_cell0 = (expected_angular_flux_cell0_dir0 * dir.weight + expected_angular_flux_cell0_dir1 * dir2.weight);
+    const double expected_collapsed_flux_cell1 = (expected_angular_flux_cell1_dir0 * dir.weight + expected_angular_flux_cell1_dir1 * dir2.weight);
+    // collapse flux
+    std::vector<double> collapsed_flux = flux_solver.collapseFlux();
+    // test if size of collapsed_flux is 2
+    ASSERT_EQ(collapsed_flux.size(), 2) << "There should be 2 collapsed flux values";
+    // test if collapsed_flux[0] is the weighted sum of fluxes for Cell 0
+    EXPECT_NEAR(collapsed_flux[0], expected_collapsed_flux_cell0, 1e-6) << "Collapsed flux for Cell 0 should match the weighted sum of fluxes";
+    // test if collapsed_flux[1] is the weighted sum of fluxes for Cell 1
+    EXPECT_NEAR(collapsed_flux[1], expected_collapsed_flux_cell1, 1e-6) << "Collapsed flux for Cell 1 should match the weighted sum of fluxes";
+}
