@@ -153,6 +153,13 @@ TEST(AngularQuadratureTest, OverloadedConstructor) {
     EXPECT_EQ(directions_[1].weight, 0.3);
 }
 
+// test the getTotalWeight method
+TEST(AngularQuadratureTest, GetTotalWeight) {
+    AngularQuadrature aq(4, 8);
+    double total_weight = aq.getTotalWeight();
+    EXPECT_NEAR(total_weight, 4.0 * M_PI, 1e-6);
+}
+
 // // main.cpp pour les tests (si nécessaire)
 // int main(int argc, char **argv) {
 //     ::testing::InitGoogleTest(&argc, argv);
