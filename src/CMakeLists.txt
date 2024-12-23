@@ -21,6 +21,7 @@ set(SOURCE_FILES
     RayTracerManager.cpp
     FluxSolver.cpp
     InputHandler.cpp
+    BoltzmannSolver.cpp
 )
 
 # Create a static library
