@@ -21,6 +21,7 @@ set(TEST_SOURCES
     test_GeometryUtils.cpp
     test_RayTracerManager.cpp
     test_FluxSolver.cpp
+    test_InputHandler.cpp
 )
 
 # Créer l'exécutable des tests
