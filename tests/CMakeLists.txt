@@ -22,7 +22,7 @@ set(TEST_SOURCES
     test_RayTracerManager.cpp
     test_FluxSolver.cpp
     test_InputHandler.cpp
-    # test_BoltzmannSolver.cpp
+    test_BoltzmannSolver.cpp
 )
 
 # Créer l'exécutable des tests
