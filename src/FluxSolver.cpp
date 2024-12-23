@@ -4,12 +4,10 @@
 
 // Constructor
 FluxSolver::FluxSolver(const MeshHandler& mesh,
-                       const Field& field,
                        const std::vector<TrackingData>& tracking_data,
                        const AngularQuadrature& angular_quadrature,
                        double sigma_t)
     : mesh_(mesh),
-      field_(field),
       tracking_data_(tracking_data),
       angular_quadrature_(angular_quadrature),
       sigma_t_(sigma_t) {
@@ -67,7 +65,7 @@ size_t FluxSolver::findDirectionIndex(const Vector3D& direction) const {
 }
 
 // Method to compute flux
-void FluxSolver::computeFlux() {
+void FluxSolver::computeFlux(const std::vector<double>& source) {
     int num_threads = omp_get_max_threads();
 
     // Create a local flux_data buffer for each thread
@@ -104,12 +102,12 @@ void FluxSolver::computeFlux() {
                 }
 
                 // Retrieve Q_k for the cell
-                if(trace.cell_id >= static_cast<int>(field_.getScalarFields().size())) {
+                if(trace.cell_id >= static_cast<int>(source.size())) {
                     // If scalar field not set for this cell, assume Q_k = 0
                     Logger::warning("Scalar field Q_k not set for cell ID " + std::to_string(trace.cell_id) + " in ray ID " + std::to_string(ray.ray_id) + ". Assuming Q_k = 0.");
                 }
-                double Q_k = (trace.cell_id < static_cast<int>(field_.getScalarFields().size())) ?
-                             field_.getScalarFields()[trace.cell_id].value : 0.0;
+                double Q_k = (trace.cell_id < static_cast<int>(source.size())) ?
+                             source[trace.cell_id] : 0.0;
 
                 // Retrieve L_k (time spent in the cell)
                 double L_k = trace.time_spent;
