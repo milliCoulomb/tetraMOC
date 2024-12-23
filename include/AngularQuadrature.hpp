@@ -24,6 +24,8 @@ public:
 
     void addDirection(const Direction& direction);
 
+    double getTotalWeight() const;
+
 private:
     int thetaOrder_;
     int phiOrder_;
