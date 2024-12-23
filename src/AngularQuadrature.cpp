@@ -56,3 +56,11 @@ void AngularQuadrature::generateQuadrature() {
     }
     // Logger::info("Sum of weights: " + std::to_string(total_weight) + " (should be close to 4*pi ≈ " + std::to_string(4.0 * M_PI) + ")");
 }
+
+double AngularQuadrature::getTotalWeight() const {
+    double total_weight = 0.0;
+    for(const auto& dir : directions_) {
+        total_weight += dir.weight;
+    }
+    return total_weight;
+}
