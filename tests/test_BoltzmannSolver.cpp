@@ -1,105 +1,206 @@
+// tests/test_FluxSolver.cpp
+
 #include <gtest/gtest.h>
-#include "BoltzmannSolver.hpp"
-#include "InputHandler.hpp"
+#include "FluxSolver.hpp"
 #include "MeshHandler.hpp"
+#include "Field.hpp"
 #include "AngularQuadrature.hpp"
 #include "TrackingData.hpp"
+#include "Vector3D.hpp"
+#include "TestUtils.hpp" // Contains createTempFile and directionVector
+#include "Logger.hpp"
+#include "InputHandler.hpp"
+#include "BoltzmannSolver.hpp"
 
-// Mock or stub classes as needed
-class MockInputHandler : public InputHandler {
-public:
-    int getNumGroups() const override { return 1; }
-    EnergyGroupData getEnergyGroupData(int group) const override {
-        EnergyGroupData data;
-        data.scattering_xs = 0.5;
-        data.total_xs = 1.0;
-        return data;
+#include <fstream>
+#include <cstdio> // For std::remove
+#include <cmath>
+#include <vector>
+#include <string>
+
+// Test Fixture for FluxSolver
+class BoltzmannSolverTest : public ::testing::Test {
+protected:
+    // Temporary file names
+    std::string nodes_file = "temp_nodes_test_FluxSolver.txt";
+    std::string cells_file = "temp_cells_test_FluxSolver.txt";
+    std::string faces_file = "temp_faces_test_FluxSolver.txt";
+    std::string nuc_data_file = "temp_nuc_data_test_FluxSolver.txt";
+
+    // Clean up temporary files after each test
+    void TearDown() override {
+        std::remove(nodes_file.c_str());
+        std::remove(cells_file.c_str());
+        std::remove(faces_file.c_str());
+        std::remove(nuc_data_file.c_str());
+    }
+
+    // Helper function to create a simple mesh with a single tetrahedron
+    bool setupSingleCellInfiniteMesh(MeshHandler& mesh) {
+        // Define nodes content with node IDs
+        std::string nodes_content = "4\n"
+                                    "0 0.0 0.0 0.0\n" // Node 0
+                                    "1 1.0e10 0.0 0.0\n" // Node 1
+                                    "2 0.0 1.0e10 0.0\n" // Node 2
+                                    "3 0.0 0.0 1.0e10\n"; // Node 3
+
+        // Create temporary nodes.txt
+        if(!createTempFile(nodes_file, nodes_content)) return false;
+        if(!mesh.loadNodes(nodes_file)) return false;
+
+        // Define cells content with cell IDs and four node IDs per cell
+        std::string cells_content = "1\n"
+                                    "0 0 1 2 3\n"; // Cell 0: Nodes 0,1,2,3
+
+        // Create temporary cells.txt
+        if(!createTempFile(cells_file, cells_content)) return false;
+        if(!mesh.loadCells(cells_file)) return false;
+
+        return true;
+    }
+
+    // Helper function to setup a simple field with a single source term
+    std::vector<double> setupSingleCellField() {
+        // Define scalar fields content
+        // returns a std::vector<double> with a single source term, 1.0
+        std::vector<double> source = {1.0};
+        return source;
+    }
+
+    // Helper function to setup a simple field with two source terms
+    std::vector<double> setupTwoCellField() {
+        // Define scalar fields content
+        // returns a std::vector<double> with two source terms, 1.0 and 2.0
+        std::vector<double> source = {1.0, 2.0};
+        return source;
+    }
+
+    // Helper function to setup simple face connectivity
+    bool setupSingleCellFaceConnectivity(MeshHandler& mesh) {
+        // Define face connectivity with counts of adjacent cells
+        // Each line: n0 n1 n2 <count> <cell_id0> [<cell_id1> ...]
+        std::string faces_content = 
+            "4\n" // Number of faces
+            "0 1 2 1 0\n"  // Face 0: Nodes 0,1,2 adjacent to Cell 0
+            "0 1 3 1 0\n"  // Face 1: Nodes 0,1,3 adjacent to Cell 0
+            "0 2 3 1 0\n"  // Face 2: Nodes 0,2,3 adjacent to Cell 0
+            "1 2 3 1 0\n"; // Face 3: Nodes 1,2,3 adjacent to Cell 0
+
+        // Create temporary faces.txt
+        if(!createTempFile(faces_file, faces_content)) return false;
+        if(!mesh.loadFaceConnectivity(faces_file)) return false;
+
+        return true;
+    }
+
+    // Helper function to create a ray traversing the single cell in a specific direction
+    TrackingData createSingleRay(int ray_id, const Vector3D& direction, const int cell_id = 0, const double L_k = 1.0, Vector3D start_point = Vector3D(0.0, 0.0, 0.0), Vector3D end_point = Vector3D(1.0, 0.0, 0.0)) {
+        TrackingData ray;
+        ray.ray_id = ray_id;
+        ray.direction = direction.normalized(); // Ensure direction is unit vector
+
+        // Single CellTrace: traversing Cell 0
+        CellTrace trace;
+        trace.cell_id = cell_id;
+        trace.time_spent = L_k; // Time spent in the cell
+        trace.start_point = start_point; // Entry point
+        trace.end_point = end_point; // Exit point
+
+        ray.cell_traces.push_back(trace);
+
+        return ray;
+    }
+
+    // Helper function to create input handler
+    bool setupInputHandler(InputHandler& input_handler) {
+        // Define material data content
+        std::string nuc_data_content = 
+            "1\n" // Number of materials
+            "1.0 0.01 0.1 2.0 0.95 0.05\n"; // Material 0: total_xs, fission_xs, scattering_xs, multiplicity, fission_spectrum, delayed_spectrum
+        
+        // Create temporary nuc_data.txt
+        if(!createTempFile(nuc_data_file, nuc_data_content)) return false;
+        if(!input_handler.loadData(nuc_data_file)) return false;
+
+        return true;
     }
 };
 
-class MockMeshHandler : public MeshHandler {
-public:
-    std::vector<Cell> getCells() const override { return std::vector<Cell>(10); }
-};
+TEST_F(BoltzmannSolverTest, SingleCellTwoRaysInfiniteOneGroup) {
+     MeshHandler mesh;
+    ASSERT_TRUE(setupSingleCellInfiniteMesh(mesh)) << "Failed to setup single cell mesh";
+    
+    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
 
-class MockAngularQuadrature : public AngularQuadrature {
-public:
-    // Implement necessary mock methods
-};
+    InputHandler input_handler;
+    ASSERT_TRUE(setupInputHandler(input_handler)) << "Failed to setup input handler";
+    
+    // Initialize AngularQuadrature with one direction
+    std::vector<Direction> predefined_directions;
+    Direction dir;
+    dir.mu = 0.0;
+    dir.phi = 0.0;
+    dir.weight = 3.0; // Weight for direction 0
+    predefined_directions.push_back(dir);
+    Direction dir2;
+    dir2.mu = 0.0;
+    dir2.phi = M_PI / 2.0;
+    dir2.weight = 1.0; // Weight for direction 1
+    predefined_directions.push_back(dir2);
+    AngularQuadrature angular_quadrature(predefined_directions);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(angular_quadrature.getDirections().size(), 2) << "There should be 2 directions";
+    // test if sum of weights is 4
+    ASSERT_EQ(angular_quadrature.getTotalWeight(), 4.0) << "Sum of weights should be 4.0";
 
-TEST(BoltzmannSolverTest, ConstructorInitialization) {
-    MockInputHandler input_handler;
-    MockMeshHandler mesh_handler;
+    // Create TrackingData with two rays: one in each direction
     std::vector<TrackingData> tracking_data;
-    MockAngularQuadrature angular_quadrature;
+    Vector3D dir_vector = directionVector(0.0, 0.0);
+    // we set extremely large path length to simulate infinite path length
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    tracking_data.push_back(ray1);
+    Vector3D dir_vector2 = directionVector(0.0, M_PI / 2.0);
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(0.0, 1.0, 0.0));
+    tracking_data.push_back(ray2);
+    // test if size of tracking_data is 2
+    ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
+
+    // Initialize FluxSolver
+    double sigma_t = input_handler.getEnergyGroupData(0).total_xs; // Total cross section
+    double sigma_s = input_handler.getEnergyGroupData(0).scattering_xs; // Scattering cross section
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+    // test if size of flux_data_ is 1
+    ASSERT_EQ(flux_solver.getFluxData().size(), 1) << "There should be flux data for 1 cell";
+    // test if size of flux_data_[0] is 2
+    ASSERT_EQ(flux_solver.getFluxData()[0].size(), 2) << "There should be flux data for 2 directions";
+
+    // create source term
+    std::vector<double> source = setupSingleCellField();
+    // Compute flux
+    flux_solver.computeFlux(source);
+    // get flux data
+    const auto& flux_data = flux_solver.getFluxData();
+    const double expected_flux_dir0 = source[0] / sigma_t;
+    const double expected_flux_dir1 = expected_flux_dir0;
+    // test if flux_data_[0][0].flux is expected_flux_dir0
+    EXPECT_NEAR(flux_data[0][0].flux, expected_flux_dir0, 1e-6) << "Flux for Direction 0 should match Q / sigma_t";
+    // test if flux_data_[0][1].flux is expected_flux_dir1
+    EXPECT_NEAR(flux_data[0][1].flux, expected_flux_dir1, 1e-6) << "Flux for Direction 1 should match Q / sigma_t";
+    // collapse flux
+    std::vector<double> collapsed_flux = flux_solver.collapseFlux();
+    // test if size of collapsed_flux is 1
+    ASSERT_EQ(collapsed_flux.size(), 1) << "There should be 1 collapsed flux value";
+    // test if collapsed_flux[0] is the weighted sum of fluxes
+    const double expected_collapsed_flux = (expected_flux_dir0 * dir.weight + expected_flux_dir1 * dir2.weight);
+    EXPECT_NEAR(collapsed_flux[0], expected_collapsed_flux, 1e-6) << "Collapsed flux should match the weighted sum of fluxes";
+    
+    // initialiase struct params from BoltzmannSolver
     BoltzmannSolver::SolverParams params;
 
-    BoltzmannSolver solver(input_handler, mesh_handler, tracking_data, angular_quadrature, params);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+    std::vector<double> external_source = setupSingleCellField();
+    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
+    const double expected_scalar_flux_infinite = external_source[0] / (sigma_t - sigma_s);
+    EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite, 1e-6) << "Scalar flux should match expected value for infinite medium";
 
-    EXPECT_DOUBLE_EQ(solver.getKEff(), params.initial_k_eff);
-}
-
-TEST(BoltzmannSolverTest, ComputeScatteringSource) {
-    MockInputHandler input_handler;
-    MockMeshHandler mesh_handler;
-    std::vector<TrackingData> tracking_data;
-    MockAngularQuadrature angular_quadrature;
-    BoltzmannSolver::SolverParams params;
-    BoltzmannSolver solver(input_handler, mesh_handler, tracking_data, angular_quadrature, params);
-
-    std::vector<double> scalar_flux = {1.0, 2.0, 3.0, 4.0, 5.0};
-    int group = 0;
-    std::vector<double> scat_source = solver.computeScatteringSource(scalar_flux, group);
-
-    for(size_t i = 0; i < scat_source.size(); ++i) {
-        EXPECT_DOUBLE_EQ(scat_source[i], 0.5 * scalar_flux[i]);
-    }
-}
-
-TEST(BoltzmannSolverTest, SolveOneGroupWithSourceConverges) {
-    MockInputHandler input_handler;
-    MockMeshHandler mesh_handler;
-    std::vector<TrackingData> tracking_data;
-    MockAngularQuadrature angular_quadrature;
-    BoltzmannSolver::SolverParams params;
-    params.convergence_threshold = 1e-3;
-    params.max_iterations = 100;
-    BoltzmannSolver solver(input_handler, mesh_handler, tracking_data, angular_quadrature, params);
-
-    std::vector<double> external_source(10, 1.0);
-    int group = 0;
-    double eps = 1e-3;
-    std::vector<double> flux = solver.solveOneGroupWithSource(external_source, group, eps);
-
-    // Check if flux has converged to expected values
-    // This requires knowing the expected result
-    // For demonstration, check size
-    EXPECT_EQ(flux.size(), mesh_handler.getCells().size());
-}
-
-TEST(BoltzmannSolverTest, UpdateKEffUpdatesCorrectly) {
-    MockInputHandler input_handler;
-    MockMeshHandler mesh_handler;
-    std::vector<TrackingData> tracking_data;
-    MockAngularQuadrature angular_quadrature;
-    BoltzmannSolver::SolverParams params;
-    BoltzmannSolver solver(input_handler, mesh_handler, tracking_data, angular_quadrature, params);
-
-    std::vector<double> fission_source_new = {2.0, 2.0, 2.0};
-    std::vector<double> fission_source_old = {1.0, 1.0, 1.0};
-
-    solver.updateKEff(fission_source_new, fission_source_old);
-
-    EXPECT_DOUBLE_EQ(solver.getKEff(), 2.0);
-}
-
-TEST(BoltzmannSolverTest, GetKEffReturnsCorrectValue) {
-    MockInputHandler input_handler;
-    MockMeshHandler mesh_handler;
-    std::vector<TrackingData> tracking_data;
-    MockAngularQuadrature angular_quadrature;
-    BoltzmannSolver::SolverParams params;
-    BoltzmannSolver solver(input_handler, mesh_handler, tracking_data, angular_quadrature, params);
-
-    EXPECT_DOUBLE_EQ(solver.getKEff(), params.initial_k_eff);
 }
