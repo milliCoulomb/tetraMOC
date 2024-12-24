@@ -141,6 +141,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
     // Retrieve all boundary faces
     const auto& boundary_faces = mesh_.getBoundaryFaces();
+    Logger::info("Boundary faces: " + std::to_string(boundary_faces.size()));
     // std::cout << "Boundary faces: " << boundary_faces.size() << std::endl;
     // std::cout << "Number of RayTracers: " << ray_tracers_.size() << std::endl;
 
