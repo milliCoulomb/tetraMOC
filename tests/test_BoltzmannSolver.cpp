@@ -67,10 +67,10 @@ protected:
         // Define nodes content with node IDs
         std::string nodes_content = "5\n"
                                     "0 0.0 0.0 0.0\n" // Node 0
-                                    "1 1.0e20 0.0 0.0\n" // Node 1
-                                    "2 0.0 1.0e20 0.0\n" // Node 2
-                                    "3 0.0 0.0 1.0e20\n" // Node 3
-                                    "4 1.0e20 1.0e20 1.0e20\n"; // Node 4
+                                    "1 1.0e10 0.0 0.0\n" // Node 1
+                                    "2 0.0 1.0e10 0.0\n" // Node 2
+                                    "3 0.0 0.0 1.0e10\n" // Node 3
+                                    "4 1.0e10 1.0e10 1.0e10\n"; // Node 4
 
         // Create temporary nodes.txt
         if(!createTempFile(nodes_file, nodes_content)) return false;
@@ -429,6 +429,9 @@ TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfi
     ASSERT_TRUE(setupTwoCellsInfiniteMesh(mesh)) << "Failed to setup two cell mesh";
     
     ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+
+    // log the number of boundary faces
+    Logger::info("Number of boundary faces: " + std::to_string(mesh.getBoundaryFaces().size()));
     
     InputHandler input_handler;
     ASSERT_TRUE(setupInputHandler(input_handler)) << "Failed to setup input handler";
@@ -444,12 +447,13 @@ TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfi
     // test if sum of weights is 4
     EXPECT_NEAR(angular_quadrature.getTotalWeight(), 4.0 * M_PI, 1e-6) << "Sum of weights should be 4.0 * M_PI";
 
-    bool use_half_quadrature_for_constant = false;
+    bool use_half_quadrature_for_constant = true;
     bool constant_dir_bool = true;
     RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     // Generate tracking data
-    int rays_per_face = 5;
+    int rays_per_face = 8;
     manager.generateTrackingData(rays_per_face);
+    manager.doubleTrackingDataByReversing();
     
     // Retrieve tracking data
     const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
