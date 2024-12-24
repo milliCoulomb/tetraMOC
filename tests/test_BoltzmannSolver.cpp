@@ -248,7 +248,7 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoRaysInfiniteOneGroup) {
 
     // Initialize FluxSolver
     double sigma_t = input_handler.getEnergyGroupData(0).total_xs; // Total cross section
-    double sigma_s = input_handler.getEnergyGroupData(0).scattering_xs[0]; // Scattering cross section
+    double sigma_s = input_handler.getSelfScatteringXS(0);
     FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // test if size of flux_data_ is 1
     ASSERT_EQ(flux_solver.getFluxData().size(), 1) << "There should be flux data for 1 cell";
@@ -354,7 +354,7 @@ TEST_F(BoltzmannSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
 
     // Initialize FluxSolver
     double sigma_t = input_handler.getEnergyGroupData(0).total_xs; // Total cross section
-    double sigma_s = input_handler.getEnergyGroupData(0).scattering_xs[0]; // Scattering cross section
+    double sigma_s = input_handler.getSelfScatteringXS(0);
     FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // check the size of flux_data_
     ASSERT_EQ(flux_solver.getFluxData().size(), 2) << "There should be flux data for 2 cells";
@@ -403,7 +403,7 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
 
     // Initialize FluxSolver
     double sigma_t = input_handler.getEnergyGroupData(0).total_xs; // Total cross section
-    double sigma_s = input_handler.getEnergyGroupData(0).scattering_xs[0]; // Scattering cross section
+    double sigma_s = input_handler.getSelfScatteringXS(0);
     FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // test if size of flux_data_ is 1
     ASSERT_EQ(flux_solver.getFluxData().size(), 1) << "There should be flux data for 1 cell";
@@ -460,7 +460,7 @@ TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfi
 
     // Initialize FluxSolver
     double sigma_t = input_handler.getEnergyGroupData(0).total_xs; // Total cross section
-    double sigma_s = input_handler.getEnergyGroupData(0).scattering_xs[0]; // Scattering cross section
+    double sigma_s = input_handler.getSelfScatteringXS(0);
     FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // test if size of flux_data_ is 1
     ASSERT_EQ(flux_solver.getFluxData().size(), 2) << "There should be flux data for 2 cells";
