@@ -13,7 +13,7 @@ public:
     struct EnergyGroupData {
         double total_xs;
         double fission_xs;
-        std::vector<double> scattering_xs; // ordered as \Sigma_{s00} \Sigma_{s01} ... \Sigma_{s0G-1}
+        std::vector<double> scattering_xs; // ordered as \Sigma_{s,g0}, \Sigma_{s,g1}, ...
         double multiplicity;
         double fission_spectrum;
         double delayed_spectrum;
@@ -43,6 +43,16 @@ public:
      * @throws std::out_of_range if the group index is invalid.
      */
     EnergyGroupData getEnergyGroupData(int group) const;
+
+    /**
+     * @brief method to retrieve the self-scattering cross section for a given group
+     * 
+     * @param group Energy group index (0-based).
+     * @return double self-scattering cross section for the specified energy group.
+     */
+    double getSelfScatteringXS(int group) const {
+        return energy_groups_[group].scattering_xs[group];
+    }
 
 private:
     int num_groups_ = 0;
