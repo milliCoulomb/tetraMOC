@@ -41,15 +41,25 @@ std::vector<double> BoltzmannSolver::computeScatteringSource(const std::vector<d
 
 std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSource(const std::vector<std::vector<double>>& scalar_flux) const {
     std::vector<std::vector<double>> scat_source(num_groups_, std::vector<double>(num_cells_, 0.0));
-    // for each group, in each cell, we compute the sum of sigma_s[g'] * phi[g'] for all g' != g, in parallel, careful we should not take the self scattering cross section
+
+    // Precompute scattering cross sections to reduce repeated access
+    std::vector<std::vector<double>> scattering_xs(num_groups_, std::vector<double>(num_groups_, 0.0));
+    for(int g_prime = 0; g_prime < num_groups_; ++g_prime){
+        for(int group = 0; group < num_groups_; ++group){
+            scattering_xs[g_prime][group] = input_.getEnergyGroupData(g_prime).scattering_xs[group];
+        }
+    }
+
     #pragma omp parallel for
     for(int cell = 0; cell < num_cells_; ++cell) {
         for(int group = 0; group < num_groups_; ++group) {
+            double sum = 0.0;
             for(int g_prime = 0; g_prime < num_groups_; ++g_prime) {
                 if(g_prime != group) {
-                    scat_source[group][cell] += input_.getEnergyGroupData(g_prime).scattering_xs[group] * scalar_flux[g_prime][cell];
+                    sum += scattering_xs[g_prime][group] * scalar_flux[g_prime][cell];
                 }
             }
+            scat_source[group][cell] = sum;
         }
     }
     return scat_source;
