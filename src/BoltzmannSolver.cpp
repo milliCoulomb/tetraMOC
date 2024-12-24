@@ -29,7 +29,7 @@ std::vector<double> BoltzmannSolver::computeScatteringSource(const std::vector<d
     std::vector<double> scat_source(num_cells_, 0.0);
 
     // Compute sigma_s * phi for each cell
-    double sigma_s = input_.getEnergyGroupData(group).scattering_xs[0]; // self-scattering only
+    double sigma_s = input_.getSelfScatteringXS(group);
 
     #pragma omp parallel for
     for (int cell = 0; cell < num_cells_; ++cell) {
@@ -39,14 +39,35 @@ std::vector<double> BoltzmannSolver::computeScatteringSource(const std::vector<d
     return scat_source;
 }
 
-std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<double>& external_source, const int group, double eps) {
+std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSource(const std::vector<std::vector<double>>& scalar_flux) const {
+    std::vector<std::vector<double>> scat_source(num_groups_, std::vector<double>(num_cells_, 0.0));
+    // for each group, in each cell, we compute the sum of sigma_s[g'] * phi[g'] for all g' != g, in parallel, careful we should not take the self scattering cross section
+    #pragma omp parallel for
+    for(int cell = 0; cell < num_cells_; ++cell) {
+        for(int group = 0; group < num_groups_; ++group) {
+            for(int g_prime = 0; g_prime < num_groups_; ++g_prime) {
+                if(g_prime != group) {
+                    scat_source[group][cell] += input_.getEnergyGroupData(group).scattering_xs[g_prime] * scalar_flux[g_prime][cell] / QuadratureTotalWeight_;
+                }
+            }
+        }
+    }
+    return scat_source;
+}
+
+std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<double>& external_source, const int group, double eps, const std::vector<double>& initial_guess) {
     if (external_source.size() != static_cast<size_t>(num_cells_)) {
         Logger::error("External source size does not match number of cells.");
         return {};
     }
 
     // Initialize scalar flux with initial guess (e.g., ones)
-    std::vector<double> old_flux(num_cells_, 1.0);
+    std::vector<double> old_flux;
+    if (!initial_guess.empty() && static_cast<int>(initial_guess.size()) == num_cells_) {
+        old_flux = std::move(initial_guess);
+    } else {
+        old_flux = std::vector<double>(num_cells_, 1.0);
+    }
     std::vector<double> new_flux(num_cells_, 0.0);
     double residual = 1.0;
     int iteration = 0;
@@ -78,7 +99,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<d
         std::vector<double> collapsed_flux = flux_solver.collapseFlux();
 
         // Update new_flux
-        new_flux = collapsed_flux;
+        new_flux = std::move(collapsed_flux);
 
         // Compute residual: ||new_flux - old_flux|| / ||old_flux||
         double norm_diff = 0.0;
@@ -107,6 +128,89 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<d
 
     return new_flux;
 }
+
+std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, double eps, const std::vector<std::vector<double>>& initial_guess) {
+    if (external_source.size() != static_cast<size_t>(num_groups_) || external_source[0].size() != static_cast<size_t>(num_cells_)) {
+        Logger::error("External source size does not match number of groups or cells.");
+        return {};
+    }
+
+    // Initialize scalar flux with initial guess (e.g., ones)
+    // std::vector<std::vector<double>> old_flux(num_groups_, std::vector<double>(num_cells_, 1.0));
+    std::vector<std::vector<double>> old_flux;
+    if (!initial_guess.empty() && static_cast<int>(initial_guess.size()) == num_groups_ && static_cast<int>(initial_guess[0].size()) == num_cells_) {
+        old_flux = std::move(initial_guess);
+    } else {
+        old_flux = std::vector<std::vector<double>>(num_groups_, std::vector<double>(num_cells_, 1.0));
+    }
+    std::vector<std::vector<double>> new_flux(num_groups_, std::vector<double>(num_cells_, 0.0));
+    double residual = 1.0;
+    int iteration = 0;
+
+    Logger::info("Starting multi-group solver with source.");
+
+    while (residual > eps && iteration < params_.max_iterations) {
+        Logger::info("Multi-group Iteration " + std::to_string(iteration + 1));
+
+        // Compute scattering source: sigma_s * phi_old
+        std::vector<std::vector<double>> scat_source = computeMultiGroupScatteringSource(old_flux);
+
+        // Compute total source: scat_source + external_source
+        std::vector<std::vector<double>> total_source(num_groups_, std::vector<double>(num_cells_, 0.0));
+
+        #pragma omp parallel for
+        for (int group = 0; group < num_groups_; ++group) {
+            for (int cell = 0; cell < num_cells_; ++cell) {
+                total_source[group][cell] = scat_source[group][cell] + external_source[group][cell] / QuadratureTotalWeight_;
+            }
+        }
+
+        // now in parallel, we solve the one group problem for each group
+        #pragma omp parallel for
+        for(int group = 0; group < num_groups_; ++group) {
+            // Compute flux using FluxSolver
+            // Assuming FluxSolver has been initialized with TrackingData corresponding to directions and cells
+            FluxSolver flux_solver(mesh_, tracking_data_, angular_quadrature_, input_.getEnergyGroupData(group).total_xs);
+
+            // Compute flux based on the total source
+            flux_solver.computeFlux(total_source[group]);
+
+            // Collapse flux to scalar flux
+            std::vector<double> collapsed_flux = flux_solver.collapseFlux();
+
+            // Update new_flux
+            new_flux[group] = std::move(collapsed_flux);
+        }
+
+        // Compute residual: ||new_flux - old_flux|| / ||old
+        double norm_diff = 0.0;
+        double norm_old = 0.0;
+
+        #pragma omp parallel for reduction(+:norm_diff, norm_old)
+        for (int group = 0; group < num_groups_; ++group) {
+            for (int cell = 0; cell < num_cells_; ++cell) {
+                double diff = new_flux[group][cell] - old_flux[group][cell];
+                norm_diff += diff * diff;
+                norm_old += old_flux[group][cell] * old_flux[group][cell];
+            }
+        }
+
+        residual = (norm_old > 0.0) ? std::sqrt(norm_diff) / std::sqrt(norm_old) : 0.0;
+        Logger::info("Residual: " + std::to_string(residual));
+
+        // Prepare for next iteration
+        old_flux = std::move(new_flux);
+        iteration++;
+        
+        if (residual <= eps) {
+            Logger::info("Multi-group solver converged in " + std::to_string(iteration) + " iterations.");
+        } else {
+            Logger::warning("Multi-group solver did not converge within the maximum iterations.");
+        }
+    }
+    return new_flux;
+}
+
 
 void BoltzmannSolver::updateKEff(const std::vector<double>& fission_source_new,
                                  const std::vector<double>& fission_source_old) {
