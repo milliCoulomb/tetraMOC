@@ -1,6 +1,7 @@
 // src/Tetrahedron.cpp
 
 #include "Tetrahedron.hpp"
+#include "GeometryUtils.hpp"
 #include <cmath>
 #include <limits>
 #include <iostream>
@@ -8,8 +9,13 @@
 // Removed: using namespace SNSolver;
 
 Tetrahedron::Tetrahedron(const TetraCell& cell, const std::vector<Vector3D>& nodes, const CellVectorField& field) {
+    // Initialize the vertices and center of mass
+    CenterOfMass = Vector3D(0.0, 0.0, 0.0);
     for(int i = 0; i < 4; ++i) {
         vertices[i] = Vector3D(nodes[cell.node_ids[i]].x, nodes[cell.node_ids[i]].y, nodes[cell.node_ids[i]].z);
+        CenterOfMass.x += vertices[i].x;
+        CenterOfMass.y += vertices[i].y;
+        CenterOfMass.z += vertices[i].z;
     }
     // Initialize the velocity vector
     velocity = Vector3D(field.x, field.y, field.z);
@@ -38,15 +44,20 @@ bool Tetrahedron::findExit(const Vector3D& x0, const Vector3D& v, double& t_exit
             default:
                 continue;
         }
-
-        // Compute the plane of the face
         Vector3D p1 = face_vertices[0];
         Vector3D p2 = face_vertices[1];
         Vector3D p3 = face_vertices[2];
+        // Compute the plane of the face
+        const std::array<Vector3D, 3> triangle = { p1, p2, p3 };
+        Vector3D normal = computeFaceNormal(triangle, CenterOfMass);
+        
 
-        Vector3D edge1 = p2 - p1;
-        Vector3D edge2 = p3 - p1;
-        Vector3D normal = edge1.cross(edge2).normalized();
+        // // Compute the normal of the face
+
+
+        // Vector3D edge1 = p2 - p1;
+        // Vector3D edge2 = p3 - p1;
+        // Vector3D normal = edge1.cross(edge2).normalized();
 
         double D = normal.dot(p1);
 
