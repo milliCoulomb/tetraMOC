@@ -29,7 +29,7 @@ std::vector<double> BoltzmannSolver::computeScatteringSource(const std::vector<d
     std::vector<double> scat_source(num_cells_, 0.0);
 
     // Compute sigma_s * phi for each cell
-    double sigma_s = input_.getEnergyGroupData(group).scattering_xs;
+    double sigma_s = input_.getEnergyGroupData(group).scattering_xs[0]; // self-scattering only
 
     #pragma omp parallel for
     for (int cell = 0; cell < num_cells_; ++cell) {
