@@ -25,6 +25,7 @@ public:
 
 private:
     std::array<Vector3D, 4> vertices; // Fully qualified with SNSolver
+    Vector3D CenterOfMass;             // Fully qualified with SNSolver
     Vector3D velocity;                // Fully qualified with SNSolver
 };
 
