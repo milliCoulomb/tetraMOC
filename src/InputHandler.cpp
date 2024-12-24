@@ -38,8 +38,22 @@ bool InputHandler::loadData(const std::string& filename) {
 
         std::istringstream iss(line);
         EnergyGroupData group_data;
-        if (!(iss >> group_data.total_xs >> group_data.fission_xs >> group_data.scattering_xs
-                  >> group_data.multiplicity >> group_data.fission_spectrum >> group_data.delayed_spectrum)) {
+        // Read total_xs and fission_xs first
+        if (!(iss >> group_data.total_xs >> group_data.fission_xs)) {
+            Logger::error("Malformed total_xs or fission_xs at group " + std::to_string(current_group) + " in file: " + filename);
+            return false;
+        }
+
+        // Read multiple scattering_xs values
+        group_data.scattering_xs.resize(num_groups_);
+        for(int i = 0; i < num_groups_; ++i) {
+            if (!(iss >> group_data.scattering_xs[i])) {
+            Logger::error("Malformed scattering_xs at group " + std::to_string(current_group) + " in file: " + filename);
+            return false;
+            }
+        }
+
+        if (!(iss >> group_data.multiplicity >> group_data.fission_spectrum >> group_data.delayed_spectrum)) {
             Logger::error("Malformed data at group " + std::to_string(current_group) + " in file: " + filename);
             return false;
         }
