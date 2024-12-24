@@ -127,6 +127,7 @@ TEST_F(RayTracerTest, TraceRay_VariableDirection_BasicTest) {
 TEST_F(RayTracerTest, TraceRay_VariableDirection_TwoCells) {
     MeshHandler mesh;
     ASSERT_TRUE(setupSimpleMesh(mesh)) << "Failed to setup simple mesh";
+    Logger::info("Number of boundary faces: " + std::to_string(mesh.getBoundaryFaces().size()));
     
     Field field;
     ASSERT_TRUE(setupSimpleField(field)) << "Failed to setup simple field";
