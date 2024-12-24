@@ -36,6 +36,10 @@ Vector3D samplePointOnTriangle(const std::array<Vector3D, 3>& triangle) {
     double u = distribution(generator);
     double v = distribution(generator);
 
+    // override and set u and v to 0.5 to sample the center of the triangle
+    // double u = 0.5;
+    // double v = 0.5;
+
     // Ensure the point is inside the triangle
     if(u + v > 1.0) {
         u = 1.0 - u;
