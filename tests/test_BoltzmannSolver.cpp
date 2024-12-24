@@ -205,6 +205,29 @@ protected:
 
         return true;
     }
+
+    // helper function for two groups nuclear data
+    bool setupTwoGroupsInputHandler(InputHandler& input_handler) {
+        // Define material data content
+        std::string nuc_data_content = 
+            "2\n" // Number of materials
+            "1.0 0.01 0.4 0.2 2.0 0.95 0.05\n"
+            "1.2 0.02 0.05 0.5 2.2 0.96 0.04\n";
+        
+        // Create temporary nuc_data.txt
+        if(!createTempFile(nuc_data_file, nuc_data_content)) return false;
+        if(!input_handler.loadData(nuc_data_file)) return false;
+
+        return true;
+    }
+
+    // Helper function to create a two groups source for a single cell std::vector<std::vector<double>>
+    std::vector<std::vector<double>> setupTwoGroupsSingleCellField() {
+        // Define scalar fields content
+        // returns a std::vector<std::vector<double>> with two groups and a single source term, 1.0
+        std::vector<std::vector<double>> source = {{1.0}, {4.0}};
+        return source;
+    }
 };
 
 TEST_F(BoltzmannSolverTest, SingleCellTwoRaysInfiniteOneGroup) {
@@ -480,5 +503,99 @@ TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfi
 
     EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite_cell0, 1e-5) << "Scalar flux for Cell 0 should match expected value for infinite medium";
     EXPECT_NEAR(scalar_flux[1], expected_scalar_flux_infinite_cell1, 1e-5) << "Scalar flux for Cell 1 should match expected value for infinite medium";
-
 }
+
+// Test case: Single Cell, two groups, two rays, two directions, infinite medium
+TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTwoRaysTwoDirectionsInfiniteMedium) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupSingleCellInfiniteMesh(mesh)) << "Failed to setup single cell mesh";
+    
+    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+
+    InputHandler input_handler;
+    ASSERT_TRUE(setupTwoGroupsInputHandler(input_handler)) << "Failed to setup input handler";
+    // check the number of groups
+    ASSERT_EQ(input_handler.getNumGroups(), 2) << "There should be 2 groups";
+
+    Field field;
+    ASSERT_TRUE(setupSimpleFieldOneCell(field)) << "Failed to setup simple field";
+    
+    // Initialize AngularQuadrature with one direction
+    std::vector<Direction> predefined_directions;
+    Direction dir;
+    dir.mu = 0.0;
+    dir.phi = 0.0;
+    dir.weight = 1.0; // Weight for direction 0
+    predefined_directions.push_back(dir);
+    Direction dir2;
+    dir2.mu = 0.0;
+    dir2.phi = M_PI / 2.0;
+    dir2.weight = 3.0; // Weight for direction 1
+    predefined_directions.push_back(dir2);
+    AngularQuadrature angular_quadrature(predefined_directions);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(angular_quadrature.getDirections().size(), 2) << "There should be 2 directions";
+    // test if sum of weights is 4
+    ASSERT_EQ(angular_quadrature.getTotalWeight(), dir.weight + dir2.weight) << "Sum of weights should be 4.0";
+
+    // Create TrackingData with two rays: one in each direction
+    std::vector<TrackingData> tracking_data;
+    Vector3D dir_vector = directionVector(0.0, 0.0);
+    // we set extremely large path length to simulate infinite path length
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    tracking_data.push_back(ray1);
+    Vector3D dir_vector2 = directionVector(0.0, M_PI / 2.0);
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(0.0, 1.0, 0.0));
+    tracking_data.push_back(ray2);
+    // test if size of tracking_data is 2
+    ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
+
+    // create source term
+    std::vector<std::vector<double>> source = setupTwoGroupsSingleCellField();
+    // assert the size of source
+    ASSERT_EQ(source.size(), 2) << "There should be 2 groups";
+    ASSERT_NEAR(source[0][0], 1.0, 1e-6) << "Source term for Group 1 should be 1.0";
+    ASSERT_NEAR(source[1][0], 4.0, 1e-6) << "Source term for Group 2 should be 4.0";
+
+    // init params
+    BoltzmannSolver::SolverParams params;
+
+    // Initialize BoltzmannSolver
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+    std::vector<std::vector<double>> scalar_flux = bt_solver.solveMultiGroupWithSource(source, 1e-7);
+    const double sigma_t1 = input_handler.getEnergyGroupData(0).total_xs;
+    ASSERT_NEAR(sigma_t1, 1.0, 1e-6) << "Total cross section for Group 1 should be 1.0";
+    const double sigma_t2 = input_handler.getEnergyGroupData(1).total_xs;
+    ASSERT_NEAR(sigma_t2, 1.2, 1e-6) << "Total cross section for Group 2 should be 1.2";
+    const double sigma_s1 = input_handler.getSelfScatteringXS(0);
+    ASSERT_NEAR(sigma_s1, 0.4, 1e-6) << "Self-scattering cross section for Group 1 should be 0.4";
+    const double sigma_s2 = input_handler.getSelfScatteringXS(1);
+    ASSERT_NEAR(sigma_s2, 0.5, 1e-6) << "Self-scattering cross section for Group 2 should be 0.1";
+    const double sigma_s1_2 = input_handler.getEnergyGroupData(0).scattering_xs[1];
+    ASSERT_NEAR(sigma_s1_2, 0.2, 1e-6) << "Scattering cross section for Group 1 to Group 2 should be 0.2";
+    const double sigma_s2_1 = input_handler.getEnergyGroupData(1).scattering_xs[0];
+    ASSERT_NEAR(sigma_s2_1, 0.05, 1e-6) << "Scattering cross section for Group 2 to Group 1 should be 0.05";
+    const double sigma_r1 = sigma_t1 - sigma_s1;
+    const double sigma_r2 = sigma_t2 - sigma_s2;
+    // now the problem has the following form:
+    // sigma_r1 * phi1 - sigma_s21 * phi2 = Q1
+    // -sigma_s12 * phi1 + sigma_r2 * phi2 = Q2
+    // this can be solved by matrix inversion
+    // A * X = B
+    // X = A^-1 * B
+    // where A = [[sigma_r1, -sigma_s21], [-sigma_s12, sigma_r2]]
+    // B = [Q1, Q2]
+    // X = [phi1, phi2]
+    // A^-1 = 1 / det(A) * [[sigma_r2, sigma_s21], [sigma_s12, sigma_r1]]
+    // det(A) = sigma_r1 * sigma_r2 - sigma_s12 * sigma_s21
+    // phi1 = (sigma_r2 * Q1 + sigma_s21 * Q2) / det(A)
+    // phi2 = (sigma_s12 * Q1 + sigma_r1 * Q2) / det(A)
+    const double det_A = sigma_r1 * sigma_r2 - sigma_s1_2 * sigma_s2_1;
+    const double expected_phi1 = (sigma_r2 * source[0][0] + sigma_s2_1 * source[1][0]) / det_A;
+    const double expected_phi2 = (sigma_s1_2 * source[0][0] + sigma_r1 * source[1][0]) / det_A;
+    // test if scalar_flux[0][0] is expected_phi1
+    EXPECT_NEAR(scalar_flux[0][0], expected_phi1, 1e-5) << "Scalar flux for Group 1 should match expected value";
+    // test if scalar_flux[1][0] is expected_phi2
+    EXPECT_NEAR(scalar_flux[1][0], expected_phi2, 1e-5) << "Scalar flux for Group 2 should match expected value";
+}
+    
