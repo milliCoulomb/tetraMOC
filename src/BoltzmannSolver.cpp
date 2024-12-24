@@ -195,7 +195,8 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(cons
         
         if (residual <= eps) {
             Logger::info("Multi-group solver converged in " + std::to_string(iteration) + " iterations.");
-        } else {
+        }
+        if (iteration >= params_.max_iterations) {
             Logger::warning("Multi-group solver did not converge within the maximum iterations.");
         }
     }
