@@ -51,7 +51,15 @@ public:
      * @param eps Convergence threshold.
      * @return std::vector<double> Converged scalar flux vector.
      */
-    std::vector<double> solveOneGroupWithSource(const std::vector<double>& external_source, const int group, double eps = 1e-5);
+    std::vector<double> solveOneGroupWithSource(const std::vector<double>& external_source, const int group, double eps = 1e-5, const std::vector<double>& initial_guess = {});
+    /**
+     * @brief Solves the multi-group transport equation with an external source.
+     * 
+     * @param external_source External source vector std::vector<std::vector<double>> (size = number of groups, each group size = number of cells).
+     * @param eps Convergence threshold.
+     * @return std::vector<std::vector<double>> Converged scalar flux vector.
+     */
+    std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, double eps = 1e-5, const std::vector<std::vector<double>>& initial_guess = {});
 
     /**
      * @brief Retrieves the computed effective multiplication factor (k_eff).
@@ -100,6 +108,14 @@ private:
      * @return std::vector<double> Scattering source vector.
      */
     std::vector<double> computeScatteringSource(const std::vector<double>& scalar_flux, const int group) const;
+
+    /**
+     * @brief Computes the multigroup scattering source.
+     * 
+     * @param scalar_flux Current scalar flux vector (std::vector<std::vector<double>> size = number of groups, each group size = number of cells).
+     * @return std::vector<std::vector<double>> Scattering source vector.
+     */
+    std::vector<std::vector<double>> computeMultiGroupScatteringSource(const std::vector<std::vector<double>>& scalar_flux) const;
 };
 
 #endif // BOLTZMANN_SOLVER_HPP
