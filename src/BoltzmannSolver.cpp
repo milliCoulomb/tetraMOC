@@ -47,7 +47,7 @@ std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSou
         for(int group = 0; group < num_groups_; ++group) {
             for(int g_prime = 0; g_prime < num_groups_; ++g_prime) {
                 if(g_prime != group) {
-                    scat_source[group][cell] += input_.getEnergyGroupData(group).scattering_xs[g_prime] * scalar_flux[g_prime][cell] / QuadratureTotalWeight_;
+                    scat_source[group][cell] += input_.getEnergyGroupData(g_prime).scattering_xs[group] * scalar_flux[g_prime][cell] / QuadratureTotalWeight_;
                 }
             }
         }
@@ -168,18 +168,10 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(cons
         // now in parallel, we solve the one group problem for each group
         #pragma omp parallel for
         for(int group = 0; group < num_groups_; ++group) {
-            // Compute flux using FluxSolver
-            // Assuming FluxSolver has been initialized with TrackingData corresponding to directions and cells
-            FluxSolver flux_solver(mesh_, tracking_data_, angular_quadrature_, input_.getEnergyGroupData(group).total_xs);
-
-            // Compute flux based on the total source
-            flux_solver.computeFlux(total_source[group]);
-
-            // Collapse flux to scalar flux
-            std::vector<double> collapsed_flux = flux_solver.collapseFlux();
-
+            // Compute flux using SolveOneGroupWithSource
+            std::vector<double> scalar_flux = solveOneGroupWithSource(total_source[group], group, eps, old_flux[group]);
             // Update new_flux
-            new_flux[group] = std::move(collapsed_flux);
+            new_flux[group] = std::move(scalar_flux);
         }
 
         // Compute residual: ||new_flux - old_flux|| / ||old
