@@ -67,10 +67,10 @@ protected:
         // Define nodes content with node IDs
         std::string nodes_content = "5\n"
                                     "0 0.0 0.0 0.0\n" // Node 0
-                                    "1 1.0e10 0.0 0.0\n" // Node 1
-                                    "2 0.0 1.0e10 0.0\n" // Node 2
-                                    "3 0.0 0.0 1.0e10\n" // Node 3
-                                    "4 1.0e10 1.0e10 1.0e10\n"; // Node 4
+                                    "1 1.0e20 0.0 0.0\n" // Node 1
+                                    "2 0.0 1.0e20 0.0\n" // Node 2
+                                    "3 0.0 0.0 1.0e20\n" // Node 3
+                                    "4 1.0e20 1.0e20 1.0e20\n"; // Node 4
 
         // Create temporary nodes.txt
         if(!createTempFile(nodes_file, nodes_content)) return false;
@@ -116,6 +116,22 @@ protected:
         // Cell 1: Velocity towards positive y-axis
         std::string field_content = "1\n" // Number of vectors
                                        "0.0 1.0 0.0\n"; // Vector for cell 0
+
+        // Create temporary field.txt
+        if(!createTempFile(field_file, field_content)) return false;
+        if(!field.loadVectorField(field_file)) return false;
+
+        return true;
+    }
+
+    // Helper function to setup a simple field with two source terms
+    bool setupSimpleFieldTwoCells(Field& field) {
+        // Define vector fields for two cells
+        // Cell 0: Velocity towards positive x-axis
+        // Cell 1: Velocity towards positive y-axis
+        std::string field_content = "2\n" // Number of vectors
+                                       "0.0 1.0 0.0\n" // Vector for cell 0
+                                       "1.0 0.0 0.0\n"; // Vector for cell 1
 
         // Create temporary field.txt
         if(!createTempFile(field_file, field_content)) return false;
@@ -379,7 +395,7 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     bool constant_dir_bool = true;
     RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     // Generate tracking data
-    int rays_per_face = 1;
+    int rays_per_face = 3;
     manager.generateTrackingData(rays_per_face);
     
     // Retrieve tracking data
@@ -405,4 +421,60 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
     const double expected_scalar_flux_infinite = external_source[0] / (sigma_t - sigma_s);
     EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite, 1e-6) << "Scalar flux should match expected value for infinite medium";
+}
+
+// Test case: Multiple Cells, true angular quadrature, true RayTracing, infinite medium, one group
+TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfiniteOneGroup) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupTwoCellsInfiniteMesh(mesh)) << "Failed to setup two cell mesh";
+    
+    ASSERT_TRUE(setupTwoCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    
+    InputHandler input_handler;
+    ASSERT_TRUE(setupInputHandler(input_handler)) << "Failed to setup input handler";
+
+    Field field;
+    ASSERT_TRUE(setupSimpleFieldTwoCells(field)) << "Failed to setup simple field";
+    
+    const int num_azimuthal = 2;
+    const int num_polar = 4;
+    AngularQuadrature angular_quadrature(num_azimuthal, num_polar);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(angular_quadrature.getDirections().size(), num_azimuthal * num_polar) << "There should be " << num_azimuthal * num_polar << " directions";
+    // test if sum of weights is 4
+    EXPECT_NEAR(angular_quadrature.getTotalWeight(), 4.0 * M_PI, 1e-6) << "Sum of weights should be 4.0 * M_PI";
+
+    bool use_half_quadrature_for_constant = false;
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
+    // Generate tracking data
+    int rays_per_face = 5;
+    manager.generateTrackingData(rays_per_face);
+    
+    // Retrieve tracking data
+    const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
+
+    // Initialize FluxSolver
+    double sigma_t = input_handler.getEnergyGroupData(0).total_xs; // Total cross section
+    double sigma_s = input_handler.getEnergyGroupData(0).scattering_xs; // Scattering cross section
+    FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
+    // test if size of flux_data_ is 1
+    ASSERT_EQ(flux_solver.getFluxData().size(), 2) << "There should be flux data for 2 cells";
+    // test if size of flux_data_[0] is 2
+    ASSERT_EQ(flux_solver.getFluxData()[0].size(), num_azimuthal * num_polar) << "There should be flux data for " << num_azimuthal * num_polar << " directions";
+
+    // initialiase struct params from BoltzmannSolver
+    BoltzmannSolver::SolverParams params;
+
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+
+    std::vector<double> external_source = setupTwoCellField();
+
+    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
+    const double expected_scalar_flux_infinite_cell0 = external_source[0] / (sigma_t - sigma_s);
+    const double expected_scalar_flux_infinite_cell1 = external_source[1] / (sigma_t - sigma_s);
+
+    EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite_cell0, 1e-5) << "Scalar flux for Cell 0 should match expected value for infinite medium";
+    EXPECT_NEAR(scalar_flux[1], expected_scalar_flux_infinite_cell1, 1e-5) << "Scalar flux for Cell 1 should match expected value for infinite medium";
+
 }
