@@ -13,7 +13,7 @@ public:
     struct EnergyGroupData {
         double total_xs;
         double fission_xs;
-        double scattering_xs;
+        std::vector<double> scattering_xs; // ordered as \Sigma_{s00} \Sigma_{s01} ... \Sigma_{s0G-1}
         double multiplicity;
         double fission_spectrum;
         double delayed_spectrum;
