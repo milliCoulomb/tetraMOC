@@ -12,6 +12,12 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+option(ENABLE_LOGGING "Enable logging" ON)
+
+if(NOT ENABLE_LOGGING)
+    add_definitions(-DDISABLE_LOGGING)
+endif()
+
 # Trouver OpenMP
 find_package(OpenMP REQUIRED)
 if(NOT OpenMP_FOUND)
