@@ -47,7 +47,7 @@ std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSou
         for(int group = 0; group < num_groups_; ++group) {
             for(int g_prime = 0; g_prime < num_groups_; ++g_prime) {
                 if(g_prime != group) {
-                    scat_source[group][cell] += input_.getEnergyGroupData(g_prime).scattering_xs[group] * scalar_flux[g_prime][cell] / QuadratureTotalWeight_;
+                    scat_source[group][cell] += input_.getEnergyGroupData(g_prime).scattering_xs[group] * scalar_flux[g_prime][cell];
                 }
             }
         }
@@ -64,7 +64,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<d
     // Initialize scalar flux with initial guess (e.g., ones)
     std::vector<double> old_flux;
     if (!initial_guess.empty() && static_cast<int>(initial_guess.size()) == num_cells_) {
-        old_flux = std::move(initial_guess);
+        old_flux = initial_guess;
     } else {
         old_flux = std::vector<double>(num_cells_, 1.0);
     }
@@ -99,7 +99,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(const std::vector<d
         std::vector<double> collapsed_flux = flux_solver.collapseFlux();
 
         // Update new_flux
-        new_flux = std::move(collapsed_flux);
+        new_flux = collapsed_flux;
 
         // Compute residual: ||new_flux - old_flux|| / ||old_flux||
         double norm_diff = 0.0;
@@ -139,7 +139,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(cons
     // std::vector<std::vector<double>> old_flux(num_groups_, std::vector<double>(num_cells_, 1.0));
     std::vector<std::vector<double>> old_flux;
     if (!initial_guess.empty() && static_cast<int>(initial_guess.size()) == num_groups_ && static_cast<int>(initial_guess[0].size()) == num_cells_) {
-        old_flux = std::move(initial_guess);
+        old_flux = initial_guess;
     } else {
         old_flux = std::vector<std::vector<double>>(num_groups_, std::vector<double>(num_cells_, 1.0));
     }
@@ -161,17 +161,16 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(cons
         #pragma omp parallel for
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
-                total_source[group][cell] = scat_source[group][cell] + external_source[group][cell] / QuadratureTotalWeight_;
+                total_source[group][cell] = scat_source[group][cell] + external_source[group][cell];
             }
         }
 
-        // now in parallel, we solve the one group problem for each group
-        #pragma omp parallel for
+        // now solve the one group problem for each group
         for(int group = 0; group < num_groups_; ++group) {
             // Compute flux using SolveOneGroupWithSource
             std::vector<double> scalar_flux = solveOneGroupWithSource(total_source[group], group, eps, old_flux[group]);
             // Update new_flux
-            new_flux[group] = std::move(scalar_flux);
+            new_flux[group] = scalar_flux;
         }
 
         // Compute residual: ||new_flux - old_flux|| / ||old
@@ -191,7 +190,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(cons
         Logger::info("Residual: " + std::to_string(residual));
 
         // Prepare for next iteration
-        old_flux = std::move(new_flux);
+        old_flux = new_flux;
         iteration++;
         
         if (residual <= eps) {
