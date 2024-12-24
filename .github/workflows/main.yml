@@ -25,7 +25,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ..
+        cmake -DENABLE_LOGGING=OFF ..
         make
 
     # 4. Exécuter les tests unitaires
