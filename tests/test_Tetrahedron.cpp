@@ -89,3 +89,36 @@ TEST(TetrahedronTest, NoExitTest) {
     // Assertions
     EXPECT_FALSE(has_exit);
 }
+
+// test Tetrahedron construction and getters for vertices, center of mass, and velocity
+TEST(TetrahedronTest, TetrahedronConstructionTest) {
+    // Define nodes
+    std::vector<Vector3D> nodes = {
+        Vector3D(0.0, 0.0, 0.0), // Node 0
+        Vector3D(1.0, 0.0, 0.0), // Node 1
+        Vector3D(0.0, 1.0, 0.0), // Node 2
+        Vector3D(0.0, 0.0, 1.0)  // Node 3
+    };
+    
+    // Define a single tetrahedron
+    TetraCell cell = createSimpleTetraCell(0, {0, 1, 2, 3});
+    CellVectorField field = {1.0, 1.0, 1.0}; // Velocity vector
+    
+    // Create Tetrahedron object
+    Tetrahedron tetra(cell, nodes, field);
+    
+    // Get vertices
+    const std::array<Vector3D, 4>& vertices = tetra.getVertices();
+    EXPECT_EQ(vertices[0], Vector3D(0.0, 0.0, 0.0));
+    EXPECT_EQ(vertices[1], Vector3D(1.0, 0.0, 0.0));
+    EXPECT_EQ(vertices[2], Vector3D(0.0, 1.0, 0.0));
+    EXPECT_EQ(vertices[3], Vector3D(0.0, 0.0, 1.0));
+    
+    // Get center of mass
+    const Vector3D& center_of_mass = tetra.getCenterOfMass();
+    EXPECT_EQ(center_of_mass, Vector3D(1.0, 1.0, 1.0));
+
+    // Get velocity
+    const Vector3D& velocity = tetra.getVelocity();
+    EXPECT_EQ(velocity, Vector3D(1.0, 1.0, 1.0));
+}
