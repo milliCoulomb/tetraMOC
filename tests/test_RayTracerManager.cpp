@@ -155,7 +155,7 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_MultipleDirections) {
     
     // Initialize AngularQuadrature with specific orders
     int theta_order = 2;
-    int phi_order = 4;
+    int phi_order = 6;
     AngularQuadrature angular_quadrature(theta_order, phi_order);
     
     // Initialize RayTracerManager with only constant directions (using half quadrature)
@@ -167,7 +167,7 @@ TEST_F(RayTracerManagerTest, TraceRays_ConstantDirection_MultipleDirections) {
     EXPECT_EQ(manager.getTrackingData().size(), 0) << "Tracking data should be empty initially";
     
     // Generate tracking data with multiple rays per face
-    int rays_per_face = 2; // Two rays per face
+    int rays_per_face = 1; // Two rays per face
     manager.generateTrackingData(rays_per_face);
     
     // Retrieve tracking data
