@@ -21,9 +21,9 @@ protected:
 // Test Case 1: Valid Input with Multiple Energy Groups
 TEST_F(InputHandlerTest, ValidInputMultipleGroups) {
     std::string content = "3\n"
-                          "1.0 0.1 0.9 2.43 0.98 0.02\n"
-                          "1.2 0.0 1.2 2.50 0.95 0.05\n"
-                          "0.8 0.05 0.75 2.35 0.97 0.03\n";
+                          "1.0 0.1 0.2 0.1 0.3 2.43 0.98 0.02\n"
+                          "1.2 0.0 0.6 0.1 0.3 2.50 0.95 0.05\n"
+                          "0.8 0.05 0.1 0.1 0.1 2.35 0.97 0.03\n";
 
     ASSERT_TRUE(createTempFile(temp_file, content)) << "Failed to create temporary input file.";
 
@@ -36,7 +36,9 @@ TEST_F(InputHandlerTest, ValidInputMultipleGroups) {
     InputHandler::EnergyGroupData group0 = input_handler.getEnergyGroupData(0);
     EXPECT_DOUBLE_EQ(group0.total_xs, 1.0);
     EXPECT_DOUBLE_EQ(group0.fission_xs, 0.1);
-    EXPECT_DOUBLE_EQ(group0.scattering_xs, 0.9);
+    EXPECT_DOUBLE_EQ(group0.scattering_xs[0], 0.2);
+    EXPECT_DOUBLE_EQ(group0.scattering_xs[1], 0.1);
+    EXPECT_DOUBLE_EQ(group0.scattering_xs[2], 0.3);
     EXPECT_DOUBLE_EQ(group0.multiplicity, 2.43);
     EXPECT_DOUBLE_EQ(group0.fission_spectrum, 0.98);
     EXPECT_DOUBLE_EQ(group0.delayed_spectrum, 0.02);
@@ -45,7 +47,9 @@ TEST_F(InputHandlerTest, ValidInputMultipleGroups) {
     InputHandler::EnergyGroupData group1 = input_handler.getEnergyGroupData(1);
     EXPECT_DOUBLE_EQ(group1.total_xs, 1.2);
     EXPECT_DOUBLE_EQ(group1.fission_xs, 0.0);
-    EXPECT_DOUBLE_EQ(group1.scattering_xs, 1.2);
+    EXPECT_DOUBLE_EQ(group1.scattering_xs[0], 0.6);
+    EXPECT_DOUBLE_EQ(group1.scattering_xs[1], 0.1);
+    EXPECT_DOUBLE_EQ(group1.scattering_xs[2], 0.3);
     EXPECT_DOUBLE_EQ(group1.multiplicity, 2.50);
     EXPECT_DOUBLE_EQ(group1.fission_spectrum, 0.95);
     EXPECT_DOUBLE_EQ(group1.delayed_spectrum, 0.05);
@@ -54,7 +58,9 @@ TEST_F(InputHandlerTest, ValidInputMultipleGroups) {
     InputHandler::EnergyGroupData group2 = input_handler.getEnergyGroupData(2);
     EXPECT_DOUBLE_EQ(group2.total_xs, 0.8);
     EXPECT_DOUBLE_EQ(group2.fission_xs, 0.05);
-    EXPECT_DOUBLE_EQ(group2.scattering_xs, 0.75);
+    EXPECT_DOUBLE_EQ(group2.scattering_xs[0], 0.1);
+    EXPECT_DOUBLE_EQ(group2.scattering_xs[1], 0.1);
+    EXPECT_DOUBLE_EQ(group2.scattering_xs[2], 0.1);
     EXPECT_DOUBLE_EQ(group2.multiplicity, 2.35);
     EXPECT_DOUBLE_EQ(group2.fission_spectrum, 0.97);
     EXPECT_DOUBLE_EQ(group2.delayed_spectrum, 0.03);
@@ -74,9 +80,9 @@ TEST_F(InputHandlerTest, InsufficientData) {
 // Test Case 3: Input File with Extra Data
 TEST_F(InputHandlerTest, ExtraData) {
     std::string content = "2\n"
-                          "1.0 0.1 0.9 2.43 0.98 0.02\n"
-                          "1.2 0.0 1.2 2.50 0.95 0.05\n"
-                          "0.8 0.05 0.75 2.35 0.97 0.03\n"; // Extra group's data
+                          "1.0 0.1 0.5 0.1 2.43 0.98 0.02\n"
+                          "1.2 0.0 0.1 0.9 2.50 0.95 0.05\n"
+                          "0.8 0.05 0.0 0.75 2.35 0.97 0.03\n"; // Extra group's data
 
     ASSERT_TRUE(createTempFile(temp_file, content)) << "Failed to create temporary input file.";
 
@@ -91,7 +97,8 @@ TEST_F(InputHandlerTest, ExtraData) {
     InputHandler::EnergyGroupData group0 = input_handler.getEnergyGroupData(0);
     EXPECT_DOUBLE_EQ(group0.total_xs, 1.0);
     EXPECT_DOUBLE_EQ(group0.fission_xs, 0.1);
-    EXPECT_DOUBLE_EQ(group0.scattering_xs, 0.9);
+    EXPECT_DOUBLE_EQ(group0.scattering_xs[0], 0.5);
+    EXPECT_DOUBLE_EQ(group0.scattering_xs[1], 0.1);
     EXPECT_DOUBLE_EQ(group0.multiplicity, 2.43);
     EXPECT_DOUBLE_EQ(group0.fission_spectrum, 0.98);
     EXPECT_DOUBLE_EQ(group0.delayed_spectrum, 0.02);
@@ -100,7 +107,8 @@ TEST_F(InputHandlerTest, ExtraData) {
     InputHandler::EnergyGroupData group1 = input_handler.getEnergyGroupData(1);
     EXPECT_DOUBLE_EQ(group1.total_xs, 1.2);
     EXPECT_DOUBLE_EQ(group1.fission_xs, 0.0);
-    EXPECT_DOUBLE_EQ(group1.scattering_xs, 1.2);
+    EXPECT_DOUBLE_EQ(group1.scattering_xs[0], 0.1);
+    EXPECT_DOUBLE_EQ(group1.scattering_xs[1], 0.9);
     EXPECT_DOUBLE_EQ(group1.multiplicity, 2.50);
     EXPECT_DOUBLE_EQ(group1.fission_spectrum, 0.95);
     EXPECT_DOUBLE_EQ(group1.delayed_spectrum, 0.05);
@@ -109,8 +117,8 @@ TEST_F(InputHandlerTest, ExtraData) {
 // Test Case 4: Input File with Non-Numeric Values
 TEST_F(InputHandlerTest, NonNumericValues) {
     std::string content = "2\n"
-                          "1.0 0.1 0.9 2.43 0.98 0.02\n"
-                          "abc 0.0 1.2 2.50 0.95 0.05\n"; // Non-numeric total cross section for group 2
+                          "1.0 0.1 0.7 0.1 2.43 0.98 0.02\n"
+                          "abc 0.0 1.2 0.1 2.50 0.95 0.05\n"; // Non-numeric total cross section for group 2
 
     ASSERT_TRUE(createTempFile(temp_file, content)) << "Failed to create temporary input file.";
 
@@ -131,8 +139,8 @@ TEST_F(InputHandlerTest, ZeroEnergyGroups) {
 // Test Case 6: Requesting Data for Invalid Group Indices
 TEST_F(InputHandlerTest, InvalidGroupIndices) {
     std::string content = "2\n"
-                          "1.0 0.1 0.9 2.43 0.98 0.02\n"
-                          "1.2 0.0 1.2 2.50 0.95 0.05\n";
+                          "1.0 0.1 0.7 0.1 2.43 0.98 0.02\n"
+                          "1.2 0.0 1.2 0.1 2.50 0.95 0.05\n";
 
     ASSERT_TRUE(createTempFile(temp_file, content)) << "Failed to create temporary input file.";
 
@@ -165,10 +173,13 @@ TEST_F(InputHandlerTest, LargeNumberOfGroups) {
     oss << num_groups << "\n";
     for(int i = 0; i < num_groups; ++i) {
         oss << (1.0 + i * 0.01) << " "    // total_xs
-            << (0.1 + i * 0.001) << " "  // fission_xs
-            << (0.9 + i * 0.005) << " "  // scattering_xs
-            << (2.0 + i * 0.01) << " "   // multiplicity
-            << (0.95 + i * 0.001) << " " // fission_spectrum
+            << (0.1 + i * 0.001) << " "; // fission_xs
+        // scattering_xs for each group
+        for(int j = 0; j < num_groups; ++j) {
+            oss << (0.9 + i * 0.005 + j * 0.0001) << " ";
+        }
+        oss << (2.0 + i * 0.01) << " "    // multiplicity
+            << (0.95 + i * 0.001) << " "  // fission_spectrum
             << (0.05 + i * 0.0001) << "\n"; // delayed_spectrum
     }
     std::string content = oss.str();
@@ -184,7 +195,10 @@ TEST_F(InputHandlerTest, LargeNumberOfGroups) {
         InputHandler::EnergyGroupData group = input_handler.getEnergyGroupData(i);
         EXPECT_DOUBLE_EQ(group.total_xs, 1.0 + i * 0.01);
         EXPECT_DOUBLE_EQ(group.fission_xs, 0.1 + i * 0.001);
-        EXPECT_DOUBLE_EQ(group.scattering_xs, 0.9 + i * 0.005);
+        ASSERT_EQ(group.scattering_xs.size(), static_cast<size_t>(num_groups)) << "Scattering_xs size mismatch.";
+        for(int j = 0; j < num_groups; ++j) {
+            EXPECT_DOUBLE_EQ(group.scattering_xs[j], 0.9 + i * 0.005 + j * 0.0001);
+        }
         EXPECT_DOUBLE_EQ(group.multiplicity, 2.0 + i * 0.01);
         EXPECT_DOUBLE_EQ(group.fission_spectrum, 0.95 + i * 0.001);
         EXPECT_DOUBLE_EQ(group.delayed_spectrum, 0.05 + i * 0.0001);
@@ -194,9 +208,9 @@ TEST_F(InputHandlerTest, LargeNumberOfGroups) {
 // Test Case 8: Mixed Valid and Invalid Data Lines
 TEST_F(InputHandlerTest, MixedValidAndInvalidDataLines) {
     std::string content = "3\n"
-                          "1.0 0.1 0.9 2.43 0.98 0.02\n"
-                          "1.2 0.0 1.2 2.50 0.95 abc\n" // Invalid delayed_spectrum
-                          "0.8 0.05 0.75 2.35 0.97 0.03\n";
+                          "1.0 0.1 0.2 0.1 0.3 2.43 0.98 0.02\n"
+                          "1.2 0.0 0.6 0.1 0.3 2.50 0.95 caca\n"
+                          "0.8 0.05 0.1 0.1 0.1 2.35 0.97 0.03\n";
 
     ASSERT_TRUE(createTempFile(temp_file, content)) << "Failed to create temporary input file.";
 
