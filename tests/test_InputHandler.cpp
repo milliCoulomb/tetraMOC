@@ -237,3 +237,21 @@ TEST_F(InputHandlerTest, OnlyHeaderInputFile) {
     InputHandler input_handler;
     ASSERT_FALSE(input_handler.loadData(temp_file)) << "Should fail due to missing data lines.";
 }
+
+// Test Case 11: the self-scattering cross section for a given group
+TEST_F(InputHandlerTest, SelfScatteringXS) {
+    std::string content = "3\n"
+                          "1.0 0.1 0.2 0.1 0.3 2.43 0.98 0.02\n"
+                          "1.2 0.0 0.6 0.1 0.3 2.50 0.95 0.05\n"
+                          "0.8 0.05 0.4 0.5 0.1 2.35 0.97 0.03\n";
+
+    ASSERT_TRUE(createTempFile(temp_file, content)) << "Failed to create temporary input file.";
+
+    InputHandler input_handler;
+    ASSERT_TRUE(input_handler.loadData(temp_file)) << "Failed to load valid data.";
+
+    // Verify self-scattering cross section for each group
+    EXPECT_DOUBLE_EQ(input_handler.getSelfScatteringXS(0), 0.2);
+    EXPECT_DOUBLE_EQ(input_handler.getSelfScatteringXS(1), 0.1);
+    EXPECT_DOUBLE_EQ(input_handler.getSelfScatteringXS(2), 0.1);
+}
