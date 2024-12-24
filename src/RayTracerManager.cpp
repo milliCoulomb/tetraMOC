@@ -234,7 +234,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                 }
 
                 // Check if the direction is valid (incoming)
-                if (isValidDirection(face_normal, direction, 1e-6))
+                if (isValidDirection(face_normal, direction, 1e-5))
                 {
                     // For each ray per face
                     for (int ray = 0; ray < rays_per_face; ++ray)
@@ -247,6 +247,11 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
                         // Trace the ray through the mesh
                         std::vector<CellTrace> cell_traces = tracer->traceRay(adjacent_cell_id, start_point, 100);
+
+                        // If cell_traces is empty, discard the ray
+                        if (cell_traces.empty()) {
+                            continue;
+                        }
 
                         // Assign a unique ray_id
                         int ray_id = ray_id_counter.fetch_add(1, std::memory_order_relaxed);
