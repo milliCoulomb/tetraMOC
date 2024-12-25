@@ -275,3 +275,21 @@ TEST_F(MeshHandlerTest, GetCellCenter_Success) {
     EXPECT_DOUBLE_EQ(center1.y, 0.5);
     EXPECT_DOUBLE_EQ(center1.z, 0.5);
 }
+
+// test the getTotalFaces() method
+TEST_F(MeshHandlerTest, GetTotalFaces_Success) {
+    // Define content for faces.txt with counts of adjacent cells
+    std::string faces_content = "3\n" // Number of faces
+                                   "0 1 2 2 0 1\n" // Face with nodes 0,1,2 adjacent to cells 0 and 1
+                                   "0 1 3 1 0\n"   // Face with nodes 0,1,3 adjacent to cell 0
+                                   "1 2 3 1 1\n";  // Face with nodes 1,2,3 adjacent to cell 1
+    
+    // Create temporary faces.txt
+    ASSERT_TRUE(createTempFile(faces_file, faces_content)) << "Failed to create temporary faces.txt";
+
+    MeshHandler mesh;
+    EXPECT_TRUE(mesh.loadFaceConnectivity(faces_file)) << "MeshHandler failed to load faces.txt";
+
+    // Verify total faces
+    EXPECT_EQ(mesh.getTotalFaces(), 3) << "Total faces mismatch";
+}
