@@ -184,15 +184,15 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         std::vector<std::vector<double>> scat_source = computeMultiGroupScatteringSource(old_flux);
 
         // Compute total source: scat_source + external_source
-        #pragma omp parallel for collapse(2)
+        #pragma omp parallel for collapse(2) schedule(dynamic)
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
                 scat_source[group][cell] += external_source[group][cell];
             }
         }
 
-        // Solve one group problem for each group in parallel
-        #pragma omp parallel for
+        // Solve one group problem for each group
+        #pragma omp parallel for schedule(dynamic)
         for(int group = 0; group < num_groups_; ++group) {
             new_flux[group] = solveOneGroupWithSource(scat_source[group], group, eps, old_flux[group]);
         }
@@ -201,7 +201,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         double norm_diff = 0.0;
         double norm_old = 0.0;
 
-        #pragma omp parallel for reduction(+:norm_diff, norm_old) collapse(2)
+        #pragma omp parallel for reduction(+:norm_diff, norm_old) collapse(2) schedule(dynamic)
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
                 double diff = new_flux[group][cell] - old_flux[group][cell];
@@ -216,19 +216,21 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         // Swap old_flux and new_flux to reuse memory
         std::swap(old_flux, new_flux);
         // Reset new_flux for next iteration
-        #pragma omp parallel for
+        #pragma omp parallel for collapse(2) schedule(dynamic)
         for (int group = 0; group < num_groups_; ++group) {
-            std::fill(new_flux[group].begin(), new_flux[group].end(), 0.0);
+            for (int cell = 0; cell < num_cells_; ++cell) {
+                new_flux[group][cell] = 0.0;
+            }
         }
 
         iteration++;
+    }
 
-        if (residual <= eps) {
-            Logger::info("Multi-group solver converged in " + std::to_string(iteration) + " iterations.");
-        }
-        if (iteration >= params_.max_iterations) {
-            Logger::warning("Multi-group solver did not converge within the maximum iterations.");
-        }
+    if (residual <= eps) {
+        Logger::info("Multi-group solver converged in " + std::to_string(iteration) + " iterations.");
+    }
+    if (iteration >= params_.max_iterations) {
+        Logger::warning("Multi-group solver did not converge within the maximum iterations.");
     }
     return old_flux;
 }
