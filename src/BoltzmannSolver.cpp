@@ -65,6 +65,26 @@ std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSou
     return scat_source;
 }
 
+std::vector<std::vector<double>> BoltzmannSolver::computeFissionSource(const std::vector<std::vector<double>>& scalar_flux,
+    const double old_keff) const
+{
+    std::vector<std::vector<double>> fission_source(num_groups_, std::vector<double>(num_cells_, 0.0));
+
+    // Precompute fission cross sections to reduce repeated access
+    std::vector<double> fission_xs(num_groups_, 0.0);
+    for(int group = 0; group < num_groups_; ++group){
+        fission_xs[group] = input_.getEnergyGroupData(group).fission_xs * input_.getEnergyGroupData(group).multiplicity / old_keff;
+    }
+
+    #pragma omp parallel for collapse(2)
+    for(int cell = 0; cell < num_cells_; ++cell) {
+        for(int group = 0; group < num_groups_; ++group) {
+            fission_source[group][cell] = fission_xs[group] * scalar_flux[group][cell] * input_.getEnergyGroupData(group).fission_spectrum;
+        }
+    }
+    return fission_source;
+}
+
 std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
     const std::vector<double>& external_source, 
     const int group, 
