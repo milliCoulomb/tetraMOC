@@ -110,11 +110,28 @@ TEST(Vector3DTest, Inequality) {
     EXPECT_TRUE(v1 != v2);
 }
 
-// test the isAlmostEqual method
+// test the isAlmostEqual method (exact equality)
 TEST(Vector3DTest, IsAlmostEqual) {
     Vector3D v1(1.0, 2.0, 3.0);
     Vector3D v2(1.0, 2.00000001, 3.0);
     EXPECT_TRUE(v1.isAlmostEqual(v2, 1e-6));
+}
+
+// test the isAlmostEqual method (inequality)
+TEST(Vector3DTest, IsNotAlmostEqual) {
+    Vector3D v1(1.0, 2.0, 3.0);
+    Vector3D v2(1.0, 2.1, 3.0);
+    EXPECT_FALSE(v1.isAlmostEqual(v2, 1e-6));
+}
+
+// test the += operator
+TEST(Vector3DTest, PlusEqual) {
+    Vector3D v1(1.0, 2.0, 3.0);
+    Vector3D v2(4.0, 5.0, 6.0);
+    v1 += v2;
+    EXPECT_DOUBLE_EQ(v1.x, 5.0);
+    EXPECT_DOUBLE_EQ(v1.y, 7.0);
+    EXPECT_DOUBLE_EQ(v1.z, 9.0);
 }
 
 // // main.cpp for tests (optional if using gtest_main)
