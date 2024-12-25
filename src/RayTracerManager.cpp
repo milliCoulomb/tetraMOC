@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <atomic>
 #include <iostream> // For debugging purposes
+#include <vector>
+#include <array>
+#include <mutex>
 
 const Vector3D ZERO_VECTOR(0.0, 0.0, 0.0);
 
@@ -132,18 +135,12 @@ bool RayTracerManager::isValidDirection(const Vector3D& face_normal, const Vecto
 
 void RayTracerManager::generateTrackingData(int rays_per_face)
 {
-    // Set number of threads to 1 for debugging
-    // omp_set_num_threads(1);
-
     // Clear previous tracking data
     tracking_data_.clear();
-    // std::cout << "Tracking data cleared." << std::endl;
 
     // Retrieve all boundary faces
     const auto& boundary_faces = mesh_.getBoundaryFaces();
     Logger::info("Boundary faces: " + std::to_string(boundary_faces.size()));
-    // std::cout << "Boundary faces: " << boundary_faces.size() << std::endl;
-    // std::cout << "Number of RayTracers: " << ray_tracers_.size() << std::endl;
 
     // Showcase direction of all RayTracers
     for (size_t i = 0; i < ray_tracers_.size(); ++i)
@@ -155,7 +152,6 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
         if(mode == RayTracerMode::CONSTANT_DIRECTION) {
             Vector3D dir = tracer->getFixedDirection();
             Logger::info("Direction: (" + std::to_string(dir.x) + ", " + std::to_string(dir.y) + ", " + std::to_string(dir.z) + ")");
-            // std::cout << "Direction: (" << dir.x << ", " << dir.y << ", " << dir.z << ")" << std::endl;
         }
         else if(mode == RayTracerMode::VARIABLE_DIRECTION) {
             // std::cout << "Direction: (Variable Direction)" << std::endl;
@@ -163,13 +159,21 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
         }
     }
 
-    // Initialize an atomic counter for unique ray IDs
-    std::atomic<int> ray_id_counter(0);
+    // Determine the number of threads available
+    int num_threads = omp_get_max_threads();
 
-    // Parallelize over RayTracers to utilize multiple directions
+    // Initialize per-thread tracking data containers
+    std::vector<std::vector<TrackingData>> thread_tracking_data(num_threads);
+
+    // Initialize a vector to hold per-thread ray ID offsets
+    std::vector<int> thread_ray_id_offsets(num_threads, 0);
+
+    // First parallel region: Generate tracking data without ray IDs
     #pragma omp parallel
     {
-        std::vector<TrackingData> local_tracking_data;
+        int thread_id = omp_get_thread_num();
+        auto& local_tracking_data = thread_tracking_data[thread_id];
+        local_tracking_data.reserve(rays_per_face * boundary_faces.size() / ray_tracers_.size());
 
         // Iterate over each RayTracer
         #pragma omp for nowait
@@ -193,7 +197,6 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
 
                 // Compute the cell center
                 int adjacent_cell_id = mesh_.getFaceAdjacentCell(face, true); // true for boundary face
-                // std::cout << "Adjacent Cell ID: " << adjacent_cell_id << std::endl;
                 Vector3D cell_center = mesh_.getCellCenter(adjacent_cell_id);
 
                 // Compute the face normal using GeometryUtils with cell center
@@ -210,7 +213,6 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                     if (field_direction.isAlmostEqual(ZERO_VECTOR))
                     {
                         // Skip rays with zero direction
-                        // std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
                         Logger::warning("Skipping RayTracer " + std::to_string(i) + " for face due to zero direction.");
                         continue;
                     }
@@ -223,7 +225,6 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                     if (fixed_direction.isAlmostEqual(ZERO_VECTOR))
                     {
                         // Skip rays with zero direction
-                        // std::cout << "Skipping RayTracer " << i << " for face due to zero direction." << std::endl;
                         Logger::warning("Skipping RayTracer " + std::to_string(i) + " for face due to zero direction.");
                         continue;
                     }
@@ -243,9 +244,6 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                         // Sample a starting point on the face
                         Vector3D start_point = samplePointOnTriangle(triangle);
 
-                        // Get the adjacent cell ID (assuming rays start from the boundary face into the adjacent cell)
-                        // Already have adjacent_cell_id
-
                         // Trace the ray through the mesh
                         std::vector<CellTrace> cell_traces = tracer->traceRay(adjacent_cell_id, start_point, 100);
 
@@ -254,32 +252,50 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                             continue;
                         }
 
-                        // Assign a unique ray_id
-                        int ray_id = ray_id_counter.fetch_add(1, std::memory_order_relaxed);
-
-                        // Populate TrackingData
+                        // Populate TrackingData without ray_id for now
                         TrackingData data;
-                        data.ray_id = ray_id;
                         data.direction = direction;
                         data.direction_weight = direction_weight;
+                        data.cell_traces = std::move(cell_traces);
 
-                        // Populate cell_traces
-                        data.cell_traces = cell_traces;
-
-                        local_tracking_data.push_back(data);
+                        local_tracking_data.emplace_back(std::move(data));
                     }
                 }
             }
         }
+    }
 
-        // Protect shared resource with a critical section
-        #pragma omp critical
+    // Compute ray ID offsets
+    size_t total_rays = 0;
+    for (int i = 0; i < num_threads; ++i)
+    {
+        thread_ray_id_offsets[i] = static_cast<int>(total_rays);
+        total_rays += thread_tracking_data[i].size();
+    }
+
+    // Assign unique ray IDs
+    #pragma omp parallel
+    {
+        int thread_id = omp_get_thread_num();
+        int ray_offset = thread_ray_id_offsets[thread_id];
+        auto& local_tracking_data = thread_tracking_data[thread_id];
+
+        #pragma omp for nowait
+        for (size_t i = 0; i < local_tracking_data.size(); ++i)
         {
-            tracking_data_.insert(tracking_data_.end(),
-                                  local_tracking_data.begin(),
-                                  local_tracking_data.end());
+            local_tracking_data[i].ray_id = ray_offset + static_cast<int>(i);
         }
     }
+
+    // Merge all thread-local tracking data into the global tracking_data_
+    // Reserve space to avoid multiple reallocations
+    tracking_data_.reserve(total_rays);
+    for (const auto& local_data : thread_tracking_data)
+    {
+        tracking_data_.insert(tracking_data_.end(), local_data.begin(), local_data.end());
+    }
+
+    Logger::info("Generated " + std::to_string(total_rays) + " tracking data entries.");
 }
 
 void RayTracerManager::doubleTrackingDataByReversing() {
@@ -365,5 +381,4 @@ void RayTracerManager::doubleTrackingDataByReversing() {
 
 //     tracking_data_ = std::move(symmetrized_data);
 // }
-        
 
