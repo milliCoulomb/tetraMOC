@@ -116,7 +116,7 @@ TEST(TetrahedronTest, TetrahedronConstructionTest) {
     
     // Get center of mass
     const Vector3D& center_of_mass = tetra.getCenterOfMass();
-    EXPECT_EQ(center_of_mass, Vector3D(1.0, 1.0, 1.0));
+    EXPECT_EQ(center_of_mass, Vector3D(0.25, 0.25, 0.25));
 
     // Get velocity
     const Vector3D& velocity = tetra.getVelocity();
