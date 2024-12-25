@@ -10,14 +10,14 @@ BoltzmannSolver::BoltzmannSolver(const InputHandler& input_handler,
                                  const MeshHandler& mesh_handler,
                                  const std::vector<TrackingData>& tracking_data,
                                  const AngularQuadrature& angular_quadrature,
-                                 const SolverParams& params)
+                                 const Settings& settings)
     : input_(input_handler),
       mesh_(mesh_handler),
       tracking_data_(tracking_data),
       angular_quadrature_(angular_quadrature),
-      params_(params),
-      k_eff_(params.initial_k_eff),
-      k_eff_old_(params.initial_k_eff) {
+      settings_(settings),
+      k_eff_(1.0),
+      k_eff_old_(1.0) {
     num_groups_ = input_.getNumGroups();
     num_cells_ = static_cast<int>(mesh_.getCells().size());
     QuadratureTotalWeight_ = angular_quadrature_.getTotalWeight();
@@ -68,7 +68,6 @@ std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSou
 std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
     const std::vector<double>& external_source, 
     const int group, 
-    double eps, 
     const std::vector<double>& initial_guess) 
 {
     if (external_source.size() != static_cast<size_t>(num_cells_)) {
@@ -91,7 +90,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
 
     Logger::info("Starting one-group solver with source.");
 
-    while (residual > eps && iteration < params_.max_iterations) {
+    while (residual > settings_.getOneGroupTolerance() && iteration < settings_.getOneGroupMaxIterations()) {
         Logger::info("One-group Iteration " + std::to_string(iteration + 1));
 
         // Compute scattering source: sigma_s * phi_old
@@ -140,7 +139,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
         iteration++;
     }
 
-    if (residual <= eps) {
+    if (residual <= settings_.getOneGroupTolerance()) {
         Logger::info("One-group solver converged in " + std::to_string(iteration) + " iterations.");
     } else {
         Logger::warning("One-group solver did not converge within the maximum iterations.");
@@ -150,8 +149,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
 }
 
 std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
-    const std::vector<std::vector<double>>& external_source, 
-    double eps, 
+    const std::vector<std::vector<double>>& external_source,
     const std::vector<std::vector<double>>& initial_guess) 
 {
     if (external_source.size() != static_cast<size_t>(num_groups_) || 
@@ -177,14 +175,14 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
 
     Logger::info("Starting multi-group solver with source.");
 
-    while (residual > eps && iteration < params_.max_iterations) {
+    while (residual > settings_.getMultiGroupTolerance() && iteration < settings_.getMultiGroupMaxIterations()) {
         Logger::info("Multi-group Iteration " + std::to_string(iteration + 1));
 
         // Compute scattering source: sigma_s * phi_old
         std::vector<std::vector<double>> scat_source = computeMultiGroupScatteringSource(old_flux);
 
         // Compute total source: scat_source + external_source
-        #pragma omp parallel for collapse(2) schedule(dynamic)
+        #pragma omp parallel for collapse(2)
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
                 scat_source[group][cell] += external_source[group][cell];
@@ -192,9 +190,9 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         }
 
         // Solve one group problem for each group
-        #pragma omp parallel for schedule(dynamic)
+        #pragma omp parallel for
         for(int group = 0; group < num_groups_; ++group) {
-            new_flux[group] = solveOneGroupWithSource(scat_source[group], group, eps, old_flux[group]);
+            new_flux[group] = solveOneGroupWithSource(scat_source[group], group, old_flux[group]);
         }
 
         // Compute residual: ||new_flux - old_flux|| / ||old_flux||
@@ -216,7 +214,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         // Swap old_flux and new_flux to reuse memory
         std::swap(old_flux, new_flux);
         // Reset new_flux for next iteration
-        #pragma omp parallel for collapse(2) schedule(dynamic)
+        #pragma omp parallel for collapse(2)
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
                 new_flux[group][cell] = 0.0;
@@ -226,10 +224,10 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         iteration++;
     }
 
-    if (residual <= eps) {
+    if (residual <= settings_.getMultiGroupTolerance()) {
         Logger::info("Multi-group solver converged in " + std::to_string(iteration) + " iterations.");
     }
-    if (iteration >= params_.max_iterations) {
+    if (iteration >= settings_.getMultiGroupMaxIterations()) {
         Logger::warning("Multi-group solver did not converge within the maximum iterations.");
     }
     return old_flux;
