@@ -60,6 +60,14 @@ public:
      * @return std::vector<std::vector<double>> Converged scalar flux vector.
      */
     std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, double eps = 1e-5, const std::vector<std::vector<double>>& initial_guess = {});
+    /**
+     * @brief Solves the eigenvalue problem using the power iteration method.
+     * 
+     * @param eps Convergence threshold.
+     * @return std::vector<double> Converged scalar flux vector.
+     */
+    // for now return a NotImplemented error
+    std::vector<double> solveEigenvalueProblem(double eps = 1e-5) { throw std::runtime_error("Not implemented"); }
 
     /**
      * @brief Retrieves the computed effective multiplication factor (k_eff).
