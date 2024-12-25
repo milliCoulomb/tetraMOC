@@ -8,41 +8,18 @@
 #include "AngularQuadrature.hpp" // Include AngularQuadrature
 #include "TrackingData.hpp" // Include TrackingData
 #include "Vector3D.hpp"
+#include "Settings.hpp"
 
 #include <vector>
 #include <mutex>
 
 class BoltzmannSolver {
 public:
-    /**
-     * @brief Struct to hold solver parameters.
-     */
-    struct SolverParams {
-        double convergence_threshold;
-        int max_iterations;
-        double initial_k_eff;
-    
-        SolverParams()
-            : convergence_threshold(1e-5),
-              max_iterations(1000),
-              initial_k_eff(1.0)
-        {}
-    };
-
-    /**
-     * @brief Constructor for BoltzmannSolver.
-     * 
-     * @param input_handler Reference to InputHandler containing cross-section data.
-     * @param mesh_handler Reference to MeshHandler containing mesh data.
-     * @param tracking_data Vector of TrackingData containing ray tracing data.
-     * @param angular_quadrature Reference to AngularQuadrature containing angles and weights.
-     * @param params Solver parameters.
-     */
     BoltzmannSolver(const InputHandler& input_handler,
                    const MeshHandler& mesh_handler,
                    const std::vector<TrackingData>& tracking_data,
                    const AngularQuadrature& angular_quadrature,
-                   const SolverParams& params = SolverParams());
+                   const Settings& settings);
 
     /**
      * @brief Solves the one-group transport equation with an external source.
@@ -51,7 +28,7 @@ public:
      * @param eps Convergence threshold.
      * @return std::vector<double> Converged scalar flux vector.
      */
-    std::vector<double> solveOneGroupWithSource(const std::vector<double>& external_source, const int group, double eps = 1e-5, const std::vector<double>& initial_guess = {});
+    std::vector<double> solveOneGroupWithSource(const std::vector<double>& external_source, const int group, const std::vector<double>& initial_guess = {});
     /**
      * @brief Solves the multi-group transport equation with an external source.
      * 
@@ -59,7 +36,7 @@ public:
      * @param eps Convergence threshold.
      * @return std::vector<std::vector<double>> Converged scalar flux vector.
      */
-    std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, double eps = 1e-5, const std::vector<std::vector<double>>& initial_guess = {});
+    std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, const std::vector<std::vector<double>>& initial_guess = {});
     /**
      * @brief Solves the eigenvalue problem using the power iteration method.
      * 
@@ -88,7 +65,7 @@ private:
     const MeshHandler& mesh_;
     const std::vector<TrackingData>& tracking_data_;
     const AngularQuadrature& angular_quadrature_;
-    SolverParams params_;
+    const Settings& settings_;
 
     int num_groups_;
     int num_cells_;
