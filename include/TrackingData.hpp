@@ -2,10 +2,8 @@
 #ifndef TRACKINGDATA_HPP
 #define TRACKINGDATA_HPP
 
-#include <vector>
 #include "Vector3D.hpp"
 
-// Structure to store information about a single cell traversal
 struct CellTrace {
     int cell_id;
     double time_spent;
@@ -13,12 +11,26 @@ struct CellTrace {
     Vector3D end_point;
 };
 
-// Structure to store tracking data for a single ray
 struct TrackingData {
-    int ray_id;
-    Vector3D direction; // Added direction for better traceability
-    double direction_weight; // Added direction weight for better traceability
+    int ray_id = -1; // Initialize ray_id to a default value
+    Vector3D direction;
+    double direction_weight;
     std::vector<CellTrace> cell_traces;
+
+    // Default constructor
+    TrackingData() = default;
+
+    // Copy constructor
+    TrackingData(const TrackingData& other) = default;
+
+    // Move constructor
+    TrackingData(TrackingData&& other) noexcept = default;
+
+    // Copy assignment operator
+    TrackingData& operator=(const TrackingData& other) = default;
+
+    // Move assignment operator
+    TrackingData& operator=(TrackingData&& other) noexcept = default;
 };
 
 #endif // TRACKINGDATA_HPP
