@@ -12,6 +12,7 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 # Liste des fichiers de test
 set(TEST_SOURCES
     test_Vector3D.cpp
+    test_Settings.cpp
     test_Quadrature.cpp
     test_AngularQuadrature.cpp
     test_Tetrahedron.cpp
