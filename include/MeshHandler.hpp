@@ -90,6 +90,9 @@ public:
     // calculate the centroid of a tetrahedron
     Vector3D getCellCenter(int cell_id) const;
 
+    // return the total number of faces
+    int getTotalFaces() const { return static_cast<int>(faces.size()); }
+
 private:
     std::vector<Vector3D> nodes;
     std::vector<TetraCell> cells;
