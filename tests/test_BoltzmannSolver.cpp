@@ -675,3 +675,11 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTrueAngularQuadratureTrueRayTraci
     // test if scalar_flux[1][0] is expected_phi2
     EXPECT_NEAR(scalar_flux[1][0], expected_phi2, 1e-5) << "Scalar flux for Group 2 should match expected value";
 }
+// next we should test some eigenvalue problem in infinite medium, one group
+// the problem becomes Sigma_t phi = (Sigma_s + nu * Sigma_f / k) phi
+// we search non trivial solution, so that phi != 0, meaning
+// det(Sigma_t - (Sigma_s + nu * Sigma_f / k) * I) = 0
+// which is a very dumb ways to say that we search for k such that
+// Sigma_t = Sigma_s + nu * Sigma_f / k
+// which has solution in k : k = nu * Sigma_f / (Sigma_t - Sigma_s) (k_inf)
+// The same is true for the two groups case
