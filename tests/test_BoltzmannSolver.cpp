@@ -12,6 +12,7 @@
 #include "InputHandler.hpp"
 #include "BoltzmannSolver.hpp"
 #include "RayTracerManager.hpp"
+#include "Settings.hpp"
 
 #include <fstream>
 #include <cstdio> // For std::remove
@@ -299,11 +300,11 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoRaysInfiniteOneGroup) {
     EXPECT_NEAR(collapsed_flux[0], expected_collapsed_flux, 1e-6) << "Collapsed flux should match the weighted sum of fluxes";
     
     // initialiase struct params from BoltzmannSolver
-    BoltzmannSolver::SolverParams params;
+    Settings settings;
 
-    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
     std::vector<double> external_source = setupSingleCellField();
-    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
+    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0);
     const double expected_scalar_flux_infinite = external_source[0] / (sigma_t - sigma_s);
     EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite, 1e-6) << "Scalar flux should match expected value for infinite medium";
 }
@@ -381,12 +382,12 @@ TEST_F(BoltzmannSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     FluxSolver flux_solver(mesh, tracking_data, angular_quadrature, sigma_t);
     // check the size of flux_data_
     ASSERT_EQ(flux_solver.getFluxData().size(), 2) << "There should be flux data for 2 cells";
-    // initialiase struct params from BoltzmannSolver
-    BoltzmannSolver::SolverParams params;
+    
+    Settings settings;
 
-    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
     std::vector<double> external_source = setupTwoCellField();
-    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
+    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0);
     const double expected_scalar_flux_infinite_cell0 = external_source[0] / (sigma_t - sigma_s);
     const double expected_scalar_flux_infinite_cell1 = external_source[1] / (sigma_t - sigma_s);
     EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite_cell0, 1e-6) << "Scalar flux for Cell 0 should match expected value for infinite medium";
@@ -436,12 +437,11 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     // create source term
     std::vector<double> source = setupSingleCellField();
     
-    // initialiase struct params from BoltzmannSolver
-    BoltzmannSolver::SolverParams params;
+    Settings settings;
 
-    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
     std::vector<double> external_source = setupSingleCellField();
-    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
+    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0);
     const double expected_scalar_flux_infinite = external_source[0] / (sigma_t - sigma_s);
     EXPECT_NEAR(scalar_flux[0], expected_scalar_flux_infinite, 1e-6) << "Scalar flux should match expected value for infinite medium";
 }
@@ -490,14 +490,13 @@ TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfi
     // test if size of flux_data_[0] is 2
     ASSERT_EQ(flux_solver.getFluxData()[0].size(), num_azimuthal * num_polar) << "There should be flux data for " << num_azimuthal * num_polar << " directions";
 
-    // initialiase struct params from BoltzmannSolver
-    BoltzmannSolver::SolverParams params;
+    Settings settings;
 
-    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
 
     std::vector<double> external_source = setupTwoCellField();
 
-    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0, 1e-7);
+    std::vector<double> scalar_flux = bt_solver.solveOneGroupWithSource(external_source, 0);
     const double expected_scalar_flux_infinite_cell0 = external_source[0] / (sigma_t - sigma_s);
     const double expected_scalar_flux_infinite_cell1 = external_source[1] / (sigma_t - sigma_s);
 
@@ -557,12 +556,10 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTwoRaysTwoDirectionsInfiniteMediu
     ASSERT_NEAR(source[0][0], 1.0, 1e-6) << "Source term for Group 1 should be 1.0";
     ASSERT_NEAR(source[1][0], 4.0, 1e-6) << "Source term for Group 2 should be 4.0";
 
-    // init params
-    BoltzmannSolver::SolverParams params;
+    Settings settings;
 
-    // Initialize BoltzmannSolver
-    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
-    std::vector<std::vector<double>> scalar_flux = bt_solver.solveMultiGroupWithSource(source, 1e-7);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
+    std::vector<std::vector<double>> scalar_flux = bt_solver.solveMultiGroupWithSource(source);
     const double sigma_t1 = input_handler.getEnergyGroupData(0).total_xs;
     ASSERT_NEAR(sigma_t1, 1.0, 1e-6) << "Total cross section for Group 1 should be 1.0";
     const double sigma_t2 = input_handler.getEnergyGroupData(1).total_xs;
@@ -639,12 +636,10 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTrueAngularQuadratureTrueRayTraci
     ASSERT_NEAR(source[0][0], 1.0, 1e-6) << "Source term for Group 1 should be 1.0";
     ASSERT_NEAR(source[1][0], 4.0, 1e-6) << "Source term for Group 2 should be 4.0";
 
-    // init params
-    BoltzmannSolver::SolverParams params;
+    Settings settings;
 
-    // Initialize BoltzmannSolver
-    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, params);
-    std::vector<std::vector<double>> scalar_flux = bt_solver.solveMultiGroupWithSource(source, 1e-7);
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
+    std::vector<std::vector<double>> scalar_flux = bt_solver.solveMultiGroupWithSource(source);
     const double sigma_t1 = input_handler.getEnergyGroupData(0).total_xs;
     ASSERT_NEAR(sigma_t1, 1.0, 1e-6) << "Total cross section for Group 1 should be 1.0";
     const double sigma_t2 = input_handler.getEnergyGroupData(1).total_xs;
