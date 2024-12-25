@@ -25,7 +25,7 @@ public:
      * @brief Solves the one-group transport equation with an external source.
      * 
      * @param external_source External source vector (size = number of cells).
-     * @param eps Convergence threshold.
+     * 
      * @return std::vector<double> Converged scalar flux vector.
      */
     std::vector<double> solveOneGroupWithSource(const std::vector<double>& external_source, const int group, const std::vector<double>& initial_guess = {});
@@ -33,18 +33,18 @@ public:
      * @brief Solves the multi-group transport equation with an external source.
      * 
      * @param external_source External source vector std::vector<std::vector<double>> (size = number of groups, each group size = number of cells).
-     * @param eps Convergence threshold.
+     * 
      * @return std::vector<std::vector<double>> Converged scalar flux vector.
      */
     std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, const std::vector<std::vector<double>>& initial_guess = {});
     /**
      * @brief Solves the eigenvalue problem using the power iteration method.
      * 
-     * @param eps Convergence threshold.
+     * 
      * @return std::vector<double> Converged scalar flux vector.
      */
     // for now return a NotImplemented error
-    std::vector<double> solveEigenvalueProblem(double eps = 1e-5) { throw std::runtime_error("Not implemented"); }
+    std::vector<double> solveEigenvalueProblem() { throw std::runtime_error("Not implemented"); }
 
     /**
      * @brief Retrieves the computed effective multiplication factor (k_eff).
