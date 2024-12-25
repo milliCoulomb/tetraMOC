@@ -1,6 +1,7 @@
 # Prerequisites
 *.d
 /build/
+/build_*/
 /venv/
 
 *.med
