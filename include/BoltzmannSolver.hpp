@@ -101,6 +101,16 @@ private:
      * @return std::vector<std::vector<double>> Scattering source vector.
      */
     std::vector<std::vector<double>> computeMultiGroupScatteringSource(const std::vector<std::vector<double>>& scalar_flux) const;
+
+    /**
+     * @brief Computes the fission source.
+     * 
+     * @param scalar_flux Current scalar flux vector.
+     * @param old_keff Old effective multiplication factor.
+     * @return std::vector<double> Fission source vector.
+     */
+
+    std::vector<std::vector<double>> computeFissionSource(const std::vector<std::vector<double>>& scalar_flux, const double old_keff) const;
 };
 
 #endif // BOLTZMANN_SOLVER_HPP
