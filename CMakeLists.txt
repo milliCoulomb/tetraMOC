@@ -24,6 +24,12 @@ if(NOT OpenMP_FOUND)
     message(FATAL_ERROR "OpenMP not found")
 endif()
 
+# Find yaml-cpp
+find_package(yaml-cpp REQUIRED)
+if(NOT yaml-cpp_FOUND)
+    message(FATAL_ERROR "yaml-cpp not found")
+endif()
+
 # Ajouter les répertoires d'en-têtes
 include_directories(include)
 
