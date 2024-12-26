@@ -21,6 +21,7 @@ set(SOURCE_FILES
     RayTracerManager.cpp
     FluxSolver.cpp
     InputHandler.cpp
+    InputDeck.cpp
     BoltzmannSolver.cpp
 )
 
@@ -31,7 +32,7 @@ add_library(moc_solver_lib STATIC ${SOURCE_FILES})
 target_include_directories(moc_solver_lib PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 # Link MEDCoupling and OpenMP to the library
-target_link_libraries(moc_solver_lib PUBLIC OpenMP::OpenMP_CXX)
+target_link_libraries(moc_solver_lib PUBLIC OpenMP::OpenMP_CXX yaml-cpp)
 
 # Add compiler warning flags based on the compiler
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
