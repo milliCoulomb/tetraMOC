@@ -79,10 +79,15 @@ std::vector<std::vector<double>> BoltzmannSolver::computeFissionSource(const std
         fission_spectrum[group] = group_data.fission_spectrum;
     }
 
+    // Parallelize over groups and cells to avoid race conditions
     #pragma omp parallel for collapse(2) schedule(static)
     for(int group = 0; group < num_groups_; ++group) {
         for(int cell = 0; cell < num_cells_; ++cell) {
-            fission_source[group][cell] = fission_xs[group] * scalar_flux[group][cell] * fission_spectrum[group];
+            double sum = 0.0;
+            for(int group_prime = 0; group_prime < num_groups_; ++group_prime) {
+                sum += fission_xs[group_prime] * scalar_flux[group_prime][cell];
+            }
+            fission_source[group][cell] = fission_spectrum[group] * sum;
         }
     }
 
