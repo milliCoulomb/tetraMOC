@@ -198,7 +198,7 @@ protected:
         // Define material data content
         std::string nuc_data_content = 
             "1\n" // Number of materials
-            "1.0 0.46 0.1 2.0 1.00 0.05\n"; // Material 0: total_xs, fission_xs, scattering_xs, multiplicity, fission_spectrum, delayed_spectrum
+            "1.0 0.46 0.1 2.0 1.00 1.00\n"; // Material 0: total_xs, fission_xs, scattering_xs, multiplicity, fission_spectrum, delayed_spectrum
         
         // Create temporary nuc_data.txt
         if(!createTempFile(nuc_data_file, nuc_data_content)) return false;
@@ -708,7 +708,7 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     bool constant_dir_bool = true;
     RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     // Generate tracking data
-    int rays_per_face = 3;
+    int rays_per_face = 8;
     manager.generateTrackingData(rays_per_face);
     
     // Retrieve tracking data
