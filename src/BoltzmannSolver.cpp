@@ -70,18 +70,22 @@ std::vector<std::vector<double>> BoltzmannSolver::computeFissionSource(const std
 {
     std::vector<std::vector<double>> fission_source(num_groups_, std::vector<double>(num_cells_, 0.0));
 
-    // Precompute fission cross sections to reduce repeated access
+    // Precompute fission cross sections and spectra to reduce repeated access
     std::vector<double> fission_xs(num_groups_, 0.0);
+    std::vector<double> fission_spectrum(num_groups_, 0.0);
     for(int group = 0; group < num_groups_; ++group){
-        fission_xs[group] = input_.getEnergyGroupData(group).fission_xs * input_.getEnergyGroupData(group).multiplicity / old_keff;
+        const auto& group_data = input_.getEnergyGroupData(group);
+        fission_xs[group] = group_data.fission_xs * group_data.multiplicity / old_keff;
+        fission_spectrum[group] = group_data.fission_spectrum;
     }
 
-    #pragma omp parallel for collapse(2)
-    for(int cell = 0; cell < num_cells_; ++cell) {
-        for(int group = 0; group < num_groups_; ++group) {
-            fission_source[group][cell] = fission_xs[group] * scalar_flux[group][cell] * input_.getEnergyGroupData(group).fission_spectrum;
+    #pragma omp parallel for collapse(2) schedule(static)
+    for(int group = 0; group < num_groups_; ++group) {
+        for(int cell = 0; cell < num_cells_; ++cell) {
+            fission_source[group][cell] = fission_xs[group] * scalar_flux[group][cell] * fission_spectrum[group];
         }
     }
+
     return fission_source;
 }
 
@@ -275,7 +279,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
 
 std::vector<std::vector<double>> BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess) {
     // set OpenMP number of threads to one for now
-    omp_set_num_threads(1);
+    // omp_set_num_threads(1);
     // Initialize scalar flux with initial guess or ones
     std::vector<std::vector<double>> old_flux = initial_guess;
     if (old_flux.empty() || 
