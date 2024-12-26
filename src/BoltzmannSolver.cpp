@@ -85,6 +85,26 @@ std::vector<std::vector<double>> BoltzmannSolver::computeFissionSource(const std
     return fission_source;
 }
 
+std::vector<std::vector<double>> BoltzmannSolver::computeNuFissionSource(const std::vector<std::vector<double>>& scalar_flux,
+    const double old_keff) const
+{
+    std::vector<std::vector<double>> nu_fission_source(num_groups_, std::vector<double>(num_cells_, 0.0));
+
+    // Precompute fission cross sections to reduce repeated access
+    std::vector<double> fission_xs(num_groups_, 0.0);
+    for(int group = 0; group < num_groups_; ++group){
+        fission_xs[group] = input_.getEnergyGroupData(group).fission_xs * input_.getEnergyGroupData(group).multiplicity / old_keff;
+    }
+
+    #pragma omp parallel for collapse(2)
+    for(int cell = 0; cell < num_cells_; ++cell) {
+        for(int group = 0; group < num_groups_; ++group) {
+            nu_fission_source[group][cell] = fission_xs[group] * scalar_flux[group][cell];
+        }
+    }
+    return nu_fission_source;
+}
+
 std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
     const std::vector<double>& external_source, 
     const int group, 
@@ -210,7 +230,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         }
 
         // Solve one group problem for each group
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for(int group = 0; group < num_groups_; ++group) {
             new_flux[group] = solveOneGroupWithSource(scat_source[group], group, old_flux[group]);
         }
@@ -253,16 +273,107 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
     return old_flux;
 }
 
-void BoltzmannSolver::updateKEff(const std::vector<double>& fission_source_new,
-                                 const std::vector<double>& fission_source_old) {
+std::vector<std::vector<double>> BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess) {
+    // Initialize scalar flux with initial guess or ones
+    std::vector<std::vector<double>> old_flux = initial_guess;
+    if (old_flux.empty() || 
+        static_cast<int>(old_flux.size()) != num_groups_ || 
+        static_cast<int>(old_flux[0].size()) != num_cells_) 
+    {
+        old_flux.assign(num_groups_, std::vector<double>(num_cells_, 1.0));
+    }
+
+    // Initialize fission sources
+    std::vector<std::vector<double>> old_fission_source(num_groups_, std::vector<double>(num_cells_, 1.0));
+    std::vector<std::vector<double>> old_nu_fission_source(num_groups_, std::vector<double>(num_cells_, 1.0));
+
+    // Initialize new_flux and sources once
+    std::vector<std::vector<double>> new_flux(num_groups_, std::vector<double>(num_cells_, 0.0));
+    std::vector<std::vector<double>> new_fission_source(num_groups_, std::vector<double>(num_cells_, 0.0));
+    std::vector<std::vector<double>> new_nu_fission_source(num_groups_, std::vector<double>(num_cells_, 0.0));
+
+    double residual_k = 1.0;
+    double residual_fission_source = 1.0;
+    int iteration = 0;
+
+    Logger::info("Starting eigenvalue solver.");
+
+    while (residual_k > settings_.getKeffTolerance() && 
+           residual_fission_source > settings_.getFissionSourceTolerance() && 
+           iteration < settings_.getMultiGroupMaxIterations())
+    {
+        Logger::info("Eigenvalue Iteration " + std::to_string(iteration + 1));
+
+        // Compute fission source
+        computeFissionSource(old_flux, k_eff_old_);
+
+        // Solve multi-group problem with fission source as external source
+        solveMultiGroupWithSource(new_fission_source, old_flux);
+
+        // Compute nu-fission source
+        computeNuFissionSource(new_flux, k_eff_old_);
+
+        // Calculate residual for the flux
+        double norm_diff = 0.0;
+        double norm_old = 0.0;
+
+        #pragma omp parallel for reduction(+:norm_diff, norm_old) collapse(2) schedule(dynamic)
+        for (int group = 0; group < num_groups_; ++group) {
+            for (int cell = 0; cell < num_cells_; ++cell) {
+                double diff = new_flux[group][cell] - old_flux[group][cell];
+                norm_diff += diff * diff;
+                norm_old += old_flux[group][cell] * old_flux[group][cell];
+            }
+        }
+
+        residual_fission_source = (norm_old > 0.0) ? std::sqrt(norm_diff) / std::sqrt(norm_old) : 0.0;
+        Logger::info("Fission source residual: " + std::to_string(residual_fission_source));
+
+        // Update k_eff
+        updateKEff(new_nu_fission_source, old_nu_fission_source);
+        // Calculate residual for k_eff
+        residual_k = std::abs(k_eff_ - k_eff_old_) / k_eff_old_;
+        Logger::info("k_eff residual: " + std::to_string(residual_k));
+
+        // Update old values with new values in place
+        old_flux.swap(new_flux);
+        old_fission_source.swap(new_fission_source);
+        old_nu_fission_source.swap(new_nu_fission_source);
+
+        // Reset new_flux, new_fission_source, and new_nu_fission_source for next iteration
+        #pragma omp parallel for collapse(2) schedule(dynamic)
+        for (int group = 0; group < num_groups_; ++group) {
+            for (int cell = 0; cell < num_cells_; ++cell) {
+                new_flux[group][cell] = 0.0;
+                new_fission_source[group][cell] = 0.0;
+                new_nu_fission_source[group][cell] = 0.0;
+            }
+        }
+
+        iteration++;
+    }
+
+    if (residual_k <= settings_.getKeffTolerance()) {
+        Logger::info("Eigenvalue solver converged in " + std::to_string(iteration) + " iterations.");
+    } else {
+        Logger::warning("Eigenvalue solver did not converge within the maximum iterations.");
+    }
+
+    return old_flux;
+}
+
+void BoltzmannSolver::updateKEff(const std::vector<std::vector<double>>& fission_source_new,
+                                 const std::vector<std::vector<double>>& fission_source_old) {
     double sum_new = 0.0;
     double sum_old = 0.0;
 
     // Compute total fission source
-    #pragma omp parallel for reduction(+:sum_new, sum_old)
-    for (int cell = 0; cell < num_cells_; ++cell) {
-        sum_new += fission_source_new[cell];
-        sum_old += fission_source_old[cell];
+    #pragma omp parallel for reduction(+:sum_new, sum_old) collapse(2) schedule(dynamic)
+    for (int group = 0; group < num_groups_; ++group) {
+        for (int cell = 0; cell < num_cells_; ++cell) {
+            sum_new += fission_source_new[group][cell] * fission_source_new[group][cell];
+            sum_old += fission_source_old[group][cell] * fission_source_old[group][cell];
+        }
     }
 
     if (sum_old < EPSILON) {
@@ -270,14 +381,14 @@ void BoltzmannSolver::updateKEff(const std::vector<double>& fission_source_new,
         return;
     }
 
-    double new_k_eff = sum_new / sum_old;
+    double new_k_eff = std::sqrt(sum_new / sum_old);
 
-    // Thread-safe update of k_eff
-    {
-        std::lock_guard<std::mutex> lock(k_eff_mutex_);
-        k_eff_old_ = k_eff_;
-        k_eff_ = new_k_eff;
-    }
+    // Atomically update k_eff_
+    #pragma omp atomic write
+    k_eff_old_ = k_eff_;
+
+    #pragma omp atomic write
+    k_eff_ = new_k_eff;
 }
 
 double BoltzmannSolver::getKEff() const {
