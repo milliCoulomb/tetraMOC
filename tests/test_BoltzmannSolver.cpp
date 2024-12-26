@@ -198,7 +198,7 @@ protected:
         // Define material data content
         std::string nuc_data_content = 
             "1\n" // Number of materials
-            "1.0 0.01 0.1 2.0 0.95 0.05\n"; // Material 0: total_xs, fission_xs, scattering_xs, multiplicity, fission_spectrum, delayed_spectrum
+            "1.0 0.46 0.1 2.0 1.00 0.05\n"; // Material 0: total_xs, fission_xs, scattering_xs, multiplicity, fission_spectrum, delayed_spectrum
         
         // Create temporary nuc_data.txt
         if(!createTempFile(nuc_data_file, nuc_data_content)) return false;
@@ -683,3 +683,47 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTrueAngularQuadratureTrueRayTraci
 // Sigma_t = Sigma_s + nu * Sigma_f / k
 // which has solution in k : k = nu * Sigma_f / (Sigma_t - Sigma_s) (k_inf)
 // The same is true for the two groups case
+// Test case: Single Cell, true angular quadrature, true RayTracing, infinite medium, one group
+TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfiniteOneGroupEigenvalue) {
+     MeshHandler mesh;
+    ASSERT_TRUE(setupSingleCellInfiniteMesh(mesh)) << "Failed to setup single cell mesh";
+    
+    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+
+    InputHandler input_handler;
+    ASSERT_TRUE(setupInputHandler(input_handler)) << "Failed to setup input handler";
+
+    Field field;
+    ASSERT_TRUE(setupSimpleFieldOneCell(field)) << "Failed to setup simple field";
+    
+    const int num_azimuthal = 4;
+    const int num_polar = 2;
+    AngularQuadrature angular_quadrature(num_azimuthal, num_polar);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(angular_quadrature.getDirections().size(), 8) << "There should be 8 directions";
+    // test if sum of weights is 4
+    EXPECT_NEAR(angular_quadrature.getTotalWeight(), 4.0 * M_PI, 1e-6) << "Sum of weights should be 4.0 * M_PI";
+
+    bool use_half_quadrature_for_constant = false;
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
+    // Generate tracking data
+    int rays_per_face = 3;
+    manager.generateTrackingData(rays_per_face);
+    
+    // Retrieve tracking data
+    const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
+    
+    Settings settings;
+
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
+    std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
+    // compute the analytical keff
+    const double nu = input_handler.getEnergyGroupData(0).multiplicity;
+    const double sigma_f = input_handler.getEnergyGroupData(0).fission_xs;
+    const double sigma_t = input_handler.getEnergyGroupData(0).total_xs;
+    const double sigma_s = input_handler.getSelfScatteringXS(0);
+    const double k_inf = nu * sigma_f / (sigma_t - sigma_s);
+    const double calculated_keff = bt_solver.getKEff();
+    EXPECT_NEAR(calculated_keff, k_inf, 1e-6) << "Eigenvalue problem should match analytical solution";
+}
