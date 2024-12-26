@@ -1,282 +1,250 @@
 # TetraMOC
 
-TetraMOC is a C++ library designed for solving the Boltzmann transport equation using tetrahedral meshes. It includes modules for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![C++](https://img.shields.io/badge/language-C++-blue.svg)
+![CMake](https://img.shields.io/badge/build-CMake-green.svg)
+
+**TetraMOC** is a high-performance C++ library for solving the Boltzmann transport equation using tetrahedral meshes. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities.
 
 ## Table of Contents
 
-- Features
-- Installation
-- Usage
-- Modules
-  - MeshHandler.hpp
-  - Vector3D.hpp
-  - Field.hpp
-  - AngularQuadrature.hpp
-  - TrackingData.hpp
-  - RayTracer.hpp
-  - RayTracerManager.hpp
-  - FluxSolver.hpp
-  - BoltzmannSolver.hpp
-  - InputHandler.hpp
-  - Logger.hpp
-  - Quadrature.hpp
-  - GeometryUtils.hpp
-  - Tetrahedron.hpp
-- Contributing
-- License
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Modules](#modules)
+  - [MeshHandler.hpp](#meshhandlerhpp)
+  - [Vector3D.hpp](#vector3dhpp)
+  - [Field.hpp](#fieldhpp)
+  - [AngularQuadrature.hpp](#angularquadraturehpp)
+  - [TrackingData.hpp](#trackingdatahpp)
+  - [RayTracer.hpp](#raytracerhpp)
+  - [RayTracerManager.hpp](#raytracermanagerhpp)
+  - [FluxSolver.hpp](#fluxsolverhpp)
+  - [BoltzmannSolver.hpp](#boltzmannsolverhpp)
+  - [InputHandler.hpp](#inputhandlerhpp)
+  - [Logger.hpp](#loggerhpp)
+  - [Quadrature.hpp](#quadraturehpp)
+  - [GeometryUtils.hpp](#geometryutilshpp)
+  - [Tetrahedron.hpp](#tetrahedronhpp)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
-- **Mesh Handling**: Load and manage tetrahedral meshes.
-- **Vector Operations**: 3D vector mathematics.
-- **Angular Quadrature**: Generate and manage angular quadrature sets.
-- **Ray Tracing**: Trace rays through the mesh for flux calculations.
-- **Flux Solving**: Compute and collapse flux data.
-- **Boltzmann Solver**: Solve the Boltzmann transport equation.
-- **Logging**: Integrated logging utilities for debugging and information.
-- **Input Handling**: Load and manage input data for simulations.
+- **Mesh Handling**: Efficiently load and manage tetrahedral meshes.
+- **Vector Operations**: Comprehensive 3D vector mathematics.
+- **Angular Quadrature**: Generate and manage angular quadrature sets for accurate integrations.
+- **Ray Tracing**: Perform ray tracing through meshes for precise flux calculations.
+- **Flux Solving**: Compute and collapse flux data seamlessly.
+- **Boltzmann Solver**: Robust solver for the Boltzmann transport equation.
+- **Logging**: Integrated logging utilities for debugging and informational purposes.
+- **Input Handling**: Flexible loading and management of simulation input data.
 
 ## Installation
 
-1. **Clone the Repository**:
-    ```shell
+### Prerequisites
+
+- **C++ Compiler**: Supporting C++17 or higher.
+- **CMake**: Version 3.10 or higher.
+- **Boost Libraries**: Required for certain modules.
+
+### Steps
+
+1. **Clone the Repository**
+
+    ```bash
     git clone https://github.com/yourusername/TetraMOC.git
     cd TetraMOC
     ```
 
-2. **Build the Project**:
-    ```shell
+2. **Build the Project**
+
+    ```bash
     mkdir build
     cd build
     cmake ..
     make
     ```
 
+3. **Run Tests** (Optional)
+
+    ```bash
+    make test
+    ```
+
 ## Usage
 
-Refer to the examples directory for sample applications using TetraMOC modules.
+Refer to the [examples](examples/) directory for sample applications demonstrating the usage of TetraMOC modules. Below is a basic example to get you started:
+
+```cpp
+#include <TetraMOC/MeshHandler.hpp>
+#include <TetraMOC/BoltzmannSolver.hpp>
+#include <TetraMOC/Logger.hpp>
+
+int main() {
+    TetraMOC::Logger::init();
+    TetraMOC::MeshHandler mesh;
+    mesh.loadNodes("nodes.dat");
+    mesh.loadCells("cells.dat");
+    mesh.loadFaceConnectivity("faces.dat");
+
+    TetraMOC::BoltzmannSolver solver(mesh);
+    solver.solve();
+
+    return 0;
+}
+```
 
 ## Modules
 
-### 
+### MeshHandler.hpp
 
-MeshHandler.hpp
+Manages mesh data, including nodes, cells, and face connectivity.
 
+- **Key Structures**:
+  - `TetraCell`: Represents a tetrahedral cell.
+  - `MeshFace`: Represents a mesh face.
 
+- **Key Methods**:
+  - `loadNodes()`, `loadCells()`, `loadFaceConnectivity()`: Load mesh data from files.
+  - `getCellCenter()`: Compute the center of a cell.
 
-Manages mesh data including nodes, cells, and face connectivity.
-
-**Key Structures**:
-- 
-
-TetraCell
-
-: Represents tetrahedral cells.
-- 
-
-MeshFace
-
-: Represents mesh faces.
-
-**Key Methods**:
-- `loadNodes()`, `loadCells()`, `loadFaceConnectivity()`: Load mesh data from files.
-- `getCellCenter()`: Compute the center of a cell.
-
-### 
-
-Vector3D.hpp
-
-
+### Vector3D.hpp
 
 Provides a 3D vector class for mathematical operations.
 
-**Features**:
-- Vector addition, subtraction, scalar multiplication/division.
-- Dot and cross products.
-- Norm calculation and normalization.
-- Equality checks with tolerance.
+- **Features**:
+  - Vector addition, subtraction, scalar multiplication/division.
+  - Dot and cross products.
+  - Norm calculation and normalization.
+  - Equality checks with tolerance.
 
-### 
-
-Field.hpp
-
-
+### Field.hpp
 
 Handles field data, supporting both vector and scalar fields.
 
-**Features**:
-- Load fields from files.
-- Access and modify field data.
-- Manage direction vectors.
+- **Features**:
+  - Load fields from files.
+  - Access and modify field data.
+  - Manage direction vectors.
 
-### 
-
-AngularQuadrature.hpp
-
-
+### AngularQuadrature.hpp
 
 Generates and manages angular quadrature sets.
 
-**Key Structures**:
-- 
+- **Key Structures**:
+  - `Direction`: Represents a direction with angles and weight.
 
-Direction
+- **Key Methods**:
+  - `generateQuadrature()`: Generate quadrature points and weights.
 
-: Represents a direction with angles and weight.
-
-**Key Methods**:
-- `generateQuadrature()`: Generate quadrature points and weights.
-
-### 
-
-TrackingData.hpp
-
-
+### TrackingData.hpp
 
 Stores tracking information for rays traced through the mesh.
 
-**Key Structures**:
-- 
+- **Key Structures**:
+  - `CellTrace`: Information about a single cell traversal.
+  - `TrackingData`: Aggregates traces for a single ray.
 
-CellTrace
-
-: Information about a single cell traversal.
-- 
-
-TrackingData
-
-: Aggregates traces for a single ray.
-
-### 
-
-RayTracer.hpp
-
-
+### RayTracer.hpp
 
 Performs ray tracing through the mesh using either variable or constant directions.
 
-**Key Features**:
-- Supports both variable and constant direction modes.
-- Traces rays and records cell traversals.
+- **Key Features**:
+  - Supports both variable and constant direction modes.
+  - Traces rays and records cell traversals.
 
-### 
+### RayTracerManager.hpp
 
-RayTracerManager.hpp
+Manages multiple `RayTracer` instances for comprehensive ray tracing.
 
+- **Key Features**:
+  - Initializes ray tracers based on angular quadrature.
+  - Aggregates tracking data.
+  - Supports parallel processing with OpenMP.
 
-
-Manages multiple 
-
-RayTracer
-
- instances for comprehensive ray tracing.
-
-**Key Features**:
-- Initializes ray tracers based on angular quadrature.
-- Aggregates tracking data.
-- Supports parallel processing with OpenMP.
-
-### 
-
-FluxSolver.hpp
-
-
+### FluxSolver.hpp
 
 Calculates flux within each cell based on tracking data.
 
-**Key Features**:
-- Compute flux contributions from traced rays.
-- Collapse directional flux to scalar flux.
+- **Key Features**:
+  - Compute flux contributions from traced rays.
+  - Collapse directional flux to scalar flux.
 
-### 
-
-BoltzmannSolver.hpp
-
-
+### BoltzmannSolver.hpp
 
 Solves the Boltzmann transport equation using the computed flux.
 
-**Key Features**:
-- Iterative solver with convergence criteria.
-- Computes effective multiplication factor (k_eff).
+- **Key Features**:
+  - Iterative solver with convergence criteria.
+  - Computes effective multiplication factor ($k_{eff}$).
 
-### 
+### InputHandler.hpp
 
-InputHandler.hpp
+Loads and manages input data, including cross-sections and nuclear data.
 
+- **Key Features**:
+  - Load data from files.
+  - Access energy group data.
 
-
-Loads and manages input data including cross-sections and nuclear data.
-
-**Key Features**:
-- Load data from files.
-- Access energy group data.
-
-### 
-
-Logger.hpp
-
-
+### Logger.hpp
 
 Provides logging utilities for the application.
 
-**Features**:
-- Log messages with different severity levels: INFO, WARNING, ERROR.
+- **Features**:
+  - Log messages with different severity levels: INFO, WARNING, ERROR.
 
-### 
-
-Quadrature.hpp
-
-
+### Quadrature.hpp
 
 Implements quadrature methods for numerical integration.
 
-**Key Methods**:
-- Compute Legendre polynomials and their derivatives.
-- Generate Gauss-Legendre and Gauss-Chebyshev quadrature points and weights.
+- **Key Methods**:
+  - Compute Legendre polynomials and their derivatives.
+  - Generate Gauss-Legendre and Gauss-Chebyshev quadrature points and weights.
 
-### 
-
-GeometryUtils.hpp
-
-
+### GeometryUtils.hpp
 
 Provides geometric utilities for mesh operations.
 
-**Key Functions**:
-- 
+- **Key Functions**:
+  - `computeFaceNormal()`: Compute the normal vector of a triangular face.
+  - `samplePointOnTriangle()`: Sample a point uniformly within a triangle.
 
-computeFaceNormal()
-
-: Compute the normal vector of a triangle face.
-- 
-
-samplePointOnTriangle()
-
-: Sample a point uniformly within a triangle.
-
-### 
-
-Tetrahedron.hpp
-
-
+### Tetrahedron.hpp
 
 Represents a tetrahedral element and provides methods for ray exiting.
 
-**Key Features**:
-- Store vertex positions.
-- Find exit points of rays intersecting the tetrahedron.
+- **Key Features**:
+  - Store vertex positions.
+  - Find exit points of rays intersecting the tetrahedron.
 
 ## Contributing
 
+We welcome contributions! To contribute, please follow these steps:
+
 1. **Fork the Repository**
-2. **Create a Feature Branch**: `git checkout -b feature/YourFeature`
-3. **Commit Your Changes**: `git commit -m 'Add some feature'`
-4. **Push to the Branch**: `git push origin feature/YourFeature`
+2. **Create a Feature Branch**
+
+    ```bash
+    git checkout -b feature/YourFeature
+    ```
+
+3. **Commit Your Changes**
+
+    ```bash
+    git commit -m "Add some feature"
+    ```
+
+4. **Push to the Branch**
+
+    ```bash
+    git push origin feature/YourFeature
+    ```
+
 5. **Open a Pull Request**
 
-Refer to CONTRIBUTING.md for more details.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the [MIT License](LICENSE). See the [LICENSE](LICENSE) file for details.
