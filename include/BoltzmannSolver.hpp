@@ -44,7 +44,7 @@ public:
      * @return std::vector<double> Converged scalar flux vector.
      */
     // for now return a NotImplemented error
-    std::vector<double> solveEigenvalueProblem() { throw std::runtime_error("Not implemented"); }
+    std::vector<std::vector<double>> solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess = {});
 
     /**
      * @brief Retrieves the computed effective multiplication factor (k_eff).
@@ -83,8 +83,7 @@ private:
      * @param fission_source_new New fission source vector.
      * @param fission_source_old Old fission source vector.
      */
-    void updateKEff(const std::vector<double>& fission_source_new,
-                   const std::vector<double>& fission_source_old);
+    void updateKEff(const std::vector<std::vector<double>>& fission_source_new, const std::vector<std::vector<double>>& fission_source_old);
 
     /**
      * @brief Computes the scattering source.
@@ -111,6 +110,16 @@ private:
      */
 
     std::vector<std::vector<double>> computeFissionSource(const std::vector<std::vector<double>>& scalar_flux, const double old_keff) const;
+
+    /**
+     * @brief Computes the nu-fission source (not weighted by fission spectrum).
+     * 
+     * @param scalar_flux Current scalar flux vector.
+     * @param old_keff Old effective multiplication factor.
+     * @return std::vector<std::vector<double>> Nu-fission source vector.
+     */
+
+    std::vector<std::vector<double>> computeNuFissionSource(const std::vector<std::vector<double>>& scalar_flux, const double old_keff) const;
 };
 
 #endif // BOLTZMANN_SOLVER_HPP
