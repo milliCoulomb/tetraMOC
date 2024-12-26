@@ -222,6 +222,21 @@ protected:
         return true;
     }
 
+    // helper function for two groups nuclear data
+    bool setupTwoGroupsInputHandlerNoFastFissionNoUpscatter(InputHandler& input_handler) {
+        // Define material data content
+        std::string nuc_data_content = 
+            "2\n" // Number of materials
+            "1.0 1e-6 0.4 0.3 2.0 1.0 0.00\n"
+            "1.2 0.6 1e-6 0.5 2.45 1e-6 0.00\n";
+        
+        // Create temporary nuc_data.txt
+        if(!createTempFile(nuc_data_file, nuc_data_content)) return false;
+        if(!input_handler.loadData(nuc_data_file)) return false;
+
+        return true;
+    }
+
     // Helper function to create a two groups source for a single cell std::vector<std::vector<double>>
     std::vector<std::vector<double>> setupTwoGroupsSingleCellField() {
         // Define scalar fields content
@@ -779,3 +794,59 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
 //     const double calculated_keff = bt_solver.getKEff();
 //     EXPECT_NEAR(calculated_keff, k_inf, 1e-6) << "Eigenvalue problem should match analytical solution";
 // }
+// Test case: Single cell, true angular quadrature, true RayTracing, infinite medium, two groups, eigenvalue problem, no upscattering, no fast fission
+TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfiniteTwoGroupsEigenvalueNoUpscatterNoFastFission) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupSingleCellInfiniteMesh(mesh)) << "Failed to setup single cell mesh";
+    
+    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+
+    InputHandler input_handler;
+    ASSERT_TRUE(setupTwoGroupsInputHandlerNoFastFissionNoUpscatter(input_handler)) << "Failed to setup input handler";
+
+    EXPECT_NEAR(input_handler.getEnergyGroupData(0).total_xs, 1.0, 1e-6) << "Total cross section for Group 1 should be 1.0";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(1).total_xs, 1.2, 1e-6) << "Total cross section for Group 2 should be 1.2";
+    EXPECT_NEAR(input_handler.getSelfScatteringXS(0), 0.4, 1e-6) << "Self-scattering cross section for Group 1 should be 0.4";
+    EXPECT_NEAR(input_handler.getSelfScatteringXS(1), 0.5, 1e-6) << "Self-scattering cross section for Group 2 should be 0.5";
+
+    Field field;
+    ASSERT_TRUE(setupSimpleFieldOneCell(field)) << "Failed to setup simple field";
+
+    const int num_azimuthal = 4;
+    const int num_polar = 2;
+
+    AngularQuadrature angular_quadrature(num_azimuthal, num_polar);
+
+    bool use_half_quadrature_for_constant = false;
+    bool constant_dir_bool = true;
+
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
+
+    int rays_per_face = 8;
+
+    manager.generateTrackingData(rays_per_face);
+
+    const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
+
+    Settings settings;
+
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
+
+    std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
+
+    const double nu2 = input_handler.getEnergyGroupData(1).multiplicity;
+    const double sigma_f2 = input_handler.getEnergyGroupData(1).fission_xs;
+    const double sigma_t2 = input_handler.getEnergyGroupData(1).total_xs;
+    const double sigma_s2 = input_handler.getSelfScatteringXS(1);
+    const double sigma_r2 = sigma_t2 - sigma_s2;
+    const double sigma_t1 = input_handler.getEnergyGroupData(0).total_xs;
+    const double sigma_s1 = input_handler.getSelfScatteringXS(0);
+    const double sigma_r1 = sigma_t1 - sigma_s1;
+    const double sigma_s12 = input_handler.getEnergyGroupData(0).scattering_xs[1];
+
+    const double kinf = nu2 * sigma_f2 * sigma_s12 / (sigma_r1 * sigma_r2);
+
+    const double calculated_keff = bt_solver.getKEff();
+
+    EXPECT_NEAR(calculated_keff, kinf, 1e-5) << "Eigenvalue problem should match analytical solution";
+}
