@@ -196,7 +196,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
 
     return old_flux;
 }
-// TODO: external source should be a std::vector<double> and not a std::vector<std::vector<double>>
+
 std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
     const std::vector<double>& external_source, // sum_i nu_i * sigma_f,i * phi_i
     const std::vector<std::vector<double>>& initial_guess) 
