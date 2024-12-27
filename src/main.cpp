@@ -58,8 +58,12 @@ int main(int argc, char* argv[]) {
                                angular_quadrature, settings);
 
         // Solve eigenvalue problem
-        std::vector<std::vector<double>> flux = solver.solveEigenvalueProblem();
+        bool converged = solver.solveEigenvalueProblem();
 
+        if (!converged) {
+            std::cerr << "Eigenvalue problem did not converge." << std::endl;
+            return 1;
+        }
         // Output k_eff
         std::cout << "Converged k_eff: " << solver.getKEff() << std::endl;
     }
