@@ -27,8 +27,8 @@ endif()
 # Add yaml-cpp subdirectory before finding the package
 add_subdirectory(external/yaml-cpp)
 
-# Find yaml-cpp
-find_package(yaml-cpp REQUIRED)
+# # Find yaml-cpp
+# find_package(yaml-cpp REQUIRED)
 
 # Add include directories
 include_directories(include)
