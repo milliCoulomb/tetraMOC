@@ -732,7 +732,8 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     Settings settings;
 
     BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
-    std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
+    bool converged = bt_solver.solveEigenvalueProblem();
+    ASSERT_TRUE(converged) << "Eigenvalue problem should converge";
     // compute the analytical keff
     const double nu = input_handler.getEnergyGroupData(0).multiplicity;
     const double sigma_f = input_handler.getEnergyGroupData(0).fission_xs;
@@ -789,7 +790,8 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     Settings settings;
 
     BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
-    std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
+    bool converged = bt_solver.solveEigenvalueProblem();
+    ASSERT_TRUE(converged) << "Eigenvalue problem should converge";
     const double k_inf = 1.10048780e+00;
     const double calculated_keff = bt_solver.getKEff();
     EXPECT_NEAR(calculated_keff, k_inf, 1e-6) << "Eigenvalue problem should match analytical solution";
@@ -832,7 +834,8 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
 
     BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
 
-    std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
+    bool converged = bt_solver.solveEigenvalueProblem();
+    ASSERT_TRUE(converged) << "Eigenvalue problem should converge";
 
     const double nu2 = input_handler.getEnergyGroupData(1).multiplicity;
     const double sigma_f2 = input_handler.getEnergyGroupData(1).fission_xs;
