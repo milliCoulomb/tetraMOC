@@ -238,10 +238,10 @@ protected:
     }
 
     // Helper function to create a two groups source for a single cell std::vector<std::vector<double>>
-    std::vector<std::vector<double>> setupTwoGroupsSingleCellField() {
+    std::vector<double> setupTwoGroupsSingleCellField() {
         // Define scalar fields content
         // returns a std::vector<std::vector<double>> with two groups and a single source term, 1.0
-        std::vector<std::vector<double>> source = {{1.0}, {4.0}};
+        std::vector<double> source = {4.0};
         return source;
     }
 };
@@ -565,11 +565,10 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTwoRaysTwoDirectionsInfiniteMediu
     ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
 
     // create source term
-    std::vector<std::vector<double>> source = setupTwoGroupsSingleCellField();
+    auto source = setupTwoGroupsSingleCellField();
     // assert the size of source
-    ASSERT_EQ(source.size(), 2) << "There should be 2 groups";
-    ASSERT_NEAR(source[0][0], 1.0, 1e-6) << "Source term for Group 1 should be 1.0";
-    ASSERT_NEAR(source[1][0], 4.0, 1e-6) << "Source term for Group 2 should be 4.0";
+    ASSERT_EQ(source.size(), 1) << "There should be 1 cell source term";
+    ASSERT_NEAR(source[0], 4.0, 1e-6) << "Fission source term should be 4.0";
 
     Settings settings;
 
@@ -603,8 +602,8 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTwoRaysTwoDirectionsInfiniteMediu
     // phi1 = (sigma_r2 * Q1 + sigma_s21 * Q2) / det(A)
     // phi2 = (sigma_s12 * Q1 + sigma_r1 * Q2) / det(A)
     const double det_A = sigma_r1 * sigma_r2 - sigma_s1_2 * sigma_s2_1;
-    const double expected_phi1 = (sigma_r2 * source[0][0] + sigma_s2_1 * source[1][0]) / det_A;
-    const double expected_phi2 = (sigma_s1_2 * source[0][0] + sigma_r1 * source[1][0]) / det_A;
+    const double expected_phi1 = (sigma_r2 * source[0] * input_handler.getEnergyGroupData(0).fission_spectrum + sigma_s2_1 * source[0] * input_handler.getEnergyGroupData(1).fission_spectrum) / det_A;
+    const double expected_phi2 = (sigma_s1_2 * source[0] * input_handler.getEnergyGroupData(0).fission_spectrum + sigma_r1 * source[0] * input_handler.getEnergyGroupData(1).fission_spectrum) / det_A;
     // test if scalar_flux[0][0] is expected_phi1
     EXPECT_NEAR(scalar_flux[0][0], expected_phi1, 1e-5) << "Scalar flux for Group 1 should match expected value";
     // test if scalar_flux[1][0] is expected_phi2
@@ -645,11 +644,10 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTrueAngularQuadratureTrueRayTraci
     const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
 
     // create source term
-    std::vector<std::vector<double>> source = setupTwoGroupsSingleCellField();
+    auto source = setupTwoGroupsSingleCellField();
     // assert the size of source
-    ASSERT_EQ(source.size(), 2) << "There should be 2 groups";
-    ASSERT_NEAR(source[0][0], 1.0, 1e-6) << "Source term for Group 1 should be 1.0";
-    ASSERT_NEAR(source[1][0], 4.0, 1e-6) << "Source term for Group 2 should be 4.0";
+    ASSERT_EQ(source.size(), 1) << "There should be 1 cell source term";
+    ASSERT_NEAR(source[0], 4.0, 1e-6) << "Fission source term should be 4.0";
 
     Settings settings;
 
@@ -682,9 +680,11 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTrueAngularQuadratureTrueRayTraci
     // det(A) = sigma_r1 * sigma_r2 - sigma_s12 * sigma_s21
     // phi1 = (sigma_r2 * Q1 + sigma_s21 * Q2) / det(A)
     // phi2 = (sigma_s12 * Q1 + sigma_r1 * Q2) / det(A)
+    const double chi1 = input_handler.getEnergyGroupData(0).fission_spectrum;
+    const double chi2 = input_handler.getEnergyGroupData(1).fission_spectrum;
     const double det_A = sigma_r1 * sigma_r2 - sigma_s1_2 * sigma_s2_1;
-    const double expected_phi1 = (sigma_r2 * source[0][0] + sigma_s2_1 * source[1][0]) / det_A;
-    const double expected_phi2 = (sigma_s1_2 * source[0][0] + sigma_r1 * source[1][0]) / det_A;
+    const double expected_phi1 = (sigma_r2 * source[0] * chi1 + sigma_s2_1 * source[0] * chi2) / det_A;
+    const double expected_phi2 = (sigma_s1_2 * source[0] * chi1 + sigma_r1 * source[0] * chi2) / det_A;
     // test if scalar_flux[0][0] is expected_phi1
     EXPECT_NEAR(scalar_flux[0][0], expected_phi1, 1e-5) << "Scalar flux for Group 1 should match expected value";
     // test if scalar_flux[1][0] is expected_phi2
