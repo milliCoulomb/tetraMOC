@@ -18,14 +18,14 @@ const std::array<std::array<int, 3>, NUM_FACES> FACE_VERTEX_INDICES = {{
 // Constructor for Tetrahedron
 Tetrahedron::Tetrahedron(const TetraCell& cell, const std::vector<Vector3D>& nodes, const CellVectorField& field) {
     // Validate that the cell has exactly four node IDs
-    if(cell.node_ids.size() != 4) {
+    if(cell.node_ids.size() != static_cast<size_t>(NUM_FACES)) {
         Logger::error("TetraCell must have exactly four node IDs.");
         throw std::invalid_argument("Invalid number of node IDs in TetraCell.");
     }
 
     // Initialize the vertices and center of mass
     CenterOfMass = Vector3D(0.0, 0.0, 0.0);
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < NUM_FACES; ++i) {
         int node_id = cell.node_ids[i];
         // Validate node_id
         if(node_id < 0 || node_id >= static_cast<int>(nodes.size())) {
