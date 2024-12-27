@@ -74,6 +74,14 @@ By default, the unit tests are compiled and logging is enabled.
     ```bash
     make test
     ``` -->
+2. **Install Python venv with MEDCoupling**
+
+    ```bash
+    cd TetraMOC
+    python -m venv venv
+    pip install -requirements.txt
+    ```
+
 
 ## Usage
 
