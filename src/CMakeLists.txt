@@ -37,6 +37,16 @@ target_link_libraries(moc_solver_lib PUBLIC
     yaml-cpp
 )
 
+# Add executable for main.cpp
+add_executable(tetraMOC main.cpp)
+
+# Link the executable with the library and dependencies
+target_link_libraries(tetraMOC PUBLIC 
+    moc_solver_lib
+    OpenMP::OpenMP_CXX 
+    yaml-cpp
+)
+
 # Add compiler warning flags based on the compiler
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(moc_solver_lib PRIVATE
