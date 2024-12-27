@@ -41,6 +41,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
@@ -110,6 +111,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
@@ -149,6 +151,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
@@ -192,6 +195,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
@@ -270,6 +274,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
@@ -313,6 +318,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 logging:
   level: "INFO"
@@ -352,6 +358,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
@@ -434,6 +441,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  rays_per_face: 8
 
 output:
   flux_output_file: "output/flux.dat"
