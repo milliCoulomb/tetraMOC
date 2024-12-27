@@ -22,6 +22,7 @@ set(SOURCE_FILES
     FluxSolver.cpp
     InputHandler.cpp
     InputDeck.cpp
+    OutputHandler.cpp
     BoltzmannSolver.cpp
 )
 
