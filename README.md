@@ -4,7 +4,9 @@
 ![C++](https://img.shields.io/badge/language-C++-blue.svg)
 ![CMake](https://img.shields.io/badge/build-CMake-green.svg)
 
-**TetraMOC** is a high-performance C++ library for solving the Boltzmann transport equation using tetrahedral meshes. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities.
+**TetraMOC** is a small C++ project for solving the Boltzmann transport equation using tetrahedral meshes. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities. Because the MEDCoupling library was not available without the SALOME platform when this code was written, a preprocessing of the mesh .MED files is needed. The python script will convert the mesh information to .txt files which are read by the C++ code.
+
+TetraMOC reads a YAML file as an input deck, which contains paths to cross-sections, mesh topology preprocessed with Python and solver parameters (number of directions in the angular quadrature, number of rays per boundary face, convergence threshold, etc).
 
 ## Table of Contents
 
@@ -66,11 +68,12 @@
     make
     ```
 
-3. **Run Tests** (Optional)
+By default, the unit tests are compiled and logging is enabled.
+<!-- 3. **Run Tests** (Optional)
 
     ```bash
     make test
-    ```
+    ``` -->
 
 ## Usage
 
