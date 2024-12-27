@@ -282,7 +282,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
     return old_flux;
 }
 
-std::vector<std::vector<double>> BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess) {
+bool BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess) {
     // set OpenMP number of threads to one for now
     // omp_set_num_threads(1);
     // Initialize scalar flux with initial guess or ones
@@ -306,6 +306,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveEigenvalueProblem(const s
     double residual_k = 1.0;
     double residual_fission_source = 1.0;
     int iteration = 0;
+    bool converged = false;
 
     Logger::info("Starting eigenvalue solver.");
 
@@ -365,13 +366,17 @@ std::vector<std::vector<double>> BoltzmannSolver::solveEigenvalueProblem(const s
         iteration++;
     }
 
-    if (residual_k <= settings_.getKeffTolerance()) {
+    if (residual_k <= settings_.getKeffTolerance() &&
+        residual_fission_source <= settings_.getFissionSourceTolerance()) {
         Logger::info("Eigenvalue solver converged in " + std::to_string(iteration) + " iterations.");
+        converged = true;
+        // set the scalar flux to the converged flux
+        scalar_flux_ = std::move(old_flux);
     } else {
         Logger::warning("Eigenvalue solver did not converge within the maximum iterations.");
     }
 
-    return old_flux;
+    return converged;
 }
 
 void BoltzmannSolver::updateKEff(const std::vector<std::vector<double>>& fission_source_new,
