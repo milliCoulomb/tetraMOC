@@ -351,15 +351,6 @@ bool BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<doubl
         std::swap(old_flux, new_flux);
         std::swap(old_nu_fission_source, new_nu_fission_source);
 
-        // Reset new_flux, new_fission_source, and new_nu_fission_source for next iteration
-        #pragma omp parallel for collapse(2) schedule(dynamic)
-        for (int group = 0; group < num_groups_; ++group) {
-            for (int cell = 0; cell < num_cells_; ++cell) {
-                new_flux[group][cell] = 0.0;
-                new_nu_fission_source[cell] = 0.0;
-            }
-        }
-
         iteration++;
     }
 
