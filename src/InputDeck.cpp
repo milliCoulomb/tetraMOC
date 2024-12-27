@@ -40,6 +40,7 @@ InputDeck InputDeckParser::parse(const std::string& filename) {
         deck.solver_parameters.one_group_tolerance = sp_node["one_group_tolerance"].as<double>();
         deck.solver_parameters.fission_source_tolerance = sp_node["fission_source_tolerance"].as<double>();
         deck.solver_parameters.keff_tolerance = sp_node["keff_tolerance"].as<double>();
+        deck.solver_parameters.rays_per_face = sp_node["rays_per_face"].as<int>();
 
         // Parse output settings
         YAML::Node out_node = config["output"];
