@@ -1,15 +1,15 @@
 # tests/CMakeLists.txt
 
-# Activer le test
+# Activate testing
 enable_testing()
 
-# Ajouter Google Test
+# Add Google Test as a subdirectory
 add_subdirectory(${CMAKE_SOURCE_DIR}/external/googletest ${CMAKE_BINARY_DIR}/googletest-build)
 
-# Inclure les répertoires d'en-têtes de Google Test
+# include header files
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-# Liste des fichiers de test
+# test sources
 set(TEST_SOURCES
     test_Vector3D.cpp
     test_Settings.cpp
@@ -27,11 +27,11 @@ set(TEST_SOURCES
     test_BoltzmannSolver.cpp
 )
 
-# Créer l'exécutable des tests
+# create the test executable
 add_executable(runTests ${TEST_SOURCES})
 
-# Lier les bibliothèques nécessaires (Google Test et ta bibliothèque)
+# link libraries
 target_link_libraries(runTests gtest gtest_main moc_solver_lib)
 
-# Ajouter les tests à CTest
+# add tests
 add_test(NAME RunAllTests COMMAND runTests)
