@@ -312,7 +312,7 @@ bool BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<doubl
 
     while ((residual_k > settings_.getKeffTolerance() || 
         residual_fission_source > settings_.getFissionSourceTolerance()) && 
-        iteration < settings_.getMultiGroupMaxIterations())
+        iteration < settings_.getMaxPowerIterations())
     {
         Logger::info("Eigenvalue Iteration " + std::to_string(iteration + 1));
 
