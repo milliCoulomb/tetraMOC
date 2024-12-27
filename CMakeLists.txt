@@ -24,11 +24,11 @@ if(NOT OpenMP_FOUND)
     message(FATAL_ERROR "OpenMP not found")
 endif()
 
+# Add yaml-cpp subdirectory before finding the package
+add_subdirectory(external/yaml-cpp)
+
 # Find yaml-cpp
 find_package(yaml-cpp REQUIRED)
-# if(NOT yaml-cpp_FOUND)
-#     message(FATAL_ERROR "yaml-cpp not found")
-# endif()
 
 # Add include directories
 include_directories(include)
@@ -36,4 +36,3 @@ include_directories(include)
 # subdirectories
 add_subdirectory(src)
 add_subdirectory(tests)
-add_subdirectory(external/yaml-cpp)
