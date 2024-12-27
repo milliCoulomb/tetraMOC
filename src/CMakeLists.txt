@@ -31,7 +31,7 @@ add_library(moc_solver_lib STATIC ${SOURCE_FILES})
 # Include header directories
 target_include_directories(moc_solver_lib PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
-# Link MEDCoupling and OpenMP to the library
+# Link libraries
 target_link_libraries(moc_solver_lib PUBLIC 
     OpenMP::OpenMP_CXX 
     yaml-cpp
