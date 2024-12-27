@@ -31,6 +31,7 @@ struct SolverParameters {
     int one_group_max_iterations;
     double fission_source_tolerance;
     double keff_tolerance;
+    int rays_per_face;
 };
 
 // Structure to hold output settings
