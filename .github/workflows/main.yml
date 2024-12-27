@@ -28,7 +28,7 @@ jobs:
         cmake -DENABLE_LOGGING=OFF ..
         make
 
-    # 4. Exécuter les tests unitaires
+    # Exécuter les tests unitaires
     - name: Run Unit Tests
       run: |
         cd build
