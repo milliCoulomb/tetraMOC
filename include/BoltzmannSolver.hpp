@@ -36,7 +36,7 @@ public:
      * 
      * @return std::vector<std::vector<double>> Converged scalar flux vector.
      */
-    std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<std::vector<double>>& external_source, const std::vector<std::vector<double>>& initial_guess = {});
+    std::vector<std::vector<double>> solveMultiGroupWithSource(const std::vector<double>& external_source, const std::vector<std::vector<double>>& initial_guess = {});
     /**
      * @brief Solves the eigenvalue problem using the power iteration method.
      * 
@@ -92,7 +92,7 @@ private:
      * @param fission_source_new New fission source vector.
      * @param fission_source_old Old fission source vector.
      */
-    void updateKEff(const std::vector<std::vector<double>>& fission_source_new, const std::vector<std::vector<double>>& fission_source_old);
+    void updateKEff(const std::vector<double>& fission_source_new, const std::vector<double>& fission_source_old);
 
     /**
      * @brief Computes the scattering source.
@@ -128,7 +128,7 @@ private:
      * @return std::vector<std::vector<double>> Nu-fission source vector.
      */
 
-    std::vector<std::vector<double>> computeNuFissionSource(const std::vector<std::vector<double>>& scalar_flux, const double old_keff) const;
+    std::vector<double> computeNuFissionSource(const std::vector<std::vector<double>>& scalar_flux, const double old_keff) const;
     // TODO: nu-fission source should be a std::vector<double> instead of std::vector<std::vector<double>> (sum over groups)
 };
 
