@@ -41,10 +41,10 @@ public:
      * @brief Solves the eigenvalue problem using the power iteration method.
      * 
      * 
-     * @return std::vector<double> Converged scalar flux vector.
+     * @return bool True if the eigenvalue problem converged, false otherwise.
      */
     // for now return a NotImplemented error
-    std::vector<std::vector<double>> solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess = {});
+    bool solveEigenvalueProblem(const std::vector<std::vector<double>>& initial_guess = {});
 
     /**
      * @brief Retrieves the computed effective multiplication factor (k_eff).
@@ -60,6 +60,13 @@ public:
      */
     double getQuadratureTotalWeight() const { return QuadratureTotalWeight_; }
 
+    /**
+     * @brief Retrieves the scalar flux.
+     * 
+     * @return std::vector<std::vector<double>> Scalar flux vector.
+     */
+    std::vector<std::vector<double>> getScalarFlux() const { return scalar_flux_; }
+
 private:
     const InputHandler& input_;
     const MeshHandler& mesh_;
@@ -73,6 +80,8 @@ private:
 
     double k_eff_;
     double k_eff_old_;
+
+    std::vector<std::vector<double>> scalar_flux_;
 
     // Mutex for thread-safe k_eff update
     std::mutex k_eff_mutex_;
