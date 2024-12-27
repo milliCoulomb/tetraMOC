@@ -21,6 +21,7 @@ public:
           keff_tolerance_(1e-6),
           n_theta_(10),
           n_phi_(20) {}
+    // TODO: remove the default values for n_theta and n_phi
 
     /**
      * @brief Parameterized constructor to initialize all settings.
