@@ -8,6 +8,8 @@
 #include "BoltzmannSolver.hpp"
 #include "InputHandler.hpp"
 #include "Settings.hpp"
+#include "OutputHandler.hpp"
+#include <fstream>
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -53,6 +55,10 @@ int main(int argc, char* argv[]) {
         settings.setFissionSourceTolerance(input_deck.solver_parameters.fission_source_tolerance);
         settings.setKeffTolerance(input_deck.solver_parameters.keff_tolerance);
 
+        // get the output path
+        std::string output_path_flux = input_deck.output.flux_output_file;
+        std::string output_path_keff = input_deck.output.k_eff_output_file;
+
         // Initialize BoltzmannSolver
         BoltzmannSolver solver(input_handler, mesh_handler, ray_tracer_manager.getTrackingData(),
                                angular_quadrature, settings);
@@ -66,6 +72,13 @@ int main(int argc, char* argv[]) {
         }
         // Output k_eff
         std::cout << "Converged k_eff: " << solver.getKEff() << std::endl;
+        // store the flux
+        std::vector<std::vector<double>> flux = solver.getScalarFlux();
+        
+        // OutputHandler instance
+        OutputHandler output_handler;
+        output_handler.writeScalarFlux(output_path_flux, flux);
+        output_handler.writeKEff(output_path_keff, solver.getKEff());
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
