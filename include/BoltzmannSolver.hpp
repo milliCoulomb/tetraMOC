@@ -129,6 +129,7 @@ private:
      */
 
     std::vector<std::vector<double>> computeNuFissionSource(const std::vector<std::vector<double>>& scalar_flux, const double old_keff) const;
+    // TODO: nu-fission source should be a std::vector<double> instead of std::vector<std::vector<double>> (sum over groups)
 };
 
 #endif // BOLTZMANN_SOLVER_HPP
