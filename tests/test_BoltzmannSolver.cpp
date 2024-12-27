@@ -743,57 +743,57 @@ TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfinit
     EXPECT_NEAR(calculated_keff, k_inf, 1e-6) << "Eigenvalue problem should match analytical solution";
 }
 // // Test case: Single cell, true angular quadrature, true RayTracing, infinite medium, two groups, eigenvalue problem
-// TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfiniteTwoGroupsEigenvalue) {
-//     MeshHandler mesh;
-//     ASSERT_TRUE(setupSingleCellInfiniteMesh(mesh)) << "Failed to setup single cell mesh";
+TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfiniteTwoGroupsEigenvalue) {
+    MeshHandler mesh;
+    ASSERT_TRUE(setupSingleCellInfiniteMesh(mesh)) << "Failed to setup single cell mesh";
     
-//     ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
+    ASSERT_TRUE(setupSingleCellFaceConnectivity(mesh)) << "Failed to setup face connectivity";
 
-//     InputHandler input_handler;
-//     ASSERT_TRUE(setupTwoGroupsInputHandler(input_handler)) << "Failed to setup input handler";
+    InputHandler input_handler;
+    ASSERT_TRUE(setupTwoGroupsInputHandler(input_handler)) << "Failed to setup input handler";
 
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(0).total_xs, 1.0, 1e-6) << "Total cross section for Group 1 should be 1.0";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(1).total_xs, 1.2, 1e-6) << "Total cross section for Group 2 should be 1.2";
-//     EXPECT_NEAR(input_handler.getSelfScatteringXS(0), 0.4, 1e-6) << "Self-scattering cross section for Group 1 should be 0.4";
-//     EXPECT_NEAR(input_handler.getSelfScatteringXS(1), 0.5, 1e-6) << "Self-scattering cross section for Group 2 should be 0.5";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(0).scattering_xs[1], 0.2, 1e-6) << "Scattering cross section for Group 1 to Group 2 should be 0.2";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(1).scattering_xs[0], 0.05, 1e-6) << "Scattering cross section for Group 2 to Group 1 should be 0.05";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(0).fission_xs, 0.3, 1e-6) << "Fission cross section for Group 1 should be 0.3";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(1).fission_xs, 0.3, 1e-6) << "Fission cross section for Group 2 should be 0.3";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(0).multiplicity, 2.0, 1e-6) << "Multiplicity for Group 1 should be 2.0";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(1).multiplicity, 2.2, 1e-6) << "Multiplicity for Group 2 should be 2.2";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(0).fission_spectrum, 0.2, 1e-6) << "Fission spectrum for Group 1 should be 0.2";
-//     EXPECT_NEAR(input_handler.getEnergyGroupData(1).fission_spectrum, 0.8, 1e-6) << "Fission spectrum for Group 1 should be 0.8";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(0).total_xs, 1.0, 1e-6) << "Total cross section for Group 1 should be 1.0";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(1).total_xs, 1.2, 1e-6) << "Total cross section for Group 2 should be 1.2";
+    EXPECT_NEAR(input_handler.getSelfScatteringXS(0), 0.4, 1e-6) << "Self-scattering cross section for Group 1 should be 0.4";
+    EXPECT_NEAR(input_handler.getSelfScatteringXS(1), 0.5, 1e-6) << "Self-scattering cross section for Group 2 should be 0.5";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(0).scattering_xs[1], 0.2, 1e-6) << "Scattering cross section for Group 1 to Group 2 should be 0.2";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(1).scattering_xs[0], 0.05, 1e-6) << "Scattering cross section for Group 2 to Group 1 should be 0.05";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(0).fission_xs, 0.3, 1e-6) << "Fission cross section for Group 1 should be 0.3";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(1).fission_xs, 0.3, 1e-6) << "Fission cross section for Group 2 should be 0.3";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(0).multiplicity, 2.0, 1e-6) << "Multiplicity for Group 1 should be 2.0";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(1).multiplicity, 2.2, 1e-6) << "Multiplicity for Group 2 should be 2.2";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(0).fission_spectrum, 0.2, 1e-6) << "Fission spectrum for Group 1 should be 0.2";
+    EXPECT_NEAR(input_handler.getEnergyGroupData(1).fission_spectrum, 0.8, 1e-6) << "Fission spectrum for Group 1 should be 0.8";
 
-//     Field field;
-//     ASSERT_TRUE(setupSimpleFieldOneCell(field)) << "Failed to setup simple field";
+    Field field;
+    ASSERT_TRUE(setupSimpleFieldOneCell(field)) << "Failed to setup simple field";
     
-//     const int num_azimuthal = 4;
-//     const int num_polar = 2;
-//     AngularQuadrature angular_quadrature(num_azimuthal, num_polar);
-//     // test if size of predefined_directions is 2
-//     ASSERT_EQ(angular_quadrature.getDirections().size(), 8) << "There should be 8 directions";
-//     // test if sum of weights is 4
-//     EXPECT_NEAR(angular_quadrature.getTotalWeight(), 4.0 * M_PI, 1e-6) << "Sum of weights should be 4.0 * M_PI";
+    const int num_azimuthal = 4;
+    const int num_polar = 2;
+    AngularQuadrature angular_quadrature(num_azimuthal, num_polar);
+    // test if size of predefined_directions is 2
+    ASSERT_EQ(angular_quadrature.getDirections().size(), 8) << "There should be 8 directions";
+    // test if sum of weights is 4
+    EXPECT_NEAR(angular_quadrature.getTotalWeight(), 4.0 * M_PI, 1e-6) << "Sum of weights should be 4.0 * M_PI";
 
-//     bool use_half_quadrature_for_constant = false;
-//     bool constant_dir_bool = true;
-//     RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
-//     // Generate tracking data
-//     int rays_per_face = 8;
-//     manager.generateTrackingData(rays_per_face);
+    bool use_half_quadrature_for_constant = false;
+    bool constant_dir_bool = true;
+    RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
+    // Generate tracking data
+    int rays_per_face = 8;
+    manager.generateTrackingData(rays_per_face);
     
-//     // Retrieve tracking data
-//     const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
+    // Retrieve tracking data
+    const std::vector<TrackingData>& tracking_data = manager.getTrackingData();
     
-//     Settings settings;
+    Settings settings;
 
-//     BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
-//     std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
-//     const double k_inf = 1.10048780e+00;
-//     const double calculated_keff = bt_solver.getKEff();
-//     EXPECT_NEAR(calculated_keff, k_inf, 1e-6) << "Eigenvalue problem should match analytical solution";
-// }
+    BoltzmannSolver bt_solver(input_handler, mesh, tracking_data, angular_quadrature, settings);
+    std::vector<std::vector<double>> scalar_flux = bt_solver.solveEigenvalueProblem();
+    const double k_inf = 1.10048780e+00;
+    const double calculated_keff = bt_solver.getKEff();
+    EXPECT_NEAR(calculated_keff, k_inf, 1e-6) << "Eigenvalue problem should match analytical solution";
+}
 // Test case: Single cell, true angular quadrature, true RayTracing, infinite medium, two groups, eigenvalue problem, no upscattering, no fast fission
 TEST_F(BoltzmannSolverTest, SingleCellTrueAngularQuadratureTrueRayTracingInfiniteTwoGroupsEigenvalueNoUpscatterNoFastFission) {
     MeshHandler mesh;
