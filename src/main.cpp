@@ -24,7 +24,6 @@ int main(int argc, char* argv[]) {
         // Initialize AngularQuadrature
         AngularQuadrature angular_quadrature(input_deck.angular_quadrature_parameters.ntheta,
                                              input_deck.angular_quadrature_parameters.nphi);
-        angular_quadrature.generateQuadrature();
         std::cout << "Number of angles: " << angular_quadrature.getDirections().size() << std::endl;
         std::cout << "Total weight: " << angular_quadrature.getTotalWeight() << std::endl;
 
@@ -60,8 +59,9 @@ int main(int argc, char* argv[]) {
         // int rays_per_face = input_deck.solver_parameters.rays_per_face;
         // ray_tracer_manager.generateTrackingData(rays_per_face);
 
-        // InputHandler input_handler;
-        // input_handler.loadData(input_deck.cross_sections.data_files[0]);
+        InputHandler input_handler;
+        input_handler.loadData(input_deck.cross_sections.data_files[0]);
+        std::cout << "Number of groups: " << input_handler.getNumGroups() << std::endl;
 
         // Settings settings;
         // settings.setMultiGroupTolerance(input_deck.solver_parameters.multi_group_tolerance);
