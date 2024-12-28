@@ -4,9 +4,9 @@
 ![C++](https://img.shields.io/badge/language-C++-blue.svg)
 ![CMake](https://img.shields.io/badge/build-CMake-green.svg)
 
-**TetraMOC** is a small C++ project for solving the Boltzmann transport equation using tetrahedral meshes. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities. Because the MEDCoupling library was not available without the SALOME platform when this code was written, a preprocessing of the mesh .MED files is needed. The python script will convert the mesh information to .txt files which are read by the C++ code.
+**TetraMOC** is a small C++ project for solving the Boltzmann transport equation using tetrahedral meshes, with **constant macroscopic cross-section** first and **void boundary conditions**. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities. Because the MEDCoupling library was not available without the SALOME platform when this code was written, a preprocessing of the mesh .MED files is needed. The python script will convert the mesh information to .txt files which are read by the C++ code.
 
-TetraMOC reads a YAML file as an input deck, which contains paths to cross-sections, mesh topology preprocessed with Python and solver parameters (number of directions in the angular quadrature, number of rays per boundary face, convergence threshold, etc).
+TetraMOC reads a YAML file as an input deck, which contains paths to cross-sections, mesh topology preprocessed with Python and solver parameters (number of directions in the angular quadrature, number of rays per boundary face, convergence threshold, etc). Loops over characteristics and directions are parallelized with OpenMP, as well as the ray tracing part.
 
 ## Table of Contents
 
@@ -74,7 +74,7 @@ By default, the unit tests are compiled and logging is enabled.
     ```bash
     make test
     ``` -->
-2. **Install Python venv with MEDCoupling**
+3. **Install Python venv with MEDCoupling**
 
     ```bash
     cd TetraMOC
@@ -85,25 +85,46 @@ By default, the unit tests are compiled and logging is enabled.
 
 ## Usage
 
-Refer to the [examples](examples/) directory for sample applications demonstrating the usage of TetraMOC modules. Below is a basic example to get you started:
+You can use the Python script in the preprocess folder to convert a MED mesh into three text files, one containing nodes IDs with their coordinates in space (nodes.txt), one containing the cell-node connectivity (which node belong to which cell), cells.txt and finally the face to cell connectivity (which face connects which node), faces.txt. To generate these files, use:
+```bash
+python preprocess_mesh.py --med_file=../examples/cube/cube.med --field_file=../examples/cube/cube.med --output_dir=../examples/cube
+```
+with *med_file* the path to the .MED file and *output_dir* the directory where the Python code will write the .txt files. Then, create the YAML input deck with the wanted solver parameters and the correct path to .txt files, for example:
 
-```cpp
-#include <TetraMOC/MeshHandler.hpp>
-#include <TetraMOC/BoltzmannSolver.hpp>
-#include <TetraMOC/Logger.hpp>
+```yaml
+mesh:
+  nodes: "../examples/cube/nodes.txt"
+  cells: "../examples/cube/cells.txt"
+  faces: "../examples/cube/faces.txt"
 
-int main() {
-    TetraMOC::Logger::init();
-    TetraMOC::MeshHandler mesh;
-    mesh.loadNodes("nodes.dat");
-    mesh.loadCells("cells.dat");
-    mesh.loadFaceConnectivity("faces.dat");
+cross_sections:
+  data_files:
+    - "../examples/cube/xs.txt"
 
-    TetraMOC::BoltzmannSolver solver(mesh);
-    solver.solve();
+angular_quadrature:
+  ntheta: 2
+  nphi: 4
 
-    return 0;
-}
+solver_parameters:
+  multi_group_max_iterations: 1000
+  multi_group_tolerance: 1e-7
+  one_group_max_iterations: 500
+  one_group_tolerance: 1e-7
+  fission_source_tolerance: 1e-7
+  keff_tolerance: 1e-6
+  rays_per_face: 8
+
+output:
+  flux_output_file: "output/flux.dat"
+  k_eff_output_file: "output/k_eff.dat"
+
+logging:
+  level: "INFO"
+  log_file: "logs/solver.log"
+```
+and run tetraMOC after compiling it with:
+```bash
+./src/tetraMOC ../examples/cube/cube.yaml 
 ```
 
 ## Modules
