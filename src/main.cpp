@@ -24,6 +24,9 @@ int main(int argc, char* argv[]) {
         // Initialize AngularQuadrature
         AngularQuadrature angular_quadrature(input_deck.angular_quadrature_parameters.ntheta,
                                              input_deck.angular_quadrature_parameters.nphi);
+        angular_quadrature.generateQuadrature();
+        std::cout << "Number of angles: " << angular_quadrature.getDirections().size() << std::endl;
+        std::cout << "Total weight: " << angular_quadrature.getTotalWeight() << std::endl;
 
         // Initialize MeshHandler and load mesh data
         MeshHandler mesh_handler;
