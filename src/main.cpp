@@ -27,6 +27,8 @@ int main(int argc, char* argv[]) {
 
         // Initialize MeshHandler and load mesh data
         MeshHandler mesh_handler;
+        // now we need to read those text files
+        
         mesh_handler.loadNodes(input_deck.mesh.nodes);
         mesh_handler.loadCells(input_deck.mesh.cells);
         mesh_handler.loadFaceConnectivity(input_deck.mesh.faces);
