@@ -79,7 +79,7 @@ By default, the unit tests are compiled and logging is enabled.
     ```bash
     cd TetraMOC
     python -m venv venv
-    pip install -requirements.txt
+    pip install -r requirements.txt
     ```
 
 
