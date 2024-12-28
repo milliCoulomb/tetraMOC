@@ -8,8 +8,8 @@ cross_sections:
     - "xs.txt"
 
 angular_quadrature:
-  ntheta: 10
-  nphi: 20
+  ntheta: 2
+  nphi: 4
 
 solver_parameters:
   multi_group_max_iterations: 1000
