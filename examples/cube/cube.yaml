@@ -1,0 +1,29 @@
+mesh:
+  nodes: "../examples/cube/nodes.txt"
+  cells: "../examples/cube/cells.txt"
+  faces: "../examples/cube/faces.txt"
+
+cross_sections:
+  data_files:
+    - "xs.txt"
+
+angular_quadrature:
+  ntheta: 10
+  nphi: 20
+
+solver_parameters:
+  multi_group_max_iterations: 1000
+  multi_group_tolerance: 1e-7
+  one_group_max_iterations: 500
+  one_group_tolerance: 1e-7
+  fission_source_tolerance: 1e-7
+  keff_tolerance: 1e-6
+  rays_per_face: 8
+
+output:
+  flux_output_file: "output/flux.dat"
+  k_eff_output_file: "output/k_eff.dat"
+
+logging:
+  level: "INFO"
+  log_file: "logs/solver.log"
