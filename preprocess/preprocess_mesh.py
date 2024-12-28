@@ -89,13 +89,19 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     """
     logger = logging.getLogger(__name__)
     logger.info(f"Loading MED mesh file: {med_file}")
-    field_name = 'VITESSE_ELEM_dom'
+    # field_name = 'VITESSE_ELEM_dom'
+    # try:
+    #     # Load the field from the MED file
+    #     field_obj = mc.ReadField(field_file, field_name, 1, -1)
+    #     mesh = field_obj.getMesh()
+    # except Exception as e:
+    #     logger.error(f"Failed to load field file: {e}")
+    #     raise
     try:
-        # Load the field from the MED file
-        field_obj = mc.ReadField(field_file, field_name, 1, -1)
-        mesh = field_obj.getMesh()
+        # Load the mesh from the MED file
+        mesh = mc.ReadMeshFromFile(med_file)
     except Exception as e:
-        logger.error(f"Failed to load field file: {e}")
+        logger.error(f"Failed to load mesh file: {e}")
         raise
 
     # Extract node coordinates
@@ -111,12 +117,12 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     num_cells = cell_conn.shape[0]
     logger.info(f"Number of cells: {num_cells}")
 
-    # Extract the velocity field per cell
-    try:
-        v_field = field_obj.getArray().toNumPyArray().reshape(-1, 3)
-    except Exception as e:
-        logger.error(f"Failed to extract velocity field: {e}")
-        raise
+    # # Extract the velocity field per cell
+    # try:
+    #     v_field = field_obj.getArray().toNumPyArray().reshape(-1, 3)
+    # except Exception as e:
+    #     logger.error(f"Failed to extract velocity field: {e}")
+    #     raise
 
     # if v_field.shape[0] != num_cells:
     #     logger.error("Number of velocity vectors does not match the number of cells.")
@@ -142,12 +148,12 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
             f.write(" ".join(map(str, cell)) + "\n")
 
     # Export velocity field to field.txt
-    logger.info("Exporting velocity field to field.txt")
-    field_file_path = os.path.join(output_dir, "field.txt")
-    with open(field_file_path, "w") as f:
-        f.write(f"{v_field.shape[0]}\n")
-        for vec in v_field:
-            f.write(f"{vec[0]} {vec[1]} {vec[2]}\n")
+    # logger.info("Exporting velocity field to field.txt")
+    # field_file_path = os.path.join(output_dir, "field.txt")
+    # with open(field_file_path, "w") as f:
+    #     f.write(f"{v_field.shape[0]}\n")
+    #     for vec in v_field:
+    #         f.write(f"{vec[0]} {vec[1]} {vec[2]}\n")
 
     # Build and export face connectivity to faces.txt
     logger.info("Building face connectivity.")
