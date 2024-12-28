@@ -5,7 +5,7 @@ mesh:
 
 cross_sections:
   data_files:
-    - "xs.txt"
+    - "../examples/cube/xs.txt"
 
 angular_quadrature:
   ntheta: 2
