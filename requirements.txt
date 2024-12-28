@@ -1,3 +1,12 @@
+certifi==2024.12.14
+cftime==1.6.4.post1
+h5py==3.12.1
+markdown-it-py==3.0.0
+mdurl==0.1.2
 medcoupling==9.13.0
+meshio==5.3.5
+netCDF4==1.7.2
 numpy==2.2.0
+Pygments==2.18.0
+rich==13.9.4
 scipy==1.14.1
