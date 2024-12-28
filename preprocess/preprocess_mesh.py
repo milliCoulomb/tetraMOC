@@ -72,8 +72,8 @@ def export_faces_connectivity(face_dict: Dict[Tuple[int, ...], List[int]], outpu
             # Convert node indices and cell IDs to strings
             face_str = " ".join(map(str, face))
             cells_str = " ".join(map(str, cells))
-            # Write the face nodes followed by adjacent cell IDs
-            f.write(f"{face_str} {cells_str}\n")
+            # Write the face nodes followed by number of adjacent cells and the cell IDs
+            f.write(f"{face_str} {len(cells)} {cells_str}\n")
 
     logger.info("Face connectivity exported successfully.")
 
@@ -142,6 +142,7 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     number_of_nodes = coords.shape[0]
     logger.info(f'Number of nodes: {number_of_nodes}')
     with open(nodes_file_path, "w") as f:
+        f.write(f"{number_of_nodes}\n")
         for i in range(number_of_nodes):
             f.write(f"{i} {coords[i][0]} {coords[i][1]} {coords[i][2]}\n")
     
@@ -158,6 +159,7 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     num_cells = mesh.getNumberOfCells()
     logger.info(f'Number of cells: {num_cells}')
     with open(cells_file_path, "w") as f:
+        f.write(f"{num_cells}\n")
         for i in range(num_cells):
             nodes = mesh.getNodeIdsOfCell(i)
             # print(f"Cell {i}: {nodes}")
