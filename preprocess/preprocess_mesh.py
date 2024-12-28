@@ -41,7 +41,7 @@ def build_faces_cell_connectivity(mesh: mc.MEDCouplingUMesh) -> Tuple[Dict[Tuple
 
     for face_id in range(num_faces):
         sorted_face = tuple(sorted(face_node_ids[face_id]))
-        print(f"Face {face_id}: {sorted_face}")
+        # print(f"Face {face_id}: {sorted_face}")
         start_idx = revDescIndex_np[face_id]
         end_idx = revDescIndex_np[face_id + 1]
         cell_ids = revDesc_np[start_idx:end_idx]
@@ -116,6 +116,7 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
         raise ValueError("Non-tetrahedral mesh.")
     num_cells = cell_conn.shape[0]
     logger.info(f"Number of cells: {num_cells}")
+    logger.info(f"Number of faces: {mesh.getNumberOfCells()}")
 
     # # Extract the velocity field per cell
     # try:
@@ -134,18 +135,33 @@ def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
     # Export node coordinates to nodes.txt
     logger.info("Exporting nodes to nodes.txt")
     nodes_file_path = os.path.join(output_dir, "nodes.txt")
+    # with open(nodes_file_path, "w") as f:
+    #     f.write(f"{num_nodes}\n")
+    #     for coord in coords:
+    #         f.write(f"{coord[0]} {coord[1]} {coord[2]}\n")
+    number_of_nodes = coords.shape[0]
+    logger.info(f'Number of nodes: {number_of_nodes}')
     with open(nodes_file_path, "w") as f:
-        f.write(f"{num_nodes}\n")
-        for coord in coords:
-            f.write(f"{coord[0]} {coord[1]} {coord[2]}\n")
+        for i in range(number_of_nodes):
+            f.write(f"{i} {coords[i][0]} {coords[i][1]} {coords[i][2]}\n")
+    
 
     # Export cell connectivity to cells.txt
     logger.info("Exporting cells to cells.txt")
     cells_file_path = os.path.join(output_dir, "cells.txt")
+    # with open(cells_file_path, "w") as f:
+    #     f.write(f"{num_cells}\n")
+    #     for cell in cell_conn:
+    #         # also write the cell idx, and then the nodes idx
+    #         f.write(f"{cell} " + " ".join(map(str, cell)) + "\n")
+    #         # f.write(" ".join(map(str, cell)) + "\n")
+    num_cells = mesh.getNumberOfCells()
+    logger.info(f'Number of cells: {num_cells}')
     with open(cells_file_path, "w") as f:
-        f.write(f"{num_cells}\n")
-        for cell in cell_conn:
-            f.write(" ".join(map(str, cell)) + "\n")
+        for i in range(num_cells):
+            nodes = mesh.getNodeIdsOfCell(i)
+            # print(f"Cell {i}: {nodes}")
+            f.write(f"{i} " + " ".join(map(str, nodes)) + "\n")
 
     # Export velocity field to field.txt
     # logger.info("Exporting velocity field to field.txt")
