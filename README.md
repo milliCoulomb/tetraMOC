@@ -3,6 +3,8 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![C++](https://img.shields.io/badge/language-C++-blue.svg)
 ![CMake](https://img.shields.io/badge/build-CMake-green.svg)
+![Build Status](https://img.shields.io/badge/status-in--progress-yellow.svg)
+![OpenMP](https://img.shields.io/badge/OpenMP-enabled-orange.svg)
 
 **TetraMOC** is a small C++ project for solving the Boltzmann transport equation using tetrahedral meshes, with **constant macroscopic cross-section** first and **void boundary conditions**. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities. Because the MEDCoupling library was not available without the SALOME platform when this code was written, a preprocessing of the mesh .MED files is needed. The python script will convert the mesh information to .txt files which are read by the C++ code.
 
@@ -36,11 +38,11 @@ TetraMOC reads a YAML file as an input deck, which contains paths to cross-secti
 - **Mesh Handling**: Efficiently load and manage tetrahedral meshes.
 - **Vector Operations**: Comprehensive 3D vector mathematics.
 - **Angular Quadrature**: Generate and manage angular quadrature sets for accurate integrations.
-- **Ray Tracing**: Perform ray tracing through meshes for precise flux calculations.
-- **Flux Solving**: Compute and collapse flux data seamlessly.
-- **Boltzmann Solver**: Robust solver for the Boltzmann transport equation.
+- **Ray Tracing**: Perform ray tracing through meshes for flux calculations along characteristics.
+- **Flux Solver**: Compute the angular flux within each cell based on ray tracing data with a given source.
+- **Boltzmann Solver**: Solver for the steady-state multi-group Boltzmann transport equation.
 - **Logging**: Integrated logging utilities for debugging and informational purposes.
-- **Input Handling**: Flexible loading and management of simulation input data.
+- **Input Handling**: To read cross-sections and solver parameters from a YAML file.
 
 ## Installation
 
@@ -56,7 +58,7 @@ TetraMOC reads a YAML file as an input deck, which contains paths to cross-secti
 
     ```bash
     git clone https://github.com/yourusername/TetraMOC.git
-    cd TetraMOC
+    cd tetraMOC
     ```
 
 2. **Build the Project**
@@ -77,19 +79,22 @@ By default, the unit tests are compiled and logging is enabled.
 3. **Install Python venv with MEDCoupling**
 
     ```bash
-    cd TetraMOC
+    cd tetraMOC
     python -m venv venv
     pip install -r requirements.txt
     ```
 
 
 ## Usage
+### Preprocessing
 
 You can use the Python script in the preprocess folder to convert a MED mesh into three text files, one containing nodes IDs with their coordinates in space (nodes.txt), one containing the cell-node connectivity (which node belong to which cell), cells.txt and finally the face to cell connectivity (which face connects which node), faces.txt. To generate these files, use:
 ```bash
 python preprocess_mesh.py --med_file=../examples/cube/cube.med --field_file=../examples/cube/cube.med --output_dir=../examples/cube
 ```
-with *med_file* the path to the .MED file and *output_dir* the directory where the Python code will write the .txt files. Then, create the YAML input deck with the wanted solver parameters and the correct path to .txt files, for example:
+with *med_file* the path to the .MED file and *output_dir* the directory where the Python code will write the .txt files. 
+### Running tetraMOC
+Then, create the YAML input deck with the wanted solver parameters and the correct path to .txt files, for example:
 
 ```yaml
 mesh:
@@ -115,8 +120,8 @@ solver_parameters:
   rays_per_face: 8
 
 output:
-  flux_output_file: "output/flux.dat"
-  k_eff_output_file: "output/k_eff.dat"
+  flux_output_file: "../examples/cube/output/flux.dat"
+  k_eff_output_file: "../examples/cube/output/k_eff.dat"
 
 logging:
   level: "INFO"
@@ -126,7 +131,14 @@ and run tetraMOC after compiling it with:
 ```bash
 ./src/tetraMOC ../examples/cube/cube.yaml 
 ```
-
+### Postprocessing
+The flux values are written in a .txt or .dat file, **ordered as the .MED mesh cell order.** Fortunately, MEDCoupling can convert its MED format to other formats, such as VTK, which can be read by ParaView. By default, the output file of the postprocessing script is a .vtu file. To convert the flux values to a .vtu file, use:
+```bash
+python postprocess.py --file_name=../examples/cube/output/flux.txt --mesh=../examples/cube/cube.med --output_file=../examples/cube/output/flux.vtu
+```
+the option *output_file* is optional, by default the script will write the output file in the same directory as the input file with the name *plus _flux.vtu*. vtu files can be read by ParaView, and the flux values can be visualized in the mesh:
+![Example Image](./images/flux_in_cube.png)
+which is the one group neutron flux obtained in a cube with a coarse mesh and simple cross-sections.
 ## Modules
 
 ### MeshHandler.hpp
