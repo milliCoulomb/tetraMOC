@@ -11,6 +11,7 @@
 #include "OutputHandler.hpp"
 #include <fstream>
 
+
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <input_deck.yaml>" << std::endl;
@@ -47,54 +48,54 @@ int main(int argc, char* argv[]) {
         std::cout << "Number of cells: " << number_of_cells << std::endl;
 
         // Initialize dummy Field
-        // Field field;
+        Field field;
 
-        // bool constant_dir_bool = true;
-        // bool use_half_quadrature_for_constant = false;
+        bool constant_dir_bool = true;
+        bool use_half_quadrature_for_constant = false;
 
-        // // Initialize RayTracerManager and generate tracking data
-        // RayTracerManager ray_tracer_manager(mesh_handler, field, angular_quadrature, constant_dir_bool,
-        //                                     use_half_quadrature_for_constant);
+        // Initialize RayTracerManager and generate tracking data
+        RayTracerManager ray_tracer_manager(mesh_handler, field, angular_quadrature, constant_dir_bool,
+                                            use_half_quadrature_for_constant);
         
-        // int rays_per_face = input_deck.solver_parameters.rays_per_face;
-        // ray_tracer_manager.generateTrackingData(rays_per_face);
+        int rays_per_face = input_deck.solver_parameters.rays_per_face;
+        ray_tracer_manager.generateTrackingData(rays_per_face);
 
         InputHandler input_handler;
         input_handler.loadData(input_deck.cross_sections.data_files[0]);
         std::cout << "Number of groups: " << input_handler.getNumGroups() << std::endl;
 
-        // Settings settings;
-        // settings.setMultiGroupTolerance(input_deck.solver_parameters.multi_group_tolerance);
-        // settings.setMultiGroupMaxIterations(input_deck.solver_parameters.multi_group_max_iterations);
-        // settings.setOneGroupTolerance(input_deck.solver_parameters.one_group_tolerance);
-        // settings.setOneGroupMaxIterations(input_deck.solver_parameters.one_group_max_iterations);
-        // settings.setFissionSourceTolerance(input_deck.solver_parameters.fission_source_tolerance);
-        // settings.setKeffTolerance(input_deck.solver_parameters.keff_tolerance);
+        Settings settings;
+        settings.setMultiGroupTolerance(input_deck.solver_parameters.multi_group_tolerance);
+        settings.setMultiGroupMaxIterations(input_deck.solver_parameters.multi_group_max_iterations);
+        settings.setOneGroupTolerance(input_deck.solver_parameters.one_group_tolerance);
+        settings.setOneGroupMaxIterations(input_deck.solver_parameters.one_group_max_iterations);
+        settings.setFissionSourceTolerance(input_deck.solver_parameters.fission_source_tolerance);
+        settings.setKeffTolerance(input_deck.solver_parameters.keff_tolerance);
 
         // // get the output path
-        // std::string output_path_flux = input_deck.output.flux_output_file;
-        // std::string output_path_keff = input_deck.output.k_eff_output_file;
+        std::string output_path_flux = input_deck.output.flux_output_file;
+        std::string output_path_keff = input_deck.output.k_eff_output_file;
 
-        // // Initialize BoltzmannSolver
-        // BoltzmannSolver solver(input_handler, mesh_handler, ray_tracer_manager.getTrackingData(),
-        //                        angular_quadrature, settings);
+        // Initialize BoltzmannSolver
+        BoltzmannSolver solver(input_handler, mesh_handler, ray_tracer_manager.getTrackingData(),
+                               angular_quadrature, settings);
 
-        // // Solve eigenvalue problem
-        // bool converged = solver.solveEigenvalueProblem();
+        // Solve eigenvalue problem
+        bool converged = solver.solveEigenvalueProblem();
 
-        // if (!converged) {
-        //     std::cerr << "Eigenvalue problem did not converge." << std::endl;
-        //     return 1;
-        // }
-        // // Output k_eff
-        // std::cout << "Converged k_eff: " << solver.getKEff() << std::endl;
-        // // store the flux
-        // std::vector<std::vector<double>> flux = solver.getScalarFlux();
+        if (!converged) {
+            std::cerr << "Eigenvalue problem did not converge." << std::endl;
+            return 1;
+        }
+        // Output k_eff
+        std::cout << "Converged k_eff: " << solver.getKEff() << std::endl;
+        // store the flux
+        std::vector<std::vector<double>> flux = solver.getScalarFlux();
         
-        // // OutputHandler instance
-        // OutputHandler output_handler;
-        // output_handler.writeScalarFlux(output_path_flux, flux);
-        // output_handler.writeKEff(output_path_keff, solver.getKEff());
+        // OutputHandler instance
+        OutputHandler output_handler;
+        output_handler.writeScalarFlux(output_path_flux, flux);
+        output_handler.writeKEff(output_path_keff, solver.getKEff());
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
