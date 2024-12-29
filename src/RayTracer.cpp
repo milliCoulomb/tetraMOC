@@ -10,6 +10,7 @@
 #include <cassert>
 
 const Vector3D ZERO_VECTOR(0.0, 0.0, 0.0);
+constexpr int MAX_ITERATIONS = 1000;
 
 // Constructor for variable direction tracing
 RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler)
@@ -38,7 +39,6 @@ RayTracer::RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_dire
 
 
 std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& start_point, int max_iter) const {
-    const int MAX_ITERATIONS = 1000;
     std::vector<CellTrace> pathline;
     pathline.reserve(max_iter); // Preallocate memory
 
