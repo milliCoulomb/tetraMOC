@@ -1,7 +1,5 @@
 #include "Logger.hpp"
 
-#ifndef DISABLE_LOGGING
-
 LogLevel Logger::currentLevel = LogLevel::INFO;
 
 void Logger::setLogLevel(LogLevel level) {
@@ -26,6 +24,8 @@ void Logger::log(const std::string& message, LogLevel level) {
         }
     }
 }
+
+#ifndef DISABLE_LOGGING
 
 void Logger::info(const std::string& message) {
     log(message, LogLevel::INFO);
