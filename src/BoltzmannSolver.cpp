@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <omp.h> // For OpenMP parallelization
 
+constexpr double KEFF_INITIAL_GUESS = 1.0;
+constexpr double KEFF_OLD_INITIAL_GUESS = 1.5;
+
 BoltzmannSolver::BoltzmannSolver(const InputHandler& input_handler,
                                  const MeshHandler& mesh_handler,
                                  const std::vector<TrackingData>& tracking_data,
@@ -16,8 +19,8 @@ BoltzmannSolver::BoltzmannSolver(const InputHandler& input_handler,
       tracking_data_(tracking_data),
       angular_quadrature_(angular_quadrature),
       settings_(settings),
-      k_eff_(1.0),
-      k_eff_old_(1.2) {
+      k_eff_(KEFF_INITIAL_GUESS),
+      k_eff_old_(KEFF_OLD_INITIAL_GUESS) {
     num_groups_ = input_.getNumGroups();
     num_cells_ = static_cast<int>(mesh_.getCells().size());
     QuadratureTotalWeight_ = angular_quadrature_.getTotalWeight();
