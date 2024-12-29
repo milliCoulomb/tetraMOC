@@ -8,13 +8,6 @@
 #include "Field.hpp"    // Include the Field class
 #include <array>
 
-// struct DirectionData {
-//     int cell_id;
-//     double time_spent;
-//     std::array<double, 3> start_point;
-//     std::array<double, 3> end_point;
-// };
-
 class Tetrahedron {
 public:
     // Constructor accepting CellVectorField from Field class
