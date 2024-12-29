@@ -1,19 +1,29 @@
-// Utilities/Logger.cpp
 #include "Logger.hpp"
 
 #ifndef DISABLE_LOGGING
 
+LogLevel Logger::currentLevel = LogLevel::INFO;
+
+void Logger::setLogLevel(LogLevel level) {
+    currentLevel = level;
+}
+
 void Logger::log(const std::string& message, LogLevel level) {
-    switch(level) {
-        case LogLevel::INFO:
-            std::cout << "[INFO] " << message << std::endl;
-            break;
-        case LogLevel::WARNING:
-            std::cout << "[WARNING] " << message << std::endl;
-            break;
-        case LogLevel::ERROR:
-            std::cerr << "[ERROR] " << message << std::endl;
-            break;
+    if (level <= currentLevel) {
+        switch(level) {
+            case LogLevel::RUNNING:
+                std::cout << "[RUNNING] " << message << std::endl;
+                break;
+            case LogLevel::INFO:
+                std::cout << "[INFO] " << message << std::endl;
+                break;
+            case LogLevel::WARNING:
+                std::cout << "[WARNING] " << message << std::endl;
+                break;
+            case LogLevel::ERROR:
+                std::cerr << "[ERROR] " << message << std::endl;
+                break;
+        }
     }
 }
 
@@ -27,6 +37,10 @@ void Logger::warning(const std::string& message) {
 
 void Logger::error(const std::string& message) {
     log(message, LogLevel::ERROR);
+}
+
+void Logger::running(const std::string& message) {
+    log(message, LogLevel::RUNNING);
 }
 
 #else // DISABLE_LOGGING is defined
@@ -44,6 +58,10 @@ void Logger::warning(const std::string&) {
 }
 
 void Logger::error(const std::string&) {
+    // Logging is disabled; do nothing
+}
+
+void Logger::running(const std::string&) {
     // Logging is disabled; do nothing
 }
 
