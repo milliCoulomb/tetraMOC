@@ -34,6 +34,14 @@ TEST(AngularQuadratureTest, GenerateQuadratureSnOrder2) {
     EXPECT_NEAR(total_weight, 4.0 * M_PI, 1e-6);
 }
 
+// test default direction constructor
+TEST(AngularQuadratureTest, DefaultDirection) {
+    Direction d;
+    EXPECT_EQ(d.mu, 0.0);
+    EXPECT_EQ(d.phi, 0.0);
+    EXPECT_EQ(d.weight, 0.0);
+}
+
 //n_theta = 1, n_phi = 2)
 TEST(AngularQuadratureTest, GenerateQuadratureSnOrder1) {
     int n_theta = 1;
