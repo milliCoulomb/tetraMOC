@@ -9,6 +9,7 @@
 #include "InputHandler.hpp"
 #include "Settings.hpp"
 #include "OutputHandler.hpp"
+#include "Logger.hpp"
 #include <fstream>
 
 
@@ -22,11 +23,25 @@ int main(int argc, char* argv[]) {
         // Parse InputDeck
         InputDeck input_deck = InputDeckParser::parse(argv[1]);
 
+        // Set logger level
+        if (input_deck.logging.level == "INFO") {
+            Logger::setLogLevel(LogLevel::INFO);
+        } else if (input_deck.logging.level == "WARNING") {
+            Logger::setLogLevel(LogLevel::WARNING);
+        } else if (input_deck.logging.level == "ERROR") {
+            Logger::setLogLevel(LogLevel::ERROR);
+        } else {
+            Logger::setLogLevel(LogLevel::RUNNING); // default
+        }
+
         // Initialize AngularQuadrature
         AngularQuadrature angular_quadrature(input_deck.angular_quadrature_parameters.ntheta,
                                              input_deck.angular_quadrature_parameters.nphi);
-        std::cout << "Number of angles: " << angular_quadrature.getDirections().size() << std::endl;
-        std::cout << "Total weight: " << angular_quadrature.getTotalWeight() << std::endl;
+        
+        Logger::info("Number of angles: " + std::to_string(angular_quadrature.getDirections().size()));
+        Logger::info("Total weight: " + std::to_string(angular_quadrature.getTotalWeight()));
+
+        Logger::running("Angular quadrature generated.");
 
         // Initialize MeshHandler and load mesh data
         MeshHandler mesh_handler;
@@ -36,16 +51,17 @@ int main(int argc, char* argv[]) {
         mesh_handler.loadFaceConnectivity(input_deck.mesh.faces);
 
         auto mesh_bounds = mesh_handler.getBoundaryFaces();
-        std::cout << "Number of boundary faces: " << mesh_bounds.size() << std::endl;
         // display number of nodes
         const int number_of_nodes = static_cast<int>(mesh_handler.getNodes().size());
         // display number of faces
         const int number_of_faces = static_cast<int>(mesh_handler.getFaces().size());
         // display number of cells
         const int number_of_cells = static_cast<int>(mesh_handler.getCells().size());
-        std::cout << "Number of nodes: " << number_of_nodes << std::endl;
-        std::cout << "Number of faces: " << number_of_faces << std::endl;
-        std::cout << "Number of cells: " << number_of_cells << std::endl;
+
+        Logger::info("Number of nodes: " + std::to_string(number_of_nodes));
+        Logger::info("Number of faces: " + std::to_string(number_of_faces));
+        Logger::info("Number of cells: " + std::to_string(number_of_cells));
+        Logger::running("Mesh data loaded.");
 
         // Initialize dummy Field
         Field field;
@@ -60,9 +76,10 @@ int main(int argc, char* argv[]) {
         int rays_per_face = input_deck.solver_parameters.rays_per_face;
         ray_tracer_manager.generateTrackingData(rays_per_face);
 
+        Logger::running("Tracking data generated.");
+
         InputHandler input_handler;
         input_handler.loadData(input_deck.cross_sections.data_files[0]);
-        std::cout << "Number of groups: " << input_handler.getNumGroups() << std::endl;
 
         Settings settings;
         settings.setMultiGroupTolerance(input_deck.solver_parameters.multi_group_tolerance);
@@ -80,6 +97,7 @@ int main(int argc, char* argv[]) {
         BoltzmannSolver solver(input_handler, mesh_handler, ray_tracer_manager.getTrackingData(),
                                angular_quadrature, settings);
 
+        Logger::running("Solving eigenvalue problem...");
         // Solve eigenvalue problem
         bool converged = solver.solveEigenvalueProblem();
 
@@ -87,8 +105,6 @@ int main(int argc, char* argv[]) {
             std::cerr << "Eigenvalue problem did not converge." << std::endl;
             return 1;
         }
-        // Output k_eff
-        std::cout << "Converged k_eff: " << solver.getKEff() << std::endl;
         // store the flux
         std::vector<std::vector<double>> flux = solver.getScalarFlux();
         
