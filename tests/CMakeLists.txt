@@ -13,6 +13,7 @@ include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 set(TEST_SOURCES
     test_Vector3D.cpp
     test_Settings.cpp
+    test_Logger.cpp
     test_InputDeck.cpp
     test_Quadrature.cpp
     test_AngularQuadrature.cpp
@@ -24,6 +25,7 @@ set(TEST_SOURCES
     test_RayTracerManager.cpp
     test_FluxSolver.cpp
     test_InputHandler.cpp
+    test_OutputHandler.cpp
     test_BoltzmannSolver.cpp
 )
 
