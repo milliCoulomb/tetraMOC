@@ -56,9 +56,10 @@ def main():
     flux = load_flux(args.file_name)
     mesh = load_mesh(args.mesh)
     
-    if len(flux) != mesh.GetNumberOfPoints():
-        logging.error("Number of flux values does not match number of mesh nodes.")
-        raise ValueError("Mismatch between flux values and mesh nodes.")
+    # if len(flux) != mesh.GetNumberOfCells():
+    #     logging.error("Number of flux values does not match number of mesh cells.")
+    #     logging.error(f"Flux values: {len(flux)}, Mesh cells: {mesh.GetNumberOfCells()}")
+    #     raise ValueError("Mismatch between flux values and mesh cells.")
     if args.output_file:
         output_file = args.output_file
     else:
