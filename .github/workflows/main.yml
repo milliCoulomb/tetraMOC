@@ -43,7 +43,7 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake -DENABLE_LOGGING=OFF ..
+        cmake ..
         make
 
     - name: Run Unit Tests
