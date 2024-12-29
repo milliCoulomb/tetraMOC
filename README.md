@@ -30,7 +30,6 @@ TetraMOC reads a YAML file as an input deck, which contains paths to cross-secti
   - [Quadrature.hpp](#quadraturehpp)
   - [GeometryUtils.hpp](#geometryutilshpp)
   - [Tetrahedron.hpp](#tetrahedronhpp)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Features
@@ -57,7 +56,7 @@ TetraMOC reads a YAML file as an input deck, which contains paths to cross-secti
 1. **Clone the Repository**
 
     ```bash
-    git clone https://github.com/yourusername/TetraMOC.git
+    git clone https://github.com/milliCoulomb/TetraMOC.git
     cd tetraMOC
     ```
 
@@ -71,11 +70,15 @@ TetraMOC reads a YAML file as an input deck, which contains paths to cross-secti
     ```
 
 By default, the unit tests are compiled and logging is enabled.
-<!-- 3. **Run Tests** (Optional)
+Before running the code with a real mesh, you can run the tests to check if everything is working correctly. The tests are written with the Google Test framework, which is included in the repository. To run the tests, use:
+
+3. **Run Tests** (Optional)
 
     ```bash
-    make test
-    ``` -->
+    ./tests/runTests
+    ```
+All tests should pass, and the code should run without any errors. If you encounter any issues, please open an issue on the repository.
+
 3. **Install Python venv with MEDCoupling**
 
     ```bash
@@ -236,7 +239,7 @@ Loads and manages input data, including cross-sections and nuclear data.
 Provides logging utilities for the application.
 
 - **Features**:
-  - Log messages with different severity levels: INFO, WARNING, ERROR.
+  - Log messages with different severity levels: **INFO**, **WARNING**, **ERROR** and **RUNNING**. There is a hierarchy of severity levels, with INFO being the lowest and RUNNING the highest. If the severity level of a message is lower than the one set in the logger, the message will not be displayed.
 
 ### Quadrature.hpp
 
@@ -261,33 +264,6 @@ Represents a tetrahedral element and provides methods for ray exiting.
 - **Key Features**:
   - Store vertex positions.
   - Find exit points of rays intersecting the tetrahedron.
-
-## Contributing
-
-We welcome contributions! To contribute, please follow these steps:
-
-1. **Fork the Repository**
-2. **Create a Feature Branch**
-
-    ```bash
-    git checkout -b feature/YourFeature
-    ```
-
-3. **Commit Your Changes**
-
-    ```bash
-    git commit -m "Add some feature"
-    ```
-
-4. **Push to the Branch**
-
-    ```bash
-    git push origin feature/YourFeature
-    ```
-
-5. **Open a Pull Request**
-
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## License
 
