@@ -25,5 +25,5 @@ output:
   k_eff_output_file: "../examples/cube/output/k_eff.txt"
 
 logging:
-  level: "INFO"
+  level: "RUNNING"
   log_file: "logs/solver.log"
