@@ -49,7 +49,6 @@ TetraMOC reads a YAML file as an input deck, which contains paths to cross-secti
 
 - **C++ Compiler**: Supporting C++17 or higher.
 - **CMake**: Version 3.10 or higher.
-- **Boost Libraries**: Required for certain modules.
 
 ### Steps
 
@@ -127,8 +126,7 @@ output:
   k_eff_output_file: "../examples/cube/output/k_eff.dat"
 
 logging:
-  level: "INFO"
-  log_file: "logs/solver.log"
+  level: "RUNNING"
 ```
 and run tetraMOC after compiling it with:
 ```bash
@@ -246,7 +244,8 @@ Provides logging utilities for the application.
 Implements quadrature methods for numerical integration.
 
 - **Key Methods**:
-  - Compute Legendre polynomials and their derivatives.
+  - Compute Legendre polynomials, and their derivatives.
+  - Compute the roots of Legendre polynomials.
   - Generate Gauss-Legendre and Gauss-Chebyshev quadrature points and weights.
 
 ### GeometryUtils.hpp
