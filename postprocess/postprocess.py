@@ -42,15 +42,6 @@ def add_flux_to_mesh(mesh: mc.MEDCouplingUMesh, flux: list) -> mc.MEDCouplingUMe
     field_on_cells.setName('FLUX')
     return field_on_cells
 
-def write_mesh(mesh: mc.MEDCouplingUMesh, output_file: str):
-    logging.info(f"Writing updated mesh to {output_file}")
-    try:
-        mc.Write(mesh, output_file, 0)  # 0 for ASCII, use 1 for binary if needed
-        logging.info("Mesh written successfully.")
-    except Exception as e:
-        logging.error(f"Failed to write mesh: {e}")
-        raise IOError(f"Could not write mesh to {output_file}.")
-
 def main():
     setup_logging()
     
