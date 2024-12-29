@@ -5,10 +5,12 @@
 #include <string>
 #include <iostream>
 
-enum class LogLevel { INFO, WARNING, ERROR };
+enum class LogLevel { RUNNING, ERROR, WARNING, INFO };
 
 class Logger {
 public:
+    static void setLogLevel(LogLevel level);
+
     /**
      * @brief Logs a message with the specified log level.
      * 
@@ -37,6 +39,16 @@ public:
      * @param message The message to log.
      */
     static void error(const std::string& message);
+
+    /**
+     * @brief Logs a running message.
+     * 
+     * @param message The message to log.
+     */
+    static void running(const std::string& message);
+    
+private:
+    static LogLevel currentLevel;
 };
 
 #endif // LOGGER_HPP
