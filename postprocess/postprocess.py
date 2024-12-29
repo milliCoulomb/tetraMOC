@@ -28,12 +28,13 @@ def add_flux_to_mesh(mesh: mc.MEDCouplingUMesh, flux: list) -> mc.MEDCouplingUMe
     logging.info("Adding flux values to the mesh as a scalar field.")
     num_cells = mesh.getNumberOfCells()
     flux_to_numpy = np.array(flux)
+    number_of_groups = flux.shape[1] if flux_to_numpy.ndim > 1 else 1
     if flux_to_numpy.shape[0] != num_cells:
         raise ValueError("Concentration array does not match the number of cells in the mesh.")
     field_on_cells = mc.MEDCouplingFieldDouble(mc.ON_CELLS)
     field_on_cells.setMesh(mesh)
     data_array = mc.DataArrayDouble()
-    data_array.alloc(num_cells, 1) # one group flux
+    data_array.alloc(num_cells, number_of_groups)
     for cell_id in range(num_cells):
         data_array[int(cell_id)] = flux[cell_id]
     
