@@ -94,7 +94,31 @@ You can use the Python script in the preprocess folder to convert a MED mesh int
 ```bash
 python preprocess_mesh.py --med_file=../examples/cube/cube.med --field_file=../examples/cube/cube.med --output_dir=../examples/cube
 ```
-with *med_file* the path to the .MED file and *output_dir* the directory where the Python code will write the .txt files. 
+with *med_file* the path to the .MED file and *output_dir* the directory where the Python code will write the .txt files.
+
+### Mesh Topology
+The mesh topology is stored in three text files: nodes.txt, cells.txt, and faces.txt. Any tetrahedral mesh can be used, as long as these files are correctly generated. The **nodes.txt** file should contain the node IDs and their coordinates in space, with the following format:
+```
+number_of_nodes
+node_id x y z
+node_id2 x2 y2 z2
+...
+```
+The **cells.txt** file should contain the cell-node connectivity, with the following format:
+```
+number_of_cells
+cell_id node1 node2 node3 node4
+cell_id2 node5 node6 node4 node8
+...
+```
+The **faces.txt** file should contain the face-cell connectivity. A face is defined by its sorted node IDs. A face can be shared by two cells, or it can be a boundary face. The format is:
+```
+number_of_faces
+node1 node2 node3 number_of_neighbors neighbor1 neighbor2
+node4 node5 node6 number_of_neighbors2 neighbor3
+...
+```
+where the number of neighbors is 1 for boundary faces and 2 for internal faces. The neighbors are the cell IDs that share the face.
 ### Running tetraMOC
 Then, create the YAML input deck with the wanted solver parameters and the correct path to .txt files, for example:
 
