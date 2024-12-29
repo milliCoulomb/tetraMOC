@@ -67,10 +67,10 @@ def main():
     if args.output_file:
         output_file = args.output_file
     else:
-        output_file = os.path.splitext(args.mesh)[0] + "_with_flux.med"
+        output_file = os.path.splitext(args.mesh)[0] + "_with_flux"
     
     updated_mesh = add_flux_to_mesh(mesh, flux)
-    updated_mesh.writeVTK("mesh_with_flux.vtk")
+    updated_mesh.writeVTK(output_file)
 
 if __name__ == "__main__":
     main()
