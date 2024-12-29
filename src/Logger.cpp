@@ -6,6 +6,8 @@ void Logger::setLogLevel(LogLevel level) {
     currentLevel = level;
 }
 
+#ifndef DISABLE_LOGGING
+
 void Logger::log(const std::string& message, LogLevel level) {
     if (level <= currentLevel) {
         switch(level) {
@@ -24,8 +26,6 @@ void Logger::log(const std::string& message, LogLevel level) {
         }
     }
 }
-
-#ifndef DISABLE_LOGGING
 
 void Logger::info(const std::string& message) {
     log(message, LogLevel::INFO);
