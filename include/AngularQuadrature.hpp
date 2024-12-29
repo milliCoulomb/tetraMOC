@@ -6,10 +6,19 @@
 #include "Quadrature.hpp"
 #include <utility>
 
+/*
+@struct Direction
+@brief Structure to store the direction of the quadrature and its weight
+
+@var mu: cosine of the polar angle
+@var phi: azimuthal angle
+@var weight: weight of the direction
+*/
+
 struct Direction {
-    double mu;
-    double phi;
-    double weight;
+    double mu = 0.0; // default value to avoid uninitialized variables
+    double phi = 0.0; // default value to avoid uninitialized variables
+    double weight = 0.0; // default value to avoid uninitialized variables
 };
 
 class AngularQuadrature {
