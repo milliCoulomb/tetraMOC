@@ -13,12 +13,12 @@ angular_quadrature:
 
 solver_parameters:
   multi_group_max_iterations: 1000
-  multi_group_tolerance: 1e-7
+  multi_group_tolerance: 1e-5
   one_group_max_iterations: 500
-  one_group_tolerance: 1e-7
-  fission_source_tolerance: 1e-7
+  one_group_tolerance: 1e-5
+  fission_source_tolerance: 1e-5
   keff_tolerance: 1e-6
-  rays_per_face: 8
+  rays_per_face: 10
 
 output:
   flux_output_file: "../examples/cube/output/flux.txt"
