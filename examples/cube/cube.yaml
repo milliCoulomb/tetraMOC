@@ -13,11 +13,11 @@ angular_quadrature:
 
 solver_parameters:
   multi_group_max_iterations: 1000
-  multi_group_tolerance: 1e-5
+  multi_group_tolerance: 1e-4
   one_group_max_iterations: 500
-  one_group_tolerance: 1e-5
-  fission_source_tolerance: 1e-5
-  keff_tolerance: 1e-6
+  one_group_tolerance: 1e-4
+  fission_source_tolerance: 1e-4
+  keff_tolerance: 1e-5
   rays_per_face: 10
 
 output:
