@@ -77,7 +77,7 @@ def export_faces_connectivity(face_dict: Dict[Tuple[int, ...], List[int]], outpu
 
     logger.info("Face connectivity exported successfully.")
 
-def preprocess_mesh(med_file: str, output_dir: str):
+def preprocess_mesh(med_file: str, output_dir: str, scale: float = 1.0):
     """
     Preprocesses the MED mesh and field files, extracting necessary information and exporting them
     to text files for use in C++ ray tracing code.
@@ -104,7 +104,7 @@ def preprocess_mesh(med_file: str, output_dir: str):
         raise
 
     # Extract node coordinates
-    coords = mesh.getCoords().toNumPyArray().reshape(-1, 3)
+    coords = mesh.getCoords().toNumPyArray().reshape(-1, 3) * scale
     num_nodes = coords.shape[0]
     logger.info(f"Number of nodes: {num_nodes}")
     mesh_faces, desc, descIndex, revDesc, revDescIndex = mesh.buildDescendingConnectivity()
@@ -145,7 +145,18 @@ def preprocess_mesh(med_file: str, output_dir: str):
         for i in range(number_of_nodes):
             f.write(f"{i} {coords[i][0]} {coords[i][1]} {coords[i][2]}\n")
     
-
+    max_x_coord = np.max(coords[:, 0])
+    min_x_coord = np.min(coords[:, 0])
+    max_y_coord = np.max(coords[:, 1])
+    min_y_coord = np.min(coords[:, 1])
+    max_z_coord = np.max(coords[:, 2])
+    min_z_coord = np.min(coords[:, 2])
+    logger.info(f'Minimum x coordinate: {min_x_coord}')
+    logger.info(f'Maximum x coordinate: {max_x_coord}')
+    logger.info(f'Minimum y coordinate: {min_y_coord}')
+    logger.info(f'Maximum y coordinate: {max_y_coord}')
+    logger.info(f'Minimum z coordinate: {min_z_coord}')
+    logger.info(f'Maximum z coordinate: {max_z_coord}')
     # Export cell connectivity to cells.txt
     logger.info("Exporting cells to cells.txt")
     cells_file_path = os.path.join(output_dir, "cells.txt")
@@ -186,8 +197,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Preprocess MED and exporting to text files.")
     parser.add_argument("--med_file", type=str, required=True, help="Path to the MED mesh file.")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for exported files.")
+    parser.add_argument("--scale", type=float, default=1.0, help="Scale factor for node coordinates.")
 
     args = parser.parse_args()
 
     # Run the preprocessing function with provided arguments
-    preprocess_mesh(args.med_file, args.output_dir)
+    preprocess_mesh(args.med_file, args.output_dir, args.scale)
