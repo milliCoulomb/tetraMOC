@@ -4,6 +4,16 @@
 /build_*/
 /venv/
 /release/
+.vscode/
+*.vtk
+*.vtu
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
 
 *.med
 *.txt
