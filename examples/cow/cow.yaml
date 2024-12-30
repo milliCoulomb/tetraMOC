@@ -1,0 +1,30 @@
+mesh:
+  nodes: "../examples/cow/nodes.txt"
+  cells: "../examples/cow/cells.txt"
+  faces: "../examples/cow/faces.txt"
+
+cross_sections:
+  data_files:
+    - "../examples/cow/xs.txt"
+
+angular_quadrature:
+  ntheta: 2
+  nphi: 4
+
+solver_parameters:
+  multi_group_max_iterations: 1000
+  multi_group_tolerance: 1e-5
+  one_group_max_iterations: 500
+  one_group_tolerance: 1e-5
+  fission_source_tolerance: 1e-5
+  keff_tolerance: 1e-6
+  max_power_iterations: 5000
+  rays_per_face: 10
+
+output:
+  flux_output_file: "../examples/cow/output/flux.txt"
+  k_eff_output_file: "../examples/cow/output/k_eff.txt"
+
+logging:
+  level: "RUNNING"
+  log_file: "logs/solver.log"
