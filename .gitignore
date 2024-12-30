@@ -3,6 +3,7 @@
 /build/
 /build_*/
 /venv/
+/release/
 
 *.med
 *.txt
