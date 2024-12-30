@@ -88,6 +88,7 @@ int main(int argc, char* argv[]) {
         settings.setOneGroupMaxIterations(input_deck.solver_parameters.one_group_max_iterations);
         settings.setFissionSourceTolerance(input_deck.solver_parameters.fission_source_tolerance);
         settings.setKeffTolerance(input_deck.solver_parameters.keff_tolerance);
+        settings.setMaxPowerIterations(input_deck.solver_parameters.max_power_iterations);
 
         // // get the output path
         std::string output_path_flux = input_deck.output.flux_output_file;
