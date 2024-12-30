@@ -77,14 +77,13 @@ def export_faces_connectivity(face_dict: Dict[Tuple[int, ...], List[int]], outpu
 
     logger.info("Face connectivity exported successfully.")
 
-def preprocess_mesh(med_file: str, field_file: str, output_dir: str):
+def preprocess_mesh(med_file: str, output_dir: str):
     """
     Preprocesses the MED mesh and field files, extracting necessary information and exporting them
     to text files for use in C++ ray tracing code.
 
     Args:
         med_file (str): Path to the MED mesh file.
-        field_file (str): Path to the MED field file.
         output_dir (str): Directory where the output files will be saved.
     """
     logger = logging.getLogger(__name__)
@@ -184,12 +183,11 @@ if __name__ == "__main__":
     setup_logging()
 
     # Parse command-line arguments
-    parser = argparse.ArgumentParser(description="Preprocess MED mesh and field, exporting to text files.")
+    parser = argparse.ArgumentParser(description="Preprocess MED and exporting to text files.")
     parser.add_argument("--med_file", type=str, required=True, help="Path to the MED mesh file.")
-    parser.add_argument("--field_file", type=str, required=True, help="Path to the MED field file.")
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for exported files.")
 
     args = parser.parse_args()
 
     # Run the preprocessing function with provided arguments
-    preprocess_mesh(args.med_file, args.field_file, args.output_dir)
+    preprocess_mesh(args.med_file, args.output_dir)
