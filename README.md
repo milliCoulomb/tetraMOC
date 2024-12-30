@@ -6,7 +6,7 @@
 ![Build Status](https://img.shields.io/badge/status-in--progress-yellow.svg)
 ![OpenMP](https://img.shields.io/badge/OpenMP-enabled-orange.svg)
 
-**TetraMOC** is a small C++ project for solving the Boltzmann transport equation using tetrahedral meshes, with **constant macroscopic cross-section** first and **void boundary conditions**. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities. Because the MEDCoupling library was not available without the SALOME platform when this code was written, a preprocessing of the mesh .MED files is needed. The python script will convert the mesh information to .txt files which are read by the C++ code.
+**TetraMOC** is a small C++ project for solving the Boltzmann transport equation using tetrahedral meshes, with **constant macroscopic cross-section** first and **void boundary conditions**. Designed with modularity and efficiency in mind, TetraMOC provides comprehensive tools for mesh handling, vector operations, angular quadrature, ray tracing, flux solving, and logging utilities. Because the MEDCoupling library was not available without the SALOME platform when this code was written, a preprocessing of the mesh .MED files is needed. The python script will convert the mesh information to .txt files which are read by the C++ code. This is a temporary solution to handle different types of meshes.
 
 TetraMOC reads a YAML file as an input deck, which contains paths to cross-sections, mesh topology preprocessed with Python and solver parameters (number of directions in the angular quadrature, number of rays per boundary face, convergence threshold, etc). Loops over characteristics and directions are parallelized with OpenMP, as well as the ray tracing part.
 
@@ -162,12 +162,14 @@ The flux values are written in a .txt or .dat file, **ordered as the .MED mesh c
 ```bash
 python postprocess.py --file_name=../examples/cube/output/flux.txt --mesh=../examples/cube/cube.med --output_file=../examples/cube/output/flux.vtu
 ```
-the option *output_file* is optional, by default the script will write the output file in the same directory as the input file with the name *plus _flux.vtu*. vtu files can be read by ParaView, and the flux values can be visualized in the mesh:
+the option *output_file* is optional, by default the script will write the output file in the same directory as the input file with the name *plus _flux.vtu*. vtu files can be read by ParaView, and the flux values can be visualized in the mesh, which is the one group neutron flux obtained in a cube with a coarse mesh and simple cross-sections. 
 ![Example Image](./images/flux_in_cube.png)
 *Figure: Neutron flux in a cube.*
-which is the one group neutron flux obtained in a cube with a coarse mesh and simple cross-sections. The $k_{eff}$ obtained is 1.49709. With the XS used, $\Sigma_t = 11.0$ SI, $\Sigma_s = 8.0$ SI, $\Sigma_f = 2.0$ SI and $\nu = 2.43$, $k_{\infty}=1.62$, even if scattering does not really dominate, $D \sim 1/3\Sigma_t$ and $M^2 = D / \Sigma_a$. Then, $k_{eff} = k_{\infty} / (1 + M^2 B_g^2) \simeq 1.46897$, not that far from the value obtained with the code (should test with a finer mesh and a lot of scattering).
+
+The $k_{eff}$ obtained is 1.49709. With the XS used, $\Sigma_t = 11.0$ SI, $\Sigma_s = 8.0$ SI, $\Sigma_f = 2.0$ SI and $\nu = 2.43$, $k_{\infty}=1.62$, even if scattering does not really dominate, $D \sim 1/3\Sigma_t$ and $M^2 = D / \Sigma_a$. Then, $k_{eff} = k_{\infty} / (1 + M^2 B_g^2) \simeq 1.46897$, not that far from the value obtained with the code (should test with a finer mesh and a lot of scattering).
+
 ![Example Image](./images/cow.png)
-*Figure: A critical coarse cow (https://www.thingiverse.com/thing:2216708).*
+*Figure: Cross-section of a critical coarse cow with $k_{eff} \sim 1.2< k_{\infty}$ (https://www.thingiverse.com/thing:2216708).*
 ## Modules
 
 ### MeshHandler.hpp
