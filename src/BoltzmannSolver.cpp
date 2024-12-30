@@ -359,12 +359,15 @@ bool BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<doubl
 
     if (residual_k <= settings_.getKeffTolerance() &&
         residual_fission_source <= settings_.getFissionSourceTolerance()) {
-        Logger::info("Eigenvalue solver converged in " + std::to_string(iteration) + " iterations.");
+        Logger::running("Eigenvalue solver converged in " + std::to_string(iteration) + " iterations.");
         converged = true;
         // set the scalar flux to the converged flux
         scalar_flux_ = std::move(old_flux);
     } else {
-        Logger::warning("Eigenvalue solver did not converge within the maximum iterations.");
+        Logger::running("Eigenvalue solver did not converge within the maximum iterations.");
+        // Log the residual values
+        Logger::running("Final k_eff residual: " + std::to_string(residual_k));
+        Logger::running("Final fission source residual: " + std::to_string(residual_fission_source));
     }
 
     return converged;
