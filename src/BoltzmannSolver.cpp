@@ -384,8 +384,8 @@ void BoltzmannSolver::updateKEff(const std::vector<double>& fission_source_new,
 
     #pragma omp parallel for reduction(+:sum_new, sum_old)
     for(int i = 0; i < num_cells_; ++i) {
-        sum_new += fission_source_new[i];
-        sum_old += fission_source_old[i];
+        sum_new += fission_source_new[i] * fission_source_new[i];
+        sum_old += fission_source_old[i] * fission_source_old[i];
     }
 
     if (sum_old < EPSILON) {
@@ -393,7 +393,8 @@ void BoltzmannSolver::updateKEff(const std::vector<double>& fission_source_new,
         return;
     }
 
-    double new_k_eff = sum_new / sum_old * k_eff_old_;
+    // double new_k_eff = sum_new / sum_old * k_eff_old_;
+    double new_k_eff = std::sqrt(sum_new / sum_old) * k_eff_old_;
     // Atomically update k_eff_
     #pragma omp atomic write
     k_eff_old_ = k_eff_;
