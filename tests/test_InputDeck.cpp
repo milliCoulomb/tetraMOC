@@ -41,6 +41,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
@@ -111,6 +112,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
@@ -151,6 +153,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
@@ -195,6 +198,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
@@ -274,6 +278,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
@@ -318,6 +323,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 logging:
@@ -358,6 +364,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
@@ -441,6 +448,7 @@ solver_parameters:
   one_group_tolerance: 1e-7
   fission_source_tolerance: 1e-7
   keff_tolerance: 1e-6
+  max_power_iterations: 100
   rays_per_face: 8
 
 output:
