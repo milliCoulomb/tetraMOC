@@ -40,6 +40,7 @@ InputDeck InputDeckParser::parse(const std::string& filename) {
         deck.solver_parameters.one_group_tolerance = sp_node["one_group_tolerance"].as<double>();
         deck.solver_parameters.fission_source_tolerance = sp_node["fission_source_tolerance"].as<double>();
         deck.solver_parameters.keff_tolerance = sp_node["keff_tolerance"].as<double>();
+        deck.solver_parameters.max_power_iterations = sp_node["max_power_iterations"].as<int>();
         deck.solver_parameters.rays_per_face = sp_node["rays_per_face"].as<int>();
 
         // Parse output settings
