@@ -52,29 +52,40 @@ target_link_libraries(tetraMOC PUBLIC
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     if (CMAKE_BUILD_TYPE STREQUAL "Dev")
         target_compile_options(moc_solver_lib PRIVATE
-            -Wall                     # Enable all basic warnings
-            -Wextra                   # Enable extra warnings
-            -pedantic                 # Enforce strict ISO compliance
-            -Wconversion              # Warn about implicit type conversions
-            -Wshadow                  # Warn when a local variable shadows another
-            -Wnon-virtual-dtor        # Warn if a class with virtual functions doesn't have a virtual destructor
-            -Wold-style-cast          # Warn about C-style casts
-            -Woverloaded-virtual      # Warn when a function declaration hides a virtual function in a base class
-            -Wfloat-equal             # Warn about comparisons between floating-point numbers for equality
-            -Wformat=2                # Warn about printf/scanf format string issues
-            -Winit-self               # Warn if a variable is initialized with itself
-            -Wmissing-declarations    # Warn if a global function is missing a declaration
-            -Wmissing-include-dirs    # Warn if an #include directive refers to a directory not listed with -I
-            -Wredundant-decls         # Warn about redundant declarations
-            -Wswitch-enum             # Warn if a switch statement doesn't handle all enumeration values
-            # -Werror                 # Uncomment to treat all warnings as errors
+            -Wall
+            -Wextra
+            -pedantic
+            -Wconversion
+            -Wshadow
+            -Wnon-virtual-dtor
+            -Wold-style-cast
+            -Woverloaded-virtual
+            -Wfloat-equal
+            -Wformat=2
+            -Winit-self
+            -Wmissing-declarations
+            -Wmissing-include-dirs
+            -Wredundant-decls
+            -Wswitch-enum
+        )
+    elseif (CMAKE_BUILD_TYPE STREQUAL "perf")
+        target_compile_options(moc_solver_lib PRIVATE
+            -O2
+            -g
+            -fno-inline
+            -DPROFILE
         )
     endif()
 elseif (MSVC)
     if (CMAKE_BUILD_TYPE STREQUAL "Dev")
         target_compile_options(moc_solver_lib PRIVATE
-            /W4               # Enable high-level warnings
-            # /WX             # Uncomment to treat warnings as errors
+            /W4
+        )
+    elseif (CMAKE_BUILD_TYPE STREQUAL "perf")
+        target_compile_options(moc_solver_lib PRIVATE
+            /Zi
+            /Od
+            /DPROFILE
         )
     endif()
 endif()
