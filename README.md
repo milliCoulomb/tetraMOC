@@ -10,6 +10,13 @@
 
 TetraMOC reads a YAML file as an input deck, which contains paths to cross-sections, mesh topology preprocessed with Python and solver parameters (number of directions in the angular quadrature, number of rays per boundary face, convergence threshold, etc). Loops over characteristics and directions are parallelized with OpenMP, as well as the ray tracing part.
 
+---
+**NOTE**
+
+This project is still under development, and some features may not be fully implemented. If you encounter any issues or have suggestions, please open an issue on the repository.
+
+---
+
 ## Table of Contents
 
 - [Features](#features)
