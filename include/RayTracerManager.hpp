@@ -31,7 +31,7 @@ public:
                     bool constant_directions,
                     bool use_half_quadrature_for_constant); // Use half quadrature directions
 
-    void generateTrackingData(int rays_per_face);
+    void generateTrackingData(int rays_per_face, int max_ray_length = 1000);
     
     void doubleTrackingDataByReversing();
 
