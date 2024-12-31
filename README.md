@@ -187,7 +187,7 @@ and preprocessed with the Python script.
 ---
 **NOTE**
 
-These two examples run on a DELL XPS 13 with 4 cores, 8 threads and 8 GB of RAM. Both examples tool $\sim$ 2 minutes to run.
+These two examples run on a DELL XPS 13 with 4 cores, 8 threads and 8 GB of RAM. Both examples took $\sim$ 2 minutes to run.
 
 ---
 ## Modules
