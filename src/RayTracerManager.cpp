@@ -133,7 +133,7 @@ bool RayTracerManager::isValidDirection(const Vector3D& face_normal, const Vecto
     return dot_product < -threshold;
 }
 
-void RayTracerManager::generateTrackingData(int rays_per_face)
+void RayTracerManager::generateTrackingData(int rays_per_face, int max_ray_length)
 {
     // Clear previous tracking data
     tracking_data_.clear();
@@ -245,7 +245,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face)
                         Vector3D start_point = samplePointOnTriangle(triangle);
 
                         // Trace the ray through the mesh
-                        std::vector<CellTrace> cell_traces = tracer->traceRay(adjacent_cell_id, start_point, 100);
+                        std::vector<CellTrace> cell_traces = tracer->traceRay(adjacent_cell_id, start_point, max_ray_length);
 
                         // If cell_traces is empty, discard the ray
                         if (cell_traces.empty()) {
