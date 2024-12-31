@@ -10,7 +10,7 @@
 #include <cassert>
 
 const Vector3D ZERO_VECTOR(0.0, 0.0, 0.0);
-constexpr int MAX_ITERATIONS = 1000;
+constexpr int MAX_ITERATIONS = 10000;
 
 // Constructor for variable direction tracing
 RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler)
