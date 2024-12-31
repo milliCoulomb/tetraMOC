@@ -26,5 +26,5 @@ output:
   k_eff_output_file: "../examples/cow/output/k_eff.txt"
 
 logging:
-  level: "RUNNING"
+  level: "ERROR"
   log_file: "logs/solver.log"
