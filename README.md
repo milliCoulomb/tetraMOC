@@ -169,7 +169,7 @@ the option *output_file* is optional, by default the script will write the outpu
 The $k_{eff}$ obtained is 1.49709. With the XS used, $\Sigma_t = 11.0$ SI, $\Sigma_s = 8.0$ SI, $\Sigma_f = 2.0$ SI and $\nu = 2.43$, $k_{\infty}=1.62$, even if scattering does not really dominate, $D \sim 1/3\Sigma_t$ and $M^2 = D / \Sigma_a$. Then, $k_{eff} = k_{\infty} / (1 + M^2 B_g^2) \simeq 1.46897$, not that far from the value obtained with the code (should test with a finer mesh and a lot of scattering).
 
 ![Example Image](./images/cow.png)
-*Figure: Cross-section of a critical coarse cow with $k_{eff} \sim 1.2< k_{\infty}$ (https://www.thingiverse.com/thing:2216708).*
+*Figure: Cross-section of a critical cow with 30000 cells (https://www.thingiverse.com/thing:2216708).*
 ## Modules
 
 ### MeshHandler.hpp
