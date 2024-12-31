@@ -177,6 +177,13 @@ The $k_{eff}$ obtained is 1.49709. With the XS used, $\Sigma_t = 11.0$ SI, $\Sig
 
 ![Example Image](./images/cow.png)
 *Figure: Cross-section of a critical cow with 30000 cells (https://www.thingiverse.com/thing:2216708).*
+
+---
+**NOTE**
+
+These two examples run on a DELL XPS 13 with 4 cores, 8 threads and 8 GB of RAM. Both examples tool $\sim$ 2 minutes to run.
+
+---
 ## Modules
 
 ### MeshHandler.hpp
