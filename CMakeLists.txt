@@ -41,7 +41,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Dev")
     set(CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wconversion -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wfloat-equal -Wformat=2 -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wredundant-decls -Wswitch-enum")
 elseif(CMAKE_BUILD_TYPE STREQUAL "perf")
-    set(CMAKE_CXX_FLAGS_PERF "${CMAKE_CXX_FLAGS} -O2 -g -fno-inline -DPROFILE")
+    set(CMAKE_CXX_FLAGS_PERF "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fsanitize=address -fstack-protector -DPROFILE")
 endif()
 
 # subdirectories
