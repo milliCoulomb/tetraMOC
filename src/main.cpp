@@ -74,7 +74,8 @@ int main(int argc, char* argv[]) {
                                             use_half_quadrature_for_constant);
         
         int rays_per_face = input_deck.solver_parameters.rays_per_face;
-        ray_tracer_manager.generateTrackingData(rays_per_face);
+        int max_ray_length = input_deck.solver_parameters.max_ray_length;
+        ray_tracer_manager.generateTrackingData(rays_per_face, max_ray_length);
 
         Logger::running("Tracking data generated.");
 
