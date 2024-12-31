@@ -7,7 +7,7 @@
 .vscode/
 *.vtk
 *.vtu
-/perf_measurments/
+/perf/
 # Python
 *.pyc
 *.pyo
