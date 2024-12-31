@@ -28,7 +28,7 @@ public:
     RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_direction, const double direction_weight);
     
     // Trace a ray starting from a cell and point, up to a maximum number of iterations
-    std::vector<CellTrace> traceRay(int start_cell_id, const Vector3D& start_point, int max_iter = 100) const;
+    std::vector<CellTrace> traceRay(int start_cell_id, const Vector3D& start_point, int max_iter) const;
     
     // Getter for the associated Field (only relevant in VARIABLE_DIRECTION mode)
     // Returns a reference; ensure it's only called in VARIABLE_DIRECTION mode
