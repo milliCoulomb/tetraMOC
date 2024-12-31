@@ -1,4 +1,4 @@
-# tetraMOC
+# tetraMOC: neutron transport on tetrahedrons
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![C++](https://img.shields.io/badge/language-C++-blue.svg)
