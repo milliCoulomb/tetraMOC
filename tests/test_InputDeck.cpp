@@ -43,6 +43,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
@@ -114,6 +115,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
@@ -155,6 +157,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
@@ -200,6 +203,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
@@ -280,6 +284,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
@@ -325,6 +330,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 logging:
   level: "INFO"
@@ -366,6 +372,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
@@ -450,6 +457,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 100
   rays_per_face: 8
+  max_ray_length: 1000
 
 output:
   flux_output_file: "output/flux.dat"
