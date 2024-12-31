@@ -33,6 +33,7 @@ struct SolverParameters {
     double keff_tolerance;
     int max_power_iterations;
     int rays_per_face;
+    int max_ray_length;
 };
 
 // Structure to hold output settings
