@@ -9,7 +9,7 @@ cross_sections:
 
 angular_quadrature:
   ntheta: 4
-  nphi: 4
+  nphi: 8
 
 solver_parameters:
   multi_group_max_iterations: 1000
