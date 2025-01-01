@@ -31,3 +31,4 @@ logging:
   # log_file: "logs/solver.log"
 
 # sphere of radius 1.20 m
+# should find keff = 1.436692222882128
