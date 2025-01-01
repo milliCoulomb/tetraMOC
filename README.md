@@ -170,7 +170,15 @@ The flux values are written in a .txt or .dat file, **ordered as the .MED mesh c
 ```bash
 python postprocess.py --file_name=../examples/cube/output/flux.txt --mesh=../examples/cube/cube.med --output_file=../examples/cube/output/flux.vtu
 ```
-the option *output_file* is optional, by default the script will write the output file in the same directory as the input file with the name *plus _flux.vtu*. vtu files can be read by ParaView, and the flux values can be visualized in the mesh, which is the one group neutron flux obtained in a cube with a coarse mesh and simple cross-sections. 
+the option *output_file* is optional, by default the script will write the output file in the same directory as the input file with the name *plus _flux.vtu*. 
+### Example
+---
+**NOTE**
+
+These two examples run on a DELL XPS 13 (Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz) with 4 cores, 8 threads and 8 GB of RAM. Both examples took $\sim$ 2 minutes to run (battery economizer on).
+
+---
+vtu files can be read by ParaView, and the flux values can be visualized in the mesh, which is the one group neutron flux obtained in a cube with a coarse mesh and simple cross-sections. 
 ![Example Image](./images/flux_in_cube.png)
 *Figure: Neutron flux in a cube.*
 
@@ -184,13 +192,6 @@ and preprocessed with the Python script.
 
 ![Example Image](./images/cow.png)
 *Figure: Cross-section of a critical cow with 30000 cells (https://www.thingiverse.com/thing:2216708).*
-
----
-**NOTE**
-
-These two examples run on a DELL XPS 13 (Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz) with 4 cores, 8 threads and 8 GB of RAM. Both examples took $\sim$ 2 minutes to run (battery economizer on).
-
----
 ## Modules
 
 ### MeshHandler.hpp
