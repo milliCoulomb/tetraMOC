@@ -1,0 +1,31 @@
+mesh:
+  nodes: "../examples/sphere/nodes.txt"
+  cells: "../examples/sphere/cells.txt"
+  faces: "../examples/sphere/faces.txt"
+
+cross_sections:
+  data_files:
+    - "../examples/sphere/xs.txt"
+
+angular_quadrature:
+  ntheta: 4
+  nphi: 4
+
+solver_parameters:
+  multi_group_max_iterations: 1000
+  multi_group_tolerance: 1e-4
+  one_group_max_iterations: 500
+  one_group_tolerance: 1e-4
+  fission_source_tolerance: 1e-4
+  keff_tolerance: 1e-5
+  max_power_iterations: 300
+  rays_per_face: 10
+  max_ray_length: 5000
+
+output:
+  flux_output_file: "../examples/sphere/output/flux.txt"
+  k_eff_output_file: "../examples/sphere/output/k_eff.txt"
+
+logging:
+  level: "RUNNING"
+  log_file: "logs/solver.log"
