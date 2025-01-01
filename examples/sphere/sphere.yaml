@@ -30,5 +30,5 @@ logging:
   level: "RUNNING"
   # log_file: "logs/solver.log"
 
-# sphere of radius 1.20 m
-# should find keff = 1.436692222882128
+# sphere of radius or diameter? 1.20 m
+# should find keff = 1.436692222882128 or 1.236300905959895
