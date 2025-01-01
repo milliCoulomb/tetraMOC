@@ -28,4 +28,6 @@ output:
 
 logging:
   level: "RUNNING"
-  log_file: "logs/solver.log"
+  # log_file: "logs/solver.log"
+
+# sphere of radius 1.20 m
