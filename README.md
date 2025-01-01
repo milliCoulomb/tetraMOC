@@ -152,6 +152,7 @@ solver_parameters:
   keff_tolerance: 1e-6
   max_power_iterations: 500
   rays_per_face: 10
+  max_ray_length: 1000
 
 output:
   flux_output_file: "../examples/cube/output/flux.dat"
