@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'postprocess'))
 import postprocess
 import medcoupling as mc
 import numpy as np
+import vtk
 
 class TestPostprocess(unittest.TestCase):
 
