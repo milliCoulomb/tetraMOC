@@ -74,7 +74,11 @@ This project is still under development, and some features may not be fully impl
     cmake ..
     make
     ```
-
+  or build with ninja:
+  ```bash
+  cmake -G Ninja ..
+  ninja
+  ```
 By default, the unit tests are compiled and logging is enabled.
 Before running the code with a real mesh, you can run the tests to check if everything is working correctly. The tests are written with the Google Test framework, which is included in the repository. To run the tests, use:
 
