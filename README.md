@@ -174,7 +174,7 @@ the option *output_file* is optional, by default the script will write the outpu
 ![Example Image](./images/flux_in_cube.png)
 *Figure: Neutron flux in a cube.*
 
-The $k_{eff}$ obtained is 1.49709. With the XS used, $\Sigma_t = 11.0$ SI, $\Sigma_s = 8.0$ SI, $\Sigma_f = 2.0$ SI and $\nu = 2.43$, $k_{\infty}=1.62$, even if scattering does not really dominate, $D \sim 1/3\Sigma_t$ and $M^2 = D / \Sigma_a$. Then, $k_{eff} = k_{\infty} / (1 + M^2 B_g^2) \simeq 1.46897$, not that far from the value obtained with the code (should test with a finer mesh and a lot of scattering).
+The $k_{eff}$ obtained is 1.42799. With the XS used, the analytical solution is 1.43050. The error is roughly 0.2%, which can be lowered using a more refined mesh and more directions in the angular quadrature, but which I cannot do because of the limitations of my computer.
 
 A more complex geometry can be used, such as a cow geometry, with the same XS. The STL file is imported in Gmsh and meshed with tetrahedra. The mesh is then converted to .MED format using **meshio**:
 ```bash
