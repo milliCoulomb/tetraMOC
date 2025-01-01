@@ -161,7 +161,7 @@ output:
 logging:
   level: "RUNNING"
 ```
-and run tetraMOC after compiling it with:
+This input deck will run the code with a 4x4 angular quadrature, 10 rays per face, and a maximum ray lenght of 1000 (parameter needed to reserve the ray tracing memory). The mesh is a cube with the cross-sections in the xs.txt file. The output files are in the output directory, with the flux values in flux.dat and the $k_{eff}$ in k_eff.dat. The logging level is set to RUNNING, which will display only the most important messages. You can change the logging level to INFO, WARNING, or ERROR to display more messages. You can run the code with:
 ```bash
 ./src/tetraMOC ../examples/cube/cube.yaml 
 ```
