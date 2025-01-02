@@ -8,7 +8,7 @@ cross_sections:
     - "../examples/cow/xs.txt"
 
 angular_quadrature:
-  ntheta: 2
+  ntheta: 4
   nphi: 4
 
 solver_parameters:
