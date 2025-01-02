@@ -196,6 +196,11 @@ and preprocessed with the Python script.
 
 ![Example Image](./images/cow.png)
 *Figure: Cross-section of a critical cow with 30000 cells (https://www.thingiverse.com/thing:2216708).*
+
+Reusing the same nuclear data, the code can also run on a sphere meshed with tetrahedra. The sphere is meshed with 40000 cells. The error on $k_{eff}$ is 0.6% ($R=1.2$ m). The error could be reduced by increasing the number of directions in the angular quadrature and increasing the number of cells, but the code would take too long to run on my computer.
+
+![Example Image](./images/sphere.png)
+*Figure: Cross-section of a critical sphere with 40000 cells.*
 ## Modules
 
 ### MeshHandler.hpp
