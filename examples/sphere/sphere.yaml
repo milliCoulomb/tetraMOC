@@ -9,7 +9,7 @@ cross_sections:
 
 angular_quadrature:
   ntheta: 4
-  nphi: 4
+  nphi: 8
 
 solver_parameters:
   multi_group_max_iterations: 1000
@@ -19,7 +19,7 @@ solver_parameters:
   fission_source_tolerance: 1e-4
   keff_tolerance: 1e-5
   max_power_iterations: 300
-  rays_per_face: 10
+  rays_per_face: 8
   max_ray_length: 5000
 
 output:
@@ -27,8 +27,5 @@ output:
   k_eff_output_file: "../examples/sphere/output/k_eff.txt"
 
 logging:
-  level: "RUNNING"
-  # log_file: "logs/solver.log"
-
-# sphere of radius or diameter? 1.20 m
-# should find keff = 1.436692222882128 or 1.236300905959895
+  level: "ERROR"
+  log_file: "logs/solver.log"
