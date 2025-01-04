@@ -58,7 +58,6 @@ InputDeck InputDeckParser::parse(const std::string& filename) {
         YAML::Node log_node = config["logging"];
         if (!log_node) throw std::runtime_error("Missing 'logging' section in YAML.");
         deck.logging.level = log_node["level"].as<std::string>();
-        deck.logging.log_file = log_node["log_file"].as<std::string>();
 
     } catch (const YAML::Exception& e) {
         std::cerr << "YAML Parsing Error: " << e.what() << std::endl;

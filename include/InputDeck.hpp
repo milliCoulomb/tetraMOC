@@ -46,7 +46,6 @@ struct OutputSettings {
 // Structure to hold logging settings
 struct LoggingSettings {
     std::string level;
-    std::string log_file;
 };
 
 // Main structure to hold the entire input deck
