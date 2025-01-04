@@ -325,10 +325,10 @@ void RayTracerManager::doubleTrackingDataByReversing() {
         // Reverse the order of cell_traces
         std::reverse(reversed_ray.cell_traces.begin(), reversed_ray.cell_traces.end());
 
-        // Swap start_point and end_point in each CellTrace
-        for (auto& trace : reversed_ray.cell_traces) {
-            std::swap(trace.start_point, trace.end_point);
-        }
+        // // Swap start_point and end_point in each CellTrace
+        // for (auto& trace : reversed_ray.cell_traces) {
+        //     std::swap(trace.start_point, trace.end_point);
+        // }
 
         // Optionally, adjust direction_weight if necessary
         // For this example, we'll keep it the same
