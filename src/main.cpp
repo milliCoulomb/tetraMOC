@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
         ray_tracer_manager.generateTrackingData(rays_per_face, max_ray_length);
         if (use_half_quadrature_for_constant) {
             Logger::info("Using only the upper hemisphere for ray tracing, symmetrizing afterwards.");
-            ray_tracer_manager.symmetrizeTrackingData();
+            ray_tracer_manager.doubleTrackingDataByReversing();
         }
 
         Logger::running("Tracking data generated.");
