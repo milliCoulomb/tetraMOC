@@ -44,6 +44,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -116,6 +117,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -158,6 +160,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -204,6 +207,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -285,6 +289,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -331,6 +336,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 logging:
   level: "INFO"
@@ -373,6 +379,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -458,6 +465,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
