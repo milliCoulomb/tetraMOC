@@ -185,8 +185,8 @@ protected:
         CellTrace trace;
         trace.cell_id = cell_id;
         trace.time_spent = L_k; // Time spent in the cell
-        trace.start_point = start_point; // Entry point
-        trace.end_point = end_point; // Exit point
+        // trace.start_point = start_point; // Entry point
+        // trace.end_point = end_point; // Exit point
 
         ray.cell_traces.push_back(trace);
 
@@ -371,8 +371,8 @@ TEST_F(BoltzmannSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
         CellTrace trace1;
         trace1.cell_id = 1;
         trace1.time_spent = 1.0e10; // infinite path length
-        trace1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
-        trace1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+        // trace1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+        // trace1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
         ray.cell_traces.push_back(trace1);
         tracking_data.push_back(ray);
     }
@@ -385,8 +385,8 @@ TEST_F(BoltzmannSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
         CellTrace trace1;
         trace1.cell_id = 0;
         trace1.time_spent = 1.0e10;
-        trace1.start_point = Vector3D(0.0, 1.0, 0.0); // Entry to Cell1
-        trace1.end_point = Vector3D(0.0, 2.0, 0.0);   // Exit from Cell1
+        // trace1.start_point = Vector3D(0.0, 1.0, 0.0); // Entry to Cell1
+        // trace1.end_point = Vector3D(0.0, 2.0, 0.0);   // Exit from Cell1
         ray.cell_traces.push_back(trace1);
         tracking_data.push_back(ray);
     }
