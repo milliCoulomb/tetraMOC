@@ -148,8 +148,8 @@ protected:
         CellTrace trace;
         trace.cell_id = cell_id;
         trace.time_spent = L_k; // Time spent in the cell
-        trace.start_point = start_point; // Entry point
-        trace.end_point = end_point; // Exit point
+        // trace.start_point = start_point; // Entry point
+        // trace.end_point = end_point; // Exit point
 
         ray.cell_traces.push_back(trace);
 
@@ -302,8 +302,8 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     CellTrace trace1_1;
     trace1_1.cell_id = 1;
     trace1_1.time_spent = 1.0;
-    trace1_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
-    trace1_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+    // trace1_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    // trace1_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
     ray1.cell_traces.push_back(trace1_1);
 
     // Ray 2
@@ -312,8 +312,8 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRays) {
     CellTrace trace2_1;
     trace2_1.cell_id = 1;
     trace2_1.time_spent = 1.0;
-    trace2_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
-    trace2_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+    // trace2_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    // trace2_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
     ray2.cell_traces.push_back(trace2_1);
 
     std::vector<TrackingData> tracking_data = { ray1, ray2 };
@@ -395,8 +395,8 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRaysDifferentLengths)
     CellTrace trace1_1;
     trace1_1.cell_id = 1;
     trace1_1.time_spent = 1.0;
-    trace1_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
-    trace1_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+    // trace1_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    // trace1_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
     ray1.cell_traces.push_back(trace1_1);
 
     // Ray 2
@@ -405,8 +405,8 @@ TEST_F(FluxSolverTest, MultipleCellsSingleDirectionMultipleRaysDifferentLengths)
     CellTrace trace2_1;
     trace2_1.cell_id = 1;
     trace2_1.time_spent = 3.0;
-    trace2_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
-    trace2_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+    // trace2_1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+    // trace2_1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
     ray2.cell_traces.push_back(trace2_1);
 
     std::vector<TrackingData> tracking_data = { ray1, ray2 };
@@ -590,8 +590,8 @@ TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
         CellTrace trace1;
         trace1.cell_id = 1;
         trace1.time_spent = 1.0;
-        trace1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
-        trace1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
+        // trace1.start_point = Vector3D(1.0, 0.0, 0.0); // Entry to Cell1
+        // trace1.end_point = Vector3D(2.0, 0.0, 0.0);   // Exit from Cell1
         ray.cell_traces.push_back(trace1);
         tracking_data.push_back(ray);
     }
@@ -604,8 +604,8 @@ TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
         CellTrace trace1;
         trace1.cell_id = 1;
         trace1.time_spent = 1.0;
-        trace1.start_point = Vector3D(0.0, 1.0, 0.0); // Entry to Cell1
-        trace1.end_point = Vector3D(0.0, 2.0, 0.0);   // Exit from Cell1
+        // trace1.start_point = Vector3D(0.0, 1.0, 0.0); // Entry to Cell1
+        // trace1.end_point = Vector3D(0.0, 2.0, 0.0);   // Exit from Cell1
         ray.cell_traces.push_back(trace1);
         tracking_data.push_back(ray);
     }
@@ -763,8 +763,8 @@ TEST_F(FluxSolverTest, RaysTraversingSameCellMultipleTimes) {
     CellTrace trace2;
     trace2.cell_id = 0;
     trace2.time_spent = 1.0e-1;
-    trace2.start_point = Vector3D(1.0, 0.0, 0.0);
-    trace2.end_point = Vector3D(0.0, 0.0, 0.0);
+    // trace2.start_point = Vector3D(1.0, 0.0, 0.0);
+    // trace2.end_point = Vector3D(0.0, 0.0, 0.0);
     
     ray.cell_traces.push_back(trace2);
     
