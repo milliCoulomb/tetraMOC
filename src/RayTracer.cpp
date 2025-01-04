@@ -79,7 +79,7 @@ std::vector<CellTrace> RayTracer::traceRay(int start_cell_id, const Vector3D& st
         }
 
         // Record the traversal segment using emplace_back
-        pathline.emplace_back(CellTrace{current_cell_id, t_exit, current_point, x_exit});
+        pathline.emplace_back(CellTrace{current_cell_id, t_exit});
 
         // Validate exit_face_id
         if(exit_face_id < 0 || exit_face_id >= mesh_.getTotalFaces()) {
