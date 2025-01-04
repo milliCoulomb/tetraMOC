@@ -7,8 +7,8 @@
 struct CellTrace {
     int cell_id = -1; // Default to an invalid ID
     double time_spent = 0.0;
-    Vector3D start_point = Vector3D(); // Assumes Vector3D has a default constructor
-    Vector3D end_point = Vector3D();
+    // Vector3D start_point = Vector3D(); // Assumes Vector3D has a default constructor
+    // Vector3D end_point = Vector3D();
 };
 
 struct TrackingData {
