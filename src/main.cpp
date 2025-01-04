@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         Field field;
 
         bool constant_dir_bool = true;
-        bool use_half_quadrature_for_constant = false;
+        bool use_half_quadrature_for_constant = input_deck.solver_parameters.use_half_hemisphere;
 
         // Initialize RayTracerManager and generate tracking data
         RayTracerManager ray_tracer_manager(mesh_handler, field, angular_quadrature, constant_dir_bool,
@@ -76,6 +76,10 @@ int main(int argc, char* argv[]) {
         int rays_per_face = input_deck.solver_parameters.rays_per_face;
         int max_ray_length = input_deck.solver_parameters.max_ray_length;
         ray_tracer_manager.generateTrackingData(rays_per_face, max_ray_length);
+        if (use_half_quadrature_for_constant) {
+            Logger::info("Using only the upper hemisphere for ray tracing, symmetrizing afterwards.");
+            ray_tracer_manager.symmetrizeTrackingData();
+        }
 
         Logger::running("Tracking data generated.");
 
