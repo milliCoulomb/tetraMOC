@@ -34,6 +34,7 @@ struct SolverParameters {
     int max_power_iterations;
     int rays_per_face;
     int max_ray_length;
+    bool use_half_hemisphere; // use only the upper hemisphere for ray tracing and symmetrize afterwards
 };
 
 // Structure to hold output settings
