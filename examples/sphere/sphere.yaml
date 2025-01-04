@@ -21,6 +21,7 @@ solver_parameters:
   max_power_iterations: 500
   rays_per_face: 8
   max_ray_length: 5000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "../examples/sphere/output/flux.txt"
