@@ -13,6 +13,7 @@ set(CMAKE_CONFIGURATION_TYPES "Release;Dev" CACHE STRING "" FORCE)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Dev)
 endif()
+# default build type is Dev
 
 option(ENABLE_LOGGING "Enable logging" ON)
 
@@ -37,11 +38,17 @@ include_directories(include)
 
 # Set compiler flags based on build type
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native")
+    # add a message to say that the build type is release
+    message(STATUS "Build type: Release")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Dev")
     set(CMAKE_CXX_FLAGS_DEV "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Wconversion -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Woverloaded-virtual -Wfloat-equal -Wformat=2 -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wredundant-decls -Wswitch-enum")
+    # add a message to say that the build type is dev
+    message(STATUS "Build type: Dev")
 elseif(CMAKE_BUILD_TYPE STREQUAL "perf")
     set(CMAKE_CXX_FLAGS_PERF "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fsanitize=address -fstack-protector -DPROFILE")
+    # add a message to say that the build type is perf
+    message(STATUS "Build type: perf")
 endif()
 
 # subdirectories
