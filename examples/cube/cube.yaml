@@ -28,4 +28,3 @@ output:
 
 logging:
   level: "RUNNING"
-  log_file: "logs/solver.log"
