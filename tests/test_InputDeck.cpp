@@ -52,7 +52,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -89,7 +88,6 @@ logging:
 
     // Verify logging settings
     EXPECT_EQ(deck.logging.level, "INFO");
-    EXPECT_EQ(deck.logging.log_file, "logs/solver.log");
 
     // Clean up
     std::remove(filename.c_str());
@@ -125,7 +123,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -168,7 +165,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -215,7 +211,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -250,7 +245,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -297,7 +291,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -340,7 +333,6 @@ solver_parameters:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -473,7 +465,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 
 extra_section:
   key: "value"
