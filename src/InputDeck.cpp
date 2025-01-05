@@ -43,6 +43,7 @@ InputDeck InputDeckParser::parse(const std::string& filename) {
         deck.solver_parameters.max_power_iterations = sp_node["max_power_iterations"].as<int>();
         deck.solver_parameters.rays_per_face = sp_node["rays_per_face"].as<int>();
         deck.solver_parameters.max_ray_length = sp_node["max_ray_length"].as<int>();
+        deck.solver_parameters.use_half_hemisphere = sp_node["use_half_hemisphere"].as<bool>();
 
         // Parse output settings
         YAML::Node out_node = config["output"];
@@ -57,7 +58,6 @@ InputDeck InputDeckParser::parse(const std::string& filename) {
         YAML::Node log_node = config["logging"];
         if (!log_node) throw std::runtime_error("Missing 'logging' section in YAML.");
         deck.logging.level = log_node["level"].as<std::string>();
-        deck.logging.log_file = log_node["log_file"].as<std::string>();
 
     } catch (const YAML::Exception& e) {
         std::cerr << "YAML Parsing Error: " << e.what() << std::endl;

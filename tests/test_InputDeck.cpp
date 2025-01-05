@@ -44,6 +44,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -51,7 +52,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -88,7 +88,6 @@ logging:
 
     // Verify logging settings
     EXPECT_EQ(deck.logging.level, "INFO");
-    EXPECT_EQ(deck.logging.log_file, "logs/solver.log");
 
     // Clean up
     std::remove(filename.c_str());
@@ -116,6 +115,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -123,7 +123,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -158,6 +157,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -165,7 +165,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -204,6 +203,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -211,7 +211,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -246,7 +245,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -285,6 +283,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -292,7 +291,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -331,10 +329,10 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 )";
 
     ASSERT_TRUE(createTempYAML(filename, yaml_content)) << "Failed to create temporary YAML file.";
@@ -373,6 +371,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -458,6 +457,7 @@ solver_parameters:
   max_power_iterations: 100
   rays_per_face: 8
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "output/flux.dat"
@@ -465,7 +465,6 @@ output:
 
 logging:
   level: "INFO"
-  log_file: "logs/solver.log"
 
 extra_section:
   key: "value"

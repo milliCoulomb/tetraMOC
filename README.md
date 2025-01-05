@@ -157,6 +157,7 @@ solver_parameters:
   max_power_iterations: 500
   rays_per_face: 10
   max_ray_length: 1000
+  use_half_hemisphere: false
 
 output:
   flux_output_file: "../examples/cube/output/flux.dat"
