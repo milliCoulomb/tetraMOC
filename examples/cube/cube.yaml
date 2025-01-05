@@ -8,7 +8,7 @@ cross_sections:
     - "../examples/cube/xs.txt"
 
 angular_quadrature:
-  ntheta: 4
+  ntheta: 6
   nphi: 8
 
 solver_parameters:
@@ -17,7 +17,7 @@ solver_parameters:
   one_group_max_iterations: 500
   one_group_tolerance: 1e-4
   fission_source_tolerance: 1e-4
-  keff_tolerance: 1e-5
+  keff_tolerance: 1e-6
   max_power_iterations: 300
   rays_per_face: 10
   max_ray_length: 1000

@@ -8,8 +8,8 @@ cross_sections:
     - "../examples/sphere/xs.txt"
 
 angular_quadrature:
-  ntheta: 4
-  nphi: 4
+  ntheta: 6
+  nphi: 8
 
 solver_parameters:
   multi_group_max_iterations: 1000
