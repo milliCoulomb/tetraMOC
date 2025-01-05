@@ -56,6 +56,7 @@ This project is still under development, and some features may not be fully impl
 
 - **C++ Compiler**: Supporting C++17 or higher.
 - **CMake**: Version 3.10 or higher.
+- or **Ninja**.
 
 ### Steps
 
