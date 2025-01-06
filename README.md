@@ -56,6 +56,7 @@ This project is still under development, and some features may not be fully impl
 
 - **C++ Compiler**: Supporting C++17 or higher.
 - **CMake**: Version 3.10 or higher.
+- or **Ninja**.
 
 ### Steps
 
@@ -166,7 +167,7 @@ output:
 logging:
   level: "RUNNING"
 ```
-This input deck will run the code with a 4x4 angular quadrature, 10 rays per face, and a maximum ray lenght of 1000 (parameter needed to reserve the ray tracing memory). The mesh is a cube with the cross-sections in the xs.txt file. The output files are in the output directory, with the flux values in flux.dat and the $k_{eff}$ in k_eff.dat. The logging level is set to RUNNING, which will display only the most important messages. You can change the logging level to INFO, WARNING, or ERROR to display more messages. You can run the code with:
+This input deck will run the code with a 4x4 angular quadrature, 10 rays per face, and a maximum ray lenght of 1000 (parameter needed to reserve the ray tracing memory). **Careful**, the path used in the YAML input deck is relative to the directory where tetraMOC is launched. The mesh is a cube with the cross-sections in the xs.txt file. The output files are in the output directory, with the flux values in flux.dat and the $k_{eff}$ in k_eff.dat. The logging level is set to RUNNING, which will display only the most important messages. You can change the logging level to INFO, WARNING, or ERROR to display more messages. You can run the code by going in the *build* folder and running:
 ```bash
 ./src/tetraMOC ../examples/cube/cube.yaml 
 ```
