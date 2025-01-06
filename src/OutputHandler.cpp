@@ -1,6 +1,7 @@
 
 #include "OutputHandler.hpp"
 #include <fstream>
+#include <iomanip>
 
 void OutputHandler::writeScalarFlux(const std::string& filepath, const std::vector<std::vector<double>>& flux) {
     std::ofstream flux_file(filepath);
