@@ -1,0 +1,31 @@
+mesh:
+  nodes: "../examples/cylinder/nodes.txt"
+  cells: "../examples/cylinder/cells.txt"
+  faces: "../examples/cylinder/faces.txt"
+
+cross_sections:
+  data_files:
+    - "../examples/cylinder/xs.txt"
+
+angular_quadrature:
+  ntheta: 4
+  nphi: 6
+
+solver_parameters:
+  multi_group_max_iterations: 1000
+  multi_group_tolerance: 1e-4
+  one_group_max_iterations: 500
+  one_group_tolerance: 1e-4
+  fission_source_tolerance: 1e-4
+  keff_tolerance: 1e-6
+  max_power_iterations: 300
+  rays_per_face: 10
+  max_ray_length: 5000
+  use_half_hemisphere: false
+
+output:
+  flux_output_file: "../examples/cylinder/output/flux.txt"
+  k_eff_output_file: "../examples/cylinder/output/k_eff.txt"
+
+logging:
+  level: "RUNNING"
