@@ -10,7 +10,6 @@
 #include <iostream> // For debugging purposes
 #include <vector>
 #include <array>
-#include <mutex>
 
 const Vector3D ZERO_VECTOR(0.0, 0.0, 0.0);
 
