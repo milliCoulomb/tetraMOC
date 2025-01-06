@@ -24,6 +24,6 @@ void OutputHandler::writeKEff(const std::string& filepath, double keff) {
         throw std::runtime_error("Unable to open k_eff output file.");
     }
 
-    keff_file << keff << "\n";
+    keff_file << std::setprecision(15) << keff << "\n";
     keff_file.close();
 }
