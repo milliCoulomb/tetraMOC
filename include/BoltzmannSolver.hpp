@@ -11,7 +11,6 @@
 #include "Settings.hpp"
 
 #include <vector>
-#include <mutex>
 
 class BoltzmannSolver {
 public:
@@ -83,8 +82,8 @@ private:
 
     std::vector<std::vector<double>> scalar_flux_;
 
-    // Mutex for thread-safe k_eff update
-    std::mutex k_eff_mutex_;
+    // // Mutex for thread-safe k_eff update
+    // std::mutex k_eff_mutex_;
 
     /**
      * @brief Updates the effective multiplication factor (k_eff).
