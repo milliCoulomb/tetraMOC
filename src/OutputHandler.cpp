@@ -1,6 +1,7 @@
 
 #include "OutputHandler.hpp"
 #include <fstream>
+#include <iomanip>
 
 void OutputHandler::writeScalarFlux(const std::string& filepath, const std::vector<std::vector<double>>& flux) {
     std::ofstream flux_file(filepath);
@@ -24,6 +25,6 @@ void OutputHandler::writeKEff(const std::string& filepath, double keff) {
         throw std::runtime_error("Unable to open k_eff output file.");
     }
 
-    keff_file << keff << "\n";
+    keff_file << std::setprecision(15) << keff << "\n";
     keff_file.close();
 }
