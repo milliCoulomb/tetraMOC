@@ -126,9 +126,10 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
     }
 
     // Combine local_flux_data into global flux_data_ with parallelization
-    #pragma omp parallel for schedule(static) // Parallelize over cells
+    #pragma omp parallel for collapse(2) schedule(static)
     for (size_t cell = 0; cell < flux_data_.size(); ++cell) {
-        for (size_t dir = 0; dir < flux_data_[cell].size(); ++dir) {
+        for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
+            // TODO: check if  flux_data_[cell].size() == angular_quadrature_.getDirections().size() for collapse of the loops
             double total_flux = 0.0;
             double total_weight = 0.0;
             for(int thread_id = 0; thread_id < num_threads; ++thread_id) {
@@ -144,9 +145,10 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
 
 
     // Normalize flux by weights
-    #pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for collapse(2) schedule(static)
     for(size_t cell = 0; cell < flux_data_.size(); ++cell) {
-        for(size_t dir = 0; dir < flux_data_[cell].size(); ++dir) {
+        for(size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
+            // TODO: check if  flux_data_[cell].size() == angular_quadrature_.getDirections().size() for collapse of the loops
             if(flux_data_[cell][dir].weight > 0.0) {
                 flux_data_[cell][dir].flux /= flux_data_[cell][dir].weight;
             }
