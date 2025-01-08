@@ -36,7 +36,8 @@ public:
     void doubleTrackingDataByReversing();
 
     const std::vector<TrackingData>& getTrackingData() const { return tracking_data_; }
-    // add a method to sum up the direction weights of RayTracers in RayTracerManager
+    
+    const int getNumRays() const { return static_cast<int>(tracking_data_.size()); }
 
 private:
     const MeshHandler& mesh_;
