@@ -8,8 +8,8 @@ cross_sections:
     - "../examples/cube/xs.txt"
 
 angular_quadrature:
-  ntheta: 12
-  nphi: 12
+  ntheta: 18
+  nphi: 16
 
 solver_parameters:
   multi_group_max_iterations: 5
