@@ -46,7 +46,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Dev")
     # add a message to say that the build type is dev
     message(STATUS "Build type: Dev")
 elseif(CMAKE_BUILD_TYPE STREQUAL "perf")
-    set(CMAKE_CXX_FLAGS_PERF "${CMAKE_CXX_FLAGS} -O0 -g -fno-inline -fsanitize=address -fstack-protector -DPROFILE")
+    set(CMAKE_CXX_FLAGS_PERF "${CMAKE_CXX_FLAGS} -O2 -g -pg -fno-inline -fsanitize=address -fstack-protector -DPROFILE")
     # add a message to say that the build type is perf
     message(STATUS "Build type: perf")
 endif()
