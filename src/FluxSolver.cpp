@@ -129,17 +129,10 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
     #pragma omp parallel for collapse(2) schedule(static)
     for (size_t cell = 0; cell < flux_data_.size(); ++cell) {
         for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
-            // TODO: check if  flux_data_[cell].size() == angular_quadrature_.getDirections().size() for collapse of the loops
-            double total_flux = 0.0;
-            double total_weight = 0.0;
-            for(int thread_id = 0; thread_id < num_threads; ++thread_id) {
-                total_flux += local_flux_data[thread_id][cell][dir].flux;
-                total_weight += local_flux_data[thread_id][cell][dir].weight;
+            for (int thread_id = 0; thread_id < num_threads; ++thread_id) {
+                flux_data_[cell][dir].flux += local_flux_data[thread_id][cell][dir].flux;
+                flux_data_[cell][dir].weight += local_flux_data[thread_id][cell][dir].weight;
             }
-            #pragma omp atomic
-            flux_data_[cell][dir].flux += total_flux;
-            #pragma omp atomic
-            flux_data_[cell][dir].weight += total_weight;
         }
     }
 
