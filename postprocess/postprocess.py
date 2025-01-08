@@ -31,6 +31,9 @@ def add_flux_to_mesh(mesh: mc.MEDCouplingUMesh, flux: list, number_of_groups: in
     # reshape the flux array so that it has shape (num_cells, number_of_groups)
     flux_to_numpy_reshape = flux_to_numpy
     logging.info(f"Flux array shape: {flux_to_numpy_reshape.shape}")
+    # if there is only one group, we need to add an extra dimension
+    if number_of_groups == 1:
+        flux_to_numpy_reshape = flux_to_numpy_reshape[np.newaxis, :]
     field_on_cells = mc.MEDCouplingFieldDouble(mc.ON_CELLS)
     field_on_cells.setMesh(mesh)
     data_array = mc.DataArrayDouble()
