@@ -81,7 +81,9 @@ int main(int argc, char* argv[]) {
             ray_tracer_manager.doubleTrackingDataByReversing();
         }
 
+        int num_rays = ray_tracer_manager.getNumRays();
         Logger::running("Tracking data generated.");
+        Logger::running("Number of rays: " + std::to_string(num_rays));
 
         InputHandler input_handler;
         input_handler.loadData(input_deck.cross_sections.data_files[0]);
