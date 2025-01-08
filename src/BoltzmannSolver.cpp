@@ -53,7 +53,7 @@ std::vector<std::vector<double>> BoltzmannSolver::computeMultiGroupScatteringSou
         }
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2) schedule(static)
     for(int cell = 0; cell < num_cells_; ++cell) {
         for(int group = 0; group < num_groups_; ++group) {
             double sum = 0.0;
@@ -76,6 +76,7 @@ std::vector<std::vector<double>> BoltzmannSolver::computeFissionSource(const std
     // Precompute fission cross sections and spectra to reduce repeated access
     std::vector<double> fission_xs(num_groups_, 0.0);
     std::vector<double> fission_spectrum(num_groups_, 0.0);
+    
     for(int group = 0; group < num_groups_; ++group){
         const auto& group_data = input_.getEnergyGroupData(group);
         fission_xs[group] = group_data.fission_xs * group_data.multiplicity / old_keff;
@@ -104,11 +105,12 @@ std::vector<double> BoltzmannSolver::computeNuFissionSource(const std::vector<st
 
     // Precompute fission cross sections to reduce repeated access
     std::vector<double> fission_xs(num_groups_, 0.0);
+    
     for(int group = 0; group < num_groups_; ++group){
         fission_xs[group] = input_.getEnergyGroupData(group).fission_xs * input_.getEnergyGroupData(group).multiplicity / old_keff;
     }
 
-    #pragma omp parallel for
+    #pragma omp parallel for collapse(2) schedule(static)
     for(int cell = 0; cell < num_cells_; ++cell) {
         for(int group = 0; group < num_groups_; ++group) {
             nu_fission_source[cell] += fission_xs[group] * scalar_flux[group][cell];
@@ -161,10 +163,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
         flux_solver.computeFlux(scat_source);
 
         // Collapse flux to scalar flux
-        std::vector<double> collapsed_flux = flux_solver.collapseFlux();
-
-        // Update new_flux
-        new_flux = std::move(collapsed_flux);
+        std::vector<double> new_flux = flux_solver.collapseFlux();
 
         // Compute residual: ||new_flux - old_flux|| / ||old_flux||
         double norm_diff = 0.0;
@@ -182,11 +181,6 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
 
         // Swap old_flux and new_flux to reuse memory
         std::swap(old_flux, new_flux);
-        // Reset new_flux for next iteration
-        #pragma omp parallel for
-        for (int cell = 0; cell < num_cells_; ++cell) {
-            new_flux[cell] = 0.0;
-        }
 
         iteration++;
     }
@@ -255,7 +249,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         double norm_diff = 0.0;
         double norm_old = 0.0;
 
-        #pragma omp parallel for reduction(+:norm_diff, norm_old) collapse(2) schedule(dynamic)
+        #pragma omp parallel for reduction(+:norm_diff, norm_old) collapse(2) schedule(static)
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
                 double diff = new_flux[group][cell] - old_flux[group][cell];
@@ -269,14 +263,6 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
 
         // Swap old_flux and new_flux to reuse memory
         std::swap(old_flux, new_flux);
-        // Reset new_flux for next iteration
-        #pragma omp parallel for collapse(2)
-        for (int group = 0; group < num_groups_; ++group) {
-            for (int cell = 0; cell < num_cells_; ++cell) {
-                new_flux[group][cell] = 0.0;
-            }
-        }
-
         iteration++;
     }
 
