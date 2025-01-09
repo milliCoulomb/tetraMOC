@@ -1,5 +1,3 @@
-# src/CMakeLists.txt
-
 cmake_minimum_required(VERSION 3.10)
 project(moc_solver)
 
@@ -38,19 +36,17 @@ target_link_libraries(moc_solver_lib PUBLIC
     yaml-cpp
 )
 
-# Add executable for main.cpp
-add_executable(tetraMOC main.cpp)
-
-# Link the executable with the library and dependencies
-target_link_libraries(tetraMOC PUBLIC 
-    moc_solver_lib
-    OpenMP::OpenMP_CXX 
-    yaml-cpp
-)
-
-# Add compiler warning flags based on the compiler and build type
+# Add SIMD-specific compiler flags
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    if (CMAKE_BUILD_TYPE STREQUAL "Dev")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(moc_solver_lib PRIVATE
+            -O3
+            -DNDEBUG
+            -march=native
+            -mtune=native
+            -fopenmp-simd
+        )
+    elseif (CMAKE_BUILD_TYPE STREQUAL "Dev")
         target_compile_options(moc_solver_lib PRIVATE
             -Wall
             -Wextra
@@ -67,25 +63,47 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
             -Wmissing-include-dirs
             -Wredundant-decls
             -Wswitch-enum
+            -fopenmp-simd
         )
     elseif (CMAKE_BUILD_TYPE STREQUAL "perf")
         target_compile_options(moc_solver_lib PRIVATE
             -O2
             -g
+            -pg
             -fno-inline
+            -fsanitize=address
+            -fstack-protector
             -DPROFILE
+            -fopenmp-simd
         )
     endif()
 elseif (MSVC)
-    if (CMAKE_BUILD_TYPE STREQUAL "Dev")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(moc_solver_lib PRIVATE
+            /O2
+            /openmp
+        )
+    elseif (CMAKE_BUILD_TYPE STREQUAL "Dev")
         target_compile_options(moc_solver_lib PRIVATE
             /W4
+            /openmp
         )
     elseif (CMAKE_BUILD_TYPE STREQUAL "perf")
         target_compile_options(moc_solver_lib PRIVATE
             /Zi
             /Od
             /DPROFILE
+            /openmp
         )
     endif()
 endif()
+
+# Add executable for main.cpp
+add_executable(tetraMOC main.cpp)
+
+# Link the executable with the library and dependencies
+target_link_libraries(tetraMOC PUBLIC 
+    moc_solver_lib
+    OpenMP::OpenMP_CXX 
+    yaml-cpp
+)
