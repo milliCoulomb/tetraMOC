@@ -34,7 +34,7 @@ std::vector<double> BoltzmannSolver::computeScatteringSource(const std::vector<d
     // Compute sigma_s * phi for each cell
     double sigma_s = input_.getSelfScatteringXS(group);
 
-    #pragma omp parallel for
+    #pragma omp parallel for simd schedule(static)
     for (int cell = 0; cell < num_cells_; ++cell) {
         scat_source[cell] = sigma_s * scalar_flux[cell] / QuadratureTotalWeight_;
     }
@@ -151,7 +151,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
         std::vector<double> scat_source = computeScatteringSource(old_flux, group);
 
         // Compute total source: scat_source + external_source / QuadratureTotalWeight_
-        #pragma omp parallel for
+        #pragma omp parallel for simd schedule(static)
         for (int cell = 0; cell < num_cells_; ++cell) {
             scat_source[cell] += external_source[cell] / QuadratureTotalWeight_;
         }
@@ -169,7 +169,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
         double norm_diff = 0.0;
         double norm_old = 0.0;
 
-        #pragma omp parallel for reduction(+:norm_diff, norm_old)
+        #pragma omp parallel for simd reduction(+:norm_diff, norm_old)
         for (int cell = 0; cell < num_cells_; ++cell) {
             double diff = new_flux[cell] - old_flux[cell];
             norm_diff += diff * diff;
@@ -249,7 +249,7 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         double norm_diff = 0.0;
         double norm_old = 0.0;
 
-        #pragma omp parallel for reduction(+:norm_diff, norm_old) collapse(2) schedule(static)
+        #pragma omp parallel for simd reduction(+:norm_diff, norm_old) collapse(2) schedule(static)
         for (int group = 0; group < num_groups_; ++group) {
             for (int cell = 0; cell < num_cells_; ++cell) {
                 double diff = new_flux[group][cell] - old_flux[group][cell];
@@ -320,7 +320,7 @@ bool BoltzmannSolver::solveEigenvalueProblem(const std::vector<std::vector<doubl
 
         // loop over the cells and calculate the norm of the difference of nu_fission_source
         // and old_nu_fission_source
-        #pragma omp parallel for reduction(+:norm_diff, norm_old)
+        #pragma omp parallel for simd reduction(+:norm_diff, norm_old)
         for (int i = 0; i < num_cells_; ++i) {
             double diff = new_nu_fission_source[i] - old_nu_fission_source[i];
             norm_diff += diff * diff;
@@ -365,7 +365,7 @@ void BoltzmannSolver::updateKEff(const std::vector<double>& fission_source_new,
     double sum_old = 0.0;
 
     // Compute total fission source
-    #pragma omp parallel for reduction(+:sum_new, sum_old)
+    #pragma omp parallel for simd reduction(+:sum_new, sum_old)
     for(int i = 0; i < num_cells_; ++i) {
         sum_new += fission_source_new[i] * fission_source_new[i];
         sum_old += fission_source_old[i] * fission_source_old[i];
