@@ -5,11 +5,11 @@ mesh:
 
 cross_sections:
   data_files:
-    - "../examples/cylinder/xs_6g.txt"
+    - "../examples/cylinder/xs.txt"
 
 angular_quadrature:
-  ntheta: 4
-  nphi: 4
+  ntheta: 6
+  nphi: 8
 
 solver_parameters:
   multi_group_max_iterations: 1000
