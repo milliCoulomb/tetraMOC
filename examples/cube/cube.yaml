@@ -1,15 +1,15 @@
 mesh:
-  nodes: "../examples/cube/nodes.txt"
-  cells: "../examples/cube/cells.txt"
-  faces: "../examples/cube/faces.txt"
+  nodes: "../examples/cube/output/nodes.txt"
+  cells: "../examples/cube/output/cells.txt"
+  faces: "../examples/cube/output/faces.txt"
 
 cross_sections:
   data_files:
     - "../examples/cube/xs.txt"
 
 angular_quadrature:
-  ntheta: 18
-  nphi: 16
+  ntheta: 4
+  nphi: 4
 
 solver_parameters:
   multi_group_max_iterations: 5
