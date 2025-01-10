@@ -163,7 +163,7 @@ std::vector<double> BoltzmannSolver::solveOneGroupWithSource(
         flux_solver.computeFlux(scat_source);
 
         // Collapse flux to scalar flux
-        std::vector<double> new_flux = flux_solver.collapseFlux();
+        new_flux = flux_solver.collapseFlux();
 
         // Compute residual: ||new_flux - old_flux|| / ||old_flux||
         double norm_diff = 0.0;
