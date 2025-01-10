@@ -115,7 +115,7 @@ void RayTracerManager::initializeConstantDirectionRayTracers(const std::vector<D
         Vector3D normalized_dir = vector_dir.normalized();
 
         // Instantiate a RayTracer in CONSTANT_DIRECTION mode
-        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir, direction_weight));
+        ray_tracers_.emplace_back(std::make_unique<RayTracer>(mesh_, normalized_dir, direction_weight, i));
         added_tracers++;
     }
     Logger::info("Initialized " + std::to_string(added_tracers) + " constant direction RayTracers.");
@@ -256,6 +256,7 @@ void RayTracerManager::generateTrackingData(int rays_per_face, int max_ray_lengt
                         data.direction = direction;
                         data.direction_weight = direction_weight;
                         data.cell_traces = std::move(cell_traces);
+                        data.direction_index = tracer->getDirectionIndex();
 
                         local_tracking_data.emplace_back(std::move(data));
                     }
