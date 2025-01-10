@@ -240,7 +240,6 @@ std::vector<std::vector<double>> BoltzmannSolver::solveMultiGroupWithSource(
         }
 
         // Solve one group problem for each group
-        // #pragma omp parallel for
         for(int group = 0; group < num_groups_; ++group) {
             new_flux[group] = solveOneGroupWithSource(scat_source[group], group, old_flux[group]);
         }
