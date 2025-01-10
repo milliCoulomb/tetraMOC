@@ -23,12 +23,13 @@ RayTracer::RayTracer(const MeshHandler& mesh_handler, const Field& field_handler
 }
 
 // Constructor for constant direction tracing
-RayTracer::RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_direction, const double direction_weight)
+RayTracer::RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_direction, const double direction_weight, size_t direction_index)
     : mesh_(mesh_handler),
       mode_(RayTracerMode::CONSTANT_DIRECTION),
       field_ptr_(nullptr),
       fixed_direction_(fixed_direction.normalized()), // Normalize the fixed direction
-      direction_weight_(direction_weight)
+      direction_weight_(direction_weight),
+      direction_index_(direction_index)
 {
     // Ensure fixed_direction is not zero
     if (fixed_direction_.isAlmostEqual(ZERO_VECTOR)) {
