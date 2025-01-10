@@ -79,7 +79,7 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
         int thread_id = omp_get_thread_num();
         std::vector<std::vector<CellFlux>>& thread_flux = local_flux_data[thread_id];
 
-        #pragma omp for schedule(dynamic)
+        #pragma omp for schedule(static)
         for(size_t ray_idx = 0; ray_idx < tracking_data_.size(); ++ray_idx) {
             const TrackingData& ray = tracking_data_[ray_idx];
             const Vector3D& direction = ray.direction;
@@ -102,10 +102,6 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
                 }
 
                 // Retrieve Q_k for the cell
-                if(trace.cell_id >= static_cast<int>(source.size())) {
-                    // If scalar field not set for this cell, assume Q_k = 0
-                    Logger::warning("Scalar field Q_k not set for cell ID " + std::to_string(trace.cell_id) + " in ray ID " + std::to_string(ray.ray_id) + ". Assuming Q_k = 0.");
-                }
                 double Q_k = (trace.cell_id < static_cast<int>(source.size())) ?
                              source[trace.cell_id] : 0.0;
 
@@ -123,29 +119,29 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
                 psi_in = psi_out;
             }
         }
-    }
 
-    // Combine local_flux_data into global flux_data_ with parallelization
-    #pragma omp parallel for collapse(2) schedule(static)
-    for (size_t cell = 0; cell < flux_data_.size(); ++cell) {
-        for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
-            for(int thread = 0; thread < local_flux_data.size(); ++thread) {
-                flux_data_[cell][dir].flux += local_flux_data[thread][cell][dir].flux;
-                flux_data_[cell][dir].weight += local_flux_data[thread][cell][dir].weight;
+        // Combine local_flux_data into global flux_data_ with parallelization
+        #pragma omp for collapse(2) schedule(static)
+        for (size_t cell = 0; cell < flux_data_.size(); ++cell) {
+            for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
+                for(int thread = 0; thread < local_flux_data.size(); ++thread) {
+                    flux_data_[cell][dir].flux += local_flux_data[thread][cell][dir].flux;
+                    flux_data_[cell][dir].weight += local_flux_data[thread][cell][dir].weight;
+                }
             }
         }
-    }
 
-
-    // Normalize flux by weights
-    #pragma omp parallel for collapse(2) schedule(static)
-    for(size_t cell = 0; cell < flux_data_.size(); ++cell) {
-        for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
-            if(flux_data_[cell][dir].weight > 0.0) {
-                flux_data_[cell][dir].flux /= flux_data_[cell][dir].weight;
+        // Normalize flux by weights
+        #pragma omp for collapse(2) schedule(static)
+        for(size_t cell = 0; cell < flux_data_.size(); ++cell) {
+            for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
+                if(flux_data_[cell][dir].weight > 0.0) {
+                    flux_data_[cell][dir].flux /= flux_data_[cell][dir].weight;
+                }
             }
         }
-    }
+
+    } // End of parallel region
 }
 
 // Method to collapse the flux in all directions to a scalar flux by using the angular quadrature weights
