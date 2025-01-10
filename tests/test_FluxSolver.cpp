@@ -139,10 +139,13 @@ protected:
     }
 
     // Helper function to create a ray traversing the single cell in a specific direction
-    TrackingData createSingleRay(int ray_id, const Vector3D& direction, const int cell_id = 0, const double L_k = 1.0) {
+    TrackingData createSingleRay(int ray_id, const Vector3D& direction, const int cell_id = 0, const double L_k = 1.0, const size_t direction_index = 0) {
         TrackingData ray;
         ray.ray_id = ray_id;
         ray.direction = direction.normalized(); // Ensure direction is unit vector
+        ray.direction_weight = 1.0; // Default weight
+        ray.direction_index = direction_index; // Default index
+
 
         // Single CellTrace: traversing Cell 0
         CellTrace trace;
@@ -238,8 +241,8 @@ TEST_F(FluxSolverTest, SingleCellMultipleDirectionsMultipleRays) {
     Vector3D dir_vector0 = directionVector(dir0.mu, dir0.phi);
     Vector3D dir_vector1 = directionVector(dir1.mu, dir1.phi);
     
-    TrackingData ray1 = createSingleRay(0, dir_vector0);
-    TrackingData ray2 = createSingleRay(1, dir_vector1);
+    TrackingData ray1 = createSingleRay(0, dir_vector0, 0, 1.0, static_cast<size_t>(0));
+    TrackingData ray2 = createSingleRay(1, dir_vector1, 0, 1.0, static_cast<size_t>(1));
     std::vector<TrackingData> tracking_data = { ray1, ray2 };
     
     // Initialize FluxSolver
@@ -458,11 +461,11 @@ TEST_F(FluxSolverTest, RaysWithInvalidDirection) {
     // Create TrackingData with two rays: one valid, one invalid
     // Valid Ray
     Vector3D dir_vector0 = directionVector(valid_dir.mu, valid_dir.phi);
-    TrackingData ray1 = createSingleRay(0, dir_vector0);
+    TrackingData ray1 = createSingleRay(0, dir_vector0, 0, 1.0, 0);
     
     // Invalid Ray (direction not in angular quadrature)
     Vector3D invalid_dir_vector = directionVector(0.0, M_PI / 2.0); // +y direction not defined
-    TrackingData ray2 = createSingleRay(1, invalid_dir_vector);
+    TrackingData ray2 = createSingleRay(1, invalid_dir_vector, 0, 1.0, 1);
     
     std::vector<TrackingData> tracking_data = { ray1, ray2 };
     
@@ -585,7 +588,7 @@ TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     // Rays in +x direction
     for(int i = 0; i < 2; ++i) {
         Vector3D dir_vector = directionVector(dir0.mu, dir0.phi);
-        TrackingData ray = createSingleRay(i, dir_vector);
+        TrackingData ray = createSingleRay(i, dir_vector, 0, 1.0, static_cast<size_t>(0));
         // Add second CellTrace traversing Cell1
         CellTrace trace1;
         trace1.cell_id = 1;
@@ -599,7 +602,7 @@ TEST_F(FluxSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     // Rays in +y direction
     for(int i = 2; i < 4; ++i) {
         Vector3D dir_vector = directionVector(dir1.mu, dir1.phi);
-        TrackingData ray = createSingleRay(i, dir_vector);
+        TrackingData ray = createSingleRay(i, dir_vector, 0, 1.0, static_cast<size_t>(1));
         // Add second CellTrace traversing Cell1
         CellTrace trace1;
         trace1.cell_id = 1;
@@ -923,10 +926,10 @@ TEST_F(FluxSolverTest, CollapseFlux) {
     // Create TrackingData with two rays: one in each direction
     std::vector<TrackingData> tracking_data;
     Vector3D dir_vector = directionVector(dir.mu, dir.phi);
-    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e-1);
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e-1, 0);
     tracking_data.push_back(ray1);
     Vector3D dir_vector2 = directionVector(dir2.mu, dir2.phi);
-    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e-1);
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e-1, 1);
     tracking_data.push_back(ray2);
     // test if size of tracking_data is 2
     ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
@@ -1092,10 +1095,10 @@ TEST_F(FluxSolverTest, SingleCellTwoRaysInfinite) {
     std::vector<TrackingData> tracking_data;
     Vector3D dir_vector = directionVector(dir.mu, dir.phi);
     // we set extremely large path length to simulate infinite path length
-    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10);
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, 0);
     tracking_data.push_back(ray1);
     Vector3D dir_vector2 = directionVector(dir2.mu, dir2.phi);
-    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10);
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, 1);
     tracking_data.push_back(ray2);
     // test if size of tracking_data is 2
     ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
