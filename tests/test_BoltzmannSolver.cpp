@@ -176,10 +176,11 @@ protected:
     }
 
     // Helper function to create a ray traversing the single cell in a specific direction
-    TrackingData createSingleRay(int ray_id, const Vector3D& direction, const int cell_id = 0, const double L_k = 1.0, Vector3D start_point = Vector3D(0.0, 0.0, 0.0), Vector3D end_point = Vector3D(1.0, 0.0, 0.0)) {
+    TrackingData createSingleRay(int ray_id, const Vector3D& direction, const int cell_id = 0, const double L_k = 1.0, const size_t direction_index = 0) {
         TrackingData ray;
         ray.ray_id = ray_id;
         ray.direction = direction.normalized(); // Ensure direction is unit vector
+        ray.direction_index = direction_index;
 
         // Single CellTrace: traversing Cell 0
         CellTrace trace;
@@ -277,10 +278,10 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoRaysInfiniteOneGroup) {
     std::vector<TrackingData> tracking_data;
     Vector3D dir_vector = directionVector(0.0, 0.0);
     // we set extremely large path length to simulate infinite path length
-    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, static_cast<size_t>(0));
     tracking_data.push_back(ray1);
     Vector3D dir_vector2 = directionVector(0.0, M_PI / 2.0);
-    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(0.0, 1.0, 0.0));
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, static_cast<size_t>(1));
     tracking_data.push_back(ray2);
     // test if size of tracking_data is 2
     ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
@@ -366,7 +367,7 @@ TEST_F(BoltzmannSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     // Rays in +x direction go though cell 0 first and then cell 1
     for(int i = 0; i < 2; ++i) {
         Vector3D dir_vector = directionVector(dir0.mu, dir0.phi);
-        TrackingData ray = createSingleRay(i, dir_vector, 0, 1.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+        TrackingData ray = createSingleRay(i, dir_vector, 0, 1.0e10, static_cast<size_t>(0));
         // Add second CellTrace traversing Cell1
         CellTrace trace1;
         trace1.cell_id = 1;
@@ -380,7 +381,7 @@ TEST_F(BoltzmannSolverTest, MultipleCellsMultipleDirectionsMultipleRays) {
     // Rays in +y direction go through cell 1 first and then cell 0
     for(int i = 2; i < 4; ++i) {
         Vector3D dir_vector = directionVector(dir1.mu, dir1.phi);
-        TrackingData ray = createSingleRay(i, dir_vector, 1, 1.0e10, Vector3D(1.0, 0.0, 0.0), Vector3D(1.0, 1.0, 0.0));
+        TrackingData ray = createSingleRay(i, dir_vector, 1, 1.0e10, static_cast<size_t>(1));
         // Add second CellTrace traversing Cell0
         CellTrace trace1;
         trace1.cell_id = 0;
@@ -485,7 +486,7 @@ TEST_F(BoltzmannSolverTest, MultipleCellsTrueAngularQuadratureTrueRayTracingInfi
     // test if sum of weights is 4
     EXPECT_NEAR(angular_quadrature.getTotalWeight(), 4.0 * M_PI, 1e-6) << "Sum of weights should be 4.0 * M_PI";
 
-    bool use_half_quadrature_for_constant = true;
+    bool use_half_quadrature_for_constant = false;
     bool constant_dir_bool = true;
     RayTracerManager manager(mesh, field, angular_quadrature, constant_dir_bool, use_half_quadrature_for_constant);
     // Generate tracking data
@@ -556,10 +557,10 @@ TEST_F(BoltzmannSolverTest, SingleCellTwoGroupsTwoRaysTwoDirectionsInfiniteMediu
     std::vector<TrackingData> tracking_data;
     Vector3D dir_vector = directionVector(0.0, 0.0);
     // we set extremely large path length to simulate infinite path length
-    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(1.0, 0.0, 0.0));
+    TrackingData ray1 = createSingleRay(0, dir_vector, 0, 1.0e10, static_cast<size_t>(0));
     tracking_data.push_back(ray1);
     Vector3D dir_vector2 = directionVector(0.0, M_PI / 2.0);
-    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, Vector3D(0.0, 0.0, 0.0), Vector3D(0.0, 1.0, 0.0));
+    TrackingData ray2 = createSingleRay(1, dir_vector2, 0, 2.0e10, static_cast<size_t>(1));
     tracking_data.push_back(ray2);
     // test if size of tracking_data is 2
     ASSERT_EQ(tracking_data.size(), 2) << "There should be 2 rays";
