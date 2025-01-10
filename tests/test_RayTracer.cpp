@@ -171,7 +171,7 @@ TEST_F(RayTracerTest, TraceRay_ConstantDirection_BasicTest) {
     Vector3D fixed_direction(0.0, 1.0, 0.0); // Along +Y axis
     
     // Initialize RayTracer in CONSTANT_DIRECTION mode
-    RayTracer ray_tracer(mesh, fixed_direction, 1.0);
+    RayTracer ray_tracer(mesh, fixed_direction, 1.0, static_cast<size_t>(0));
     
     // Define starting cell and point
     int start_cell_id = 0;
@@ -230,7 +230,7 @@ TEST_F(RayTracerTest, TraceRay_ConstantDirection_InvalidCellID) {
     Vector3D fixed_direction(0.0, 1.0, 0.0); // Along +Y axis
     
     // Initialize RayTracer in CONSTANT_DIRECTION mode
-    RayTracer ray_tracer(mesh, fixed_direction, 1.0);
+    RayTracer ray_tracer(mesh, fixed_direction, 1.0, static_cast<size_t>(0));
     
     // Define invalid starting cell ID
     int start_cell_id = 10; // Assuming only 2 cells exist (IDs 0 and 1)
@@ -289,7 +289,7 @@ TEST_F(RayTracerTest, TraceRay_ConstantDirection_ExitsDomain) {
     Vector3D fixed_direction(0.0, 1.0, 0.0); // Along +Y axis
     
     // Initialize RayTracer in CONSTANT_DIRECTION mode
-    RayTracer ray_tracer(mesh, fixed_direction, 1.0);
+    RayTracer ray_tracer(mesh, fixed_direction, 1.0, static_cast<size_t>(0));
     
     // Define starting cell near the boundary
     int start_cell_id = 1; // Cell 1
