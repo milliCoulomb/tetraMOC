@@ -82,12 +82,21 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
         #pragma omp for schedule(static)
         for(size_t ray_idx = 0; ray_idx < tracking_data_.size(); ++ray_idx) {
             const TrackingData& ray = tracking_data_[ray_idx];
-            const Vector3D& direction = ray.direction;
 
-            // Find direction index
-            size_t dir_index = findDirectionIndex(direction);
-            if(dir_index >= angular_quadrature_.getDirections().size()) {
-                Logger::warning("Direction not found in angular quadrature for ray ID " + std::to_string(ray.ray_id) + ". Skipping this ray.");
+            // // Find direction index
+            // size_t dir_index = findDirectionIndex(direction);
+            // if(dir_index >= angular_quadrature_.getDirections().size()) {
+            //     Logger::warning("Direction not found in angular quadrature for ray ID " + std::to_string(ray.ray_id) + ". Skipping this ray.");
+            //     continue;
+            // }
+            // Use ray.direction_index directly
+            size_t dir_index = ray.direction_index;
+            if (dir_index >= angular_quadrature_.getDirections().size()) {
+                Logger::warning("Invalid direction index " + std::to_string(dir_index) + " in ray ID " + std::to_string(ray.ray_id) + ". Skipping this ray.");
+                continue;
+            }
+            if (dir_index == static_cast<size_t>(-1)) {
+                Logger::warning("Invalid direction index " + std::to_string(dir_index) + " in ray ID " + std::to_string(ray.ray_id) + ". Bad initialization. Skipping this ray.");
                 continue;
             }
 
@@ -124,7 +133,7 @@ void FluxSolver::computeFlux(const std::vector<double>& source) {
         #pragma omp for collapse(2) schedule(static)
         for (size_t cell = 0; cell < flux_data_.size(); ++cell) {
             for (size_t dir = 0; dir < angular_quadrature_.getDirections().size(); ++dir) {
-                for(int thread = 0; thread < local_flux_data.size(); ++thread) {
+                for(size_t thread = 0; thread < local_flux_data.size(); ++thread) {
                     flux_data_[cell][dir].flux += local_flux_data[thread][cell][dir].flux;
                     flux_data_[cell][dir].weight += local_flux_data[thread][cell][dir].weight;
                 }
