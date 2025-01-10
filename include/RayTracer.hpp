@@ -25,7 +25,7 @@ public:
     RayTracer(const MeshHandler& mesh_handler, const Field& field_handler);
     
     // Constructor for constant direction tracing
-    RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_direction, const double direction_weight);
+    RayTracer(const MeshHandler& mesh_handler, const Vector3D& fixed_direction, const double direction_weight, size_t direction_index);
     
     // Trace a ray starting from a cell and point, up to a maximum number of iterations
     std::vector<CellTrace> traceRay(int start_cell_id, const Vector3D& start_point, int max_iter) const;
@@ -49,6 +49,12 @@ public:
         assert(mode_ == RayTracerMode::CONSTANT_DIRECTION && "getDirectionWeight() called in VARIABLE_DIRECTION mode");
         return direction_weight_;
     }
+
+    // Getter for the direction index (only relevant in CONSTANT_DIRECTION mode)
+    size_t getDirectionIndex() const {
+        assert(mode_ == RayTracerMode::CONSTANT_DIRECTION && "getDirectionIndex() called in VARIABLE_DIRECTION mode");
+        return direction_index_;
+    }
     
     // Getter for the current mode
     RayTracerMode getMode() const { return mode_; }
@@ -63,6 +69,7 @@ private:
     // For CONSTANT_DIRECTION mode
     Vector3D fixed_direction_;
     double direction_weight_;
+    size_t direction_index_;
 };
 
 #endif // RAY_TRACER_HPP
