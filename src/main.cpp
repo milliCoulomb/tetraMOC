@@ -11,6 +11,8 @@
 #include "OutputHandler.hpp"
 #include "Logger.hpp"
 #include <fstream>
+// import a library to measure time
+#include <chrono>
 
 
 int main(int argc, char* argv[]) {
@@ -20,6 +22,8 @@ int main(int argc, char* argv[]) {
     }
 
     try {
+        // Start measuring time
+        auto start = std::chrono::high_resolution_clock::now();
         // Parse InputDeck
         InputDeck input_deck = InputDeckParser::parse(argv[1]);
 
@@ -120,6 +124,11 @@ int main(int argc, char* argv[]) {
         OutputHandler output_handler;
         output_handler.writeScalarFlux(output_path_flux, flux);
         output_handler.writeKEff(output_path_keff, solver.getKEff());
+
+        // Stop measuring time
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+        Logger::running("Execution time: " + std::to_string(duration.count()) + " ms");
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
