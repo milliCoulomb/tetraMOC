@@ -16,6 +16,7 @@ struct TrackingData {
     Vector3D direction;
     double direction_weight;
     std::vector<CellTrace> cell_traces;
+    size_t direction_index = -1; // Initialize to an invalid index
 
     // Default constructor
     TrackingData() = default;
