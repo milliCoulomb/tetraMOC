@@ -37,7 +37,7 @@ public:
 
     const std::vector<TrackingData>& getTrackingData() const { return tracking_data_; }
     
-    const int getNumRays() const { return static_cast<int>(tracking_data_.size()); }
+    int getNumRays() const { return static_cast<int>(tracking_data_.size()); }
 
 private:
     const MeshHandler& mesh_;
