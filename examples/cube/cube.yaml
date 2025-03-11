@@ -1,11 +1,11 @@
 mesh:
-  nodes: "../examples/cube/output/nodes.txt"
-  cells: "../examples/cube/output/cells.txt"
-  faces: "../examples/cube/output/faces.txt"
+  nodes: "../examples/cube/mesh_very_refined/nodes.txt"
+  cells: "../examples/cube/mesh_very_refined/cells.txt"
+  faces: "../examples/cube/mesh_very_refined/faces.txt"
 
 cross_sections:
   data_files:
-    - "../examples/cube/xs.txt"
+    - "../examples/cube/xs_very_diffusive.txt"
 
 angular_quadrature:
   ntheta: 4
@@ -14,11 +14,11 @@ angular_quadrature:
 solver_parameters:
   multi_group_max_iterations: 5
   multi_group_tolerance: 1e-4
-  one_group_max_iterations: 200
+  one_group_max_iterations: 5000
   one_group_tolerance: 1e-4
   fission_source_tolerance: 1e-4
-  keff_tolerance: 1e-6
-  max_power_iterations: 100
+  keff_tolerance: 1e-5
+  max_power_iterations: 1000
   rays_per_face: 10
   max_ray_length: 1000
   use_half_hemisphere: false
